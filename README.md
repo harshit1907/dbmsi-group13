@@ -1,2 +1,2 @@
-# dbmsi-group13
-DBMSI Project
+# CSE 510
+Database Management System Implementation Project
