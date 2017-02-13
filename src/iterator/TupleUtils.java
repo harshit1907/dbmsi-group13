@@ -42,6 +42,7 @@ public class TupleUtils
       int   t1_i,  t2_i;
       float t1_r,  t2_r;
       String t1_s, t2_s;
+      Descriptor t1_d, t2_d;
       
       switch (fldType.attrType) 
 	{
@@ -79,6 +80,20 @@ public class TupleUtils
 	  if(t1_s.compareTo( t2_s)>0)return 1;
 	  if (t1_s.compareTo( t2_s)<0)return -1;
 	  return 0;
+	
+	case AttrType.attrDesc:                // Compare two Descriptors
+		  try {
+		    t1_d = t1.getDescFld(t1_fld_no);
+		    t2_d = t2.getDescFld(t2_fld_no);
+		  }catch (FieldNumberOutOfBoundException e){
+		    throw new TupleUtilsException(e, "FieldNumberOutOfBoundException is caught by TupleUtils.java");
+		  }
+		  
+		  // Now handle the special case that is posed by the max_values for strings...
+		  if(t1_d.distance( t2_d)>0) return 1;
+		  if (t1_d.distance( t2_d)<0) return -1;
+		  return 0; 
+	  
 	default:
 	  
 	  throw new UnknowAttrType(null, "Don't know how to handle attrSymbol, attrNull");

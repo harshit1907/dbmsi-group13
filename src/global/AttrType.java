@@ -1,5 +1,7 @@
 package global;
 
+import catalog.AttrDesc;
+
 /** 
  * Enumeration class for AttrType
  * 
@@ -8,10 +10,11 @@ package global;
 public class AttrType {
 
   public static final int attrString  = 0;
-  public static final int attrInteger = 1;
-  public static final int attrReal    = 2;
-  public static final int attrSymbol  = 3;
-  public static final int attrNull    = 4;
+  public static final int attrDesc = 1;
+  public static final int attrInteger = 2;
+  public static final int attrReal = 3;
+  public static final int attrSymbol = 4;
+  public static final int attrNull = 5;
   
   public int attrType;
 
@@ -47,6 +50,8 @@ public class AttrType {
       return "attrSymbol";
     case attrNull:
       return "attrNull";
+    case attrDesc:
+      return "attrDesc";
     }
     return ("Unexpected AttrType " + attrType);
   }

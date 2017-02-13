@@ -4,6 +4,7 @@ package global;
 
 import java.io.*;
 import java.lang.*;
+import java.util.Vector;
 
 public class Convert{
  
@@ -35,6 +36,40 @@ public class Convert{
       
       return value;
     }
+  
+  /**
+   * read 4 bytes from given byte array at the specified position
+   * convert it to a Descriptor
+   * @param  	data 		a byte array 
+   * @param       position  	in data[]
+   * @exception   java.io.IOException I/O errors
+   * @return      the Descriptor 
+   */
+    public static Descriptor getDescValue (int position, byte []data)
+     throws java.io.IOException
+      {
+        InputStream in;
+        DataInputStream instr;
+        Descriptor value = new Descriptor();
+        byte tmp[] = new byte[20]; // For 5 int values, 20 bytes reserved
+        
+        // copy the value from data array out to a tmp byte array
+        System.arraycopy (data, position, tmp, 0, 20);
+        
+        /* creates a new data input stream to read data from the
+         * specified input stream
+         */
+    
+        in = new ByteArrayInputStream(tmp);
+        instr = new DataInputStream(in);
+       	for(int i=0;i<5;i++) {
+       		value.value[i] = instr.readInt();
+       	}
+        
+        return value;
+      }
+  
+  
   
   /**
    * read 4 bytes from given byte array at the specified position
@@ -182,6 +217,38 @@ public class Convert{
       System.arraycopy (B, 0, data, position, 4);
       
     }
+  
+  /**
+   * update an Descriptor value in the given byte array at the specified position
+   * @param  	data 		a byte array
+   * @param	value   	the value to be copied into the data[]
+   * @param	position  	the position of that value in data[]
+   * @exception   java.io.IOException I/O errors
+   */
+  public static void setDescValue (Descriptor value, int position, byte []data) 
+    throws java.io.IOException
+    {
+      /* creates a new data output stream to write data to 
+       * underlying output stream
+       */
+      
+      OutputStream out = new ByteArrayOutputStream();
+      DataOutputStream outstr = new DataOutputStream (out);
+      
+      // write 5 int values to the output stream for Descriptor
+      for(int i=0;i<5;i++) {
+    	  outstr.writeInt(value.value[i]);
+      }
+      
+      // creates a byte array with this output stream size and the
+      // valid contents of the buffer have been copied into it
+      byte []B = ((ByteArrayOutputStream) out).toByteArray();
+      
+      // copies the first 20 bytes of this byte array into data[] 
+      System.arraycopy (B, 0, data, position, 20);
+      
+    }
+  
   
   /**
    * update a float value in the given byte array at the specified position
