@@ -1,5 +1,5 @@
-JDKPATH = /Library/Java/JavaVirtualMachines/jdk1.8.0_60.jdk/Contents/Home
-LIBPATH = /Users/mihir/dev/minjava/javaminibase/src
+JDKPATH = /usr/lib/jvm/java-8-openjdk-amd64
+LIBPATH = /home/prakhar/Documents/minjava/javaminibase/dbmsi-group13/src
 CLASSPATH = $(JDKPATH)/lib/classes.zip:.:..:$(LIBPATH)
 BINPATH = $(JDKPATH)/bin
 JAVAC = $(JDKPATH)/bin/javac -classpath $(CLASSPATH)

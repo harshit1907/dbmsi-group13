@@ -1,2 +1,7 @@
 bin/*
 TRACE
+src/Makefile
+src/*/Makefile
+.idea/*
+*.iml
+*.class
