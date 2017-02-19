@@ -34,7 +34,7 @@ public class RID{
   /**
    * make a copy of the given rid
    */
-  public void copyRid (RID rid)
+  public void copyRid(RID rid)
     {
       pageNo = rid.pageNo;
       slotNo = rid.slotNo;
@@ -59,7 +59,6 @@ public class RID{
    *         false if not.
    */
   public boolean equals(RID rid) {
-    
     if ((this.pageNo.pid==rid.pageNo.pid)
 	&&(this.slotNo==rid.slotNo))
       return true;

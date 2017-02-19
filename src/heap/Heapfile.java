@@ -41,8 +41,7 @@ interface  Filetype {
 } // end of Filetype
 
 public class Heapfile implements Filetype,  GlobalConst {
-  
-  
+
   PageId      _firstDirPageId;   // page number of header page
   int         _ftype;
   private     boolean     _file_deleted;
@@ -304,9 +303,7 @@ public class Heapfile implements Filetype,  GlobalConst {
 	   InvalidTupleSizeException, 
 	   HFDiskMgrException,
 	   HFBufMgrException,
-	   IOException
-	   
-    {
+	   IOException   {
       int answer = 0;
       PageId currentDirPageId = new PageId(_firstDirPageId.pid);
       
@@ -348,7 +345,7 @@ public class Heapfile implements Filetype,  GlobalConst {
       
       return answer;
     } // end of getRecCnt
-  
+
   /** Insert record into file, return its Rid.
    *
    * @param recPtr pointer of the record
@@ -894,8 +891,7 @@ public class Heapfile implements Filetype,  GlobalConst {
     {
       if(_file_deleted ) 
    	throw new FileAlreadyDeletedException(null, "file alread deleted");
-      
-      
+
       // Mark the deleted flag (even if it doesn't get all the way done).
       _file_deleted = true;
       
