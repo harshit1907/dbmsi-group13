@@ -2,7 +2,7 @@ package global;
 
 public class Descriptor {
 public int value[] = new int[5];
-	
+
 	public void set(int value0, int value1, int value2, int value3, int value4) {
 		value[0] = value0;
 		value[1] = value1;
@@ -10,11 +10,11 @@ public int value[] = new int[5];
 		value[3] = value3;
 		value[4] = value4;
 	}
-	
+
 	public int get(int idx) {
 		return value[idx];
 	}
-	
+
 	public double equal(Descriptor desc) {
 		if( this.value[0] == desc.value[0] &&
 		this.value[1] == desc.value[1] &&
@@ -25,7 +25,7 @@ public int value[] = new int[5];
 		else 
 			return 0;
 	}
-	
+
 	public double distance(Descriptor desc) {
 		double d;
 		d = Math.sqrt( Math.pow(this.value[0]-desc.value[0], 2) +
