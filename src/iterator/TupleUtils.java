@@ -30,9 +30,11 @@ public class TupleUtils
    *@exception TupleUtilsException exception from this class
    *@return   0        if the two are equal,
    *          1        if the tuple is greater,
-   *         -1        if the tuple is smaller,                              
+   *         -1        if the tuple is smaller,
+   *@return For attrDesc:
+   * Return the distance
    */
-  public static int CompareTupleWithTuple(AttrType fldType,
+  public static double CompareTupleWithTuple(AttrType fldType,
 					  Tuple  t1, int t1_fld_no,
 					  Tuple  t2, int t2_fld_no)
     throws IOException,
@@ -88,21 +90,20 @@ public class TupleUtils
 		  }catch (FieldNumberOutOfBoundException e){
 		    throw new TupleUtilsException(e, "FieldNumberOutOfBoundException is caught by TupleUtils.java");
 		  }
-		  
+
 		  // Now handle the special case that is posed by the max_values for strings...
-		  if(t1_d.distance( t2_d)>0) return 1;
-		  if (t1_d.distance( t2_d)<0) return -1;
-		  return 0; 
+        return t1_d.distance(t2_d);
+//		  if(t1_d.distance( t2_d)>0) return 1;
+//		  if (t1_d.distance( t2_d)<0) return -1;
+//		  return 0;
 	  
 	default:
 	  
 	  throw new UnknowAttrType(null, "Don't know how to handle attrSymbol, attrNull");
 	  
 	}
-    }
-  
-  
-  
+}
+
   /**
    * This function  compares  tuple1 with another tuple2 whose
    * field number is same as the tuple1
@@ -118,16 +119,13 @@ public class TupleUtils
    *@exception IOException some I/O fault
    *@exception TupleUtilsException exception from this class   
    */            
-  public static int CompareTupleWithValue(AttrType fldType,
+  public static double CompareTupleWithValue(AttrType fldType,
 					  Tuple  t1, int t1_fld_no,
 					  Tuple  value)
-    throws IOException,
-	   UnknowAttrType,
-	   TupleUtilsException
-    {
+    throws IOException, UnknowAttrType, TupleUtilsException {
       return CompareTupleWithTuple(fldType, t1, t1_fld_no, value, t1_fld_no);
     }
-  
+
   /**
    *This function Compares two Tuple inn all fields 
    * @param t1 the first tuple
@@ -172,8 +170,7 @@ public class TupleUtils
       }
       return temp;
     }
-  
- 
+
   /**
    *set up a tuple in specified field from a tuple
    *@param value the tuple to be set 
