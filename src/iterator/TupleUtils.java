@@ -34,7 +34,7 @@ public class TupleUtils
    *@return For attrDesc:
    * Return the distance
    */
-  public static double CompareTupleWithTuple(AttrType fldType,
+  public static int CompareTupleWithTuple(AttrType fldType,
 					  Tuple  t1, int t1_fld_no,
 					  Tuple  t2, int t2_fld_no)
     throws IOException,
@@ -82,20 +82,7 @@ public class TupleUtils
 	  if(t1_s.compareTo( t2_s)>0)return 1;
 	  if (t1_s.compareTo( t2_s)<0)return -1;
 	  return 0;
-	
-	case AttrType.attrDesc:                // Compare two Descriptors
-		  try {
-		    t1_d = t1.getDescFld(t1_fld_no);
-		    t2_d = t2.getDescFld(t2_fld_no);
-		  }catch (FieldNumberOutOfBoundException e){
-		    throw new TupleUtilsException(e, "FieldNumberOutOfBoundException is caught by TupleUtils.java");
-		  }
 
-		  // Now handle the special case that is posed by the max_values for strings...
-        return t1_d.distance(t2_d);
-//		  if(t1_d.distance( t2_d)>0) return 1;
-//		  if (t1_d.distance( t2_d)<0) return -1;
-//		  return 0;
 	  
 	default:
 	  
@@ -201,14 +188,13 @@ throw new UnknowAttrType(null, "Don't know how to handle attrSymbol, attrNull");
    *@exception IOException some I/O fault
    *@exception TupleUtilsException exception from this class   
    */            
-  public static double CompareTupleWithValue(AttrType fldType,
+  public static int CompareTupleWithValue(AttrType fldType,
 					  Tuple  t1, int t1_fld_no,
 					  Tuple  value)
     throws IOException, UnknowAttrType, TupleUtilsException {
       return CompareTupleWithTuple(fldType, t1, t1_fld_no, value, t1_fld_no);
     }
 
- 
   
   public static int CompareTupleWithValue(AttrType fldType,
 		  Tuple  t1, int t1_fld_no,
