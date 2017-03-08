@@ -14,8 +14,6 @@ import global.PageId;
 import global.RID;
 import global.SystemDefs;
 import heap.HFBufMgrException;
-import heap.HFPage;
-import heap.Heapfile;
 import heap.InvalidTupleSizeException;
 
 
@@ -24,7 +22,7 @@ import heap.InvalidTupleSizeException;
  * A Scan object is created ONLY through the function openScan
  * of a HeapFile. It supports the getNext interface which will
  * simply retrieve the next record in the heapfile.
- *
+ *w
  * An object of type scan will always have pinned one directory page
  * of the heapfile.
  */

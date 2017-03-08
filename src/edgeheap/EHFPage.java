@@ -335,10 +335,10 @@ public class EHFPage extends Page
    * @exception IOException I/O errors
    * in C++ Status insertRecord(char *recPtr, int recLen, RID& rid)
    */
-  public RID insertRecord ( byte [] record)		
+  public EID insertEdge ( byte [] record)		
     throws IOException
     {
-      RID rid = new RID();
+      EID rid = new EID();
       
       int recLen = record.length;
       int spaceNeeded = recLen + SIZE_OF_SLOT;
@@ -403,7 +403,7 @@ public class EHFPage extends Page
    * @exception IOException I/O errors
    * in C++ Status deleteRecord(const RID& rid)
    */
-  public void deleteRecord ( RID rid )
+  public void deleteEdge ( EID rid )
     throws IOException,  
 	   InvalidSlotNumberException
     {
@@ -465,10 +465,10 @@ public class EHFPage extends Page
    * in C++ Status firstRecord(RID& firstRid)
    * 
    */ 
-  public RID firstRecord() 
+  public EID firstEdge() 
     throws IOException
     {
-      RID rid = new RID();
+      EID rid = new EID();
       // find the first non-empty slot
       
       
@@ -502,10 +502,10 @@ public class EHFPage extends Page
    * @exception  IOException I/O errors
    * in C++ Status nextRecord (RID curRid, RID& nextRid)
    */
-  public RID nextRecord (RID curRid) 
+  public EID nextEdge (EID curRid) 
     throws IOException 
     {
-      RID rid = new RID();
+      EID rid = new EID();
       slotCnt = Convert.getShortValue (SLOT_CNT, data);
       
       int i=curRid.slotNo;
@@ -541,7 +541,7 @@ public class EHFPage extends Page
    * @exception  	IOException I/O errors
    * @see 	Tuple
    */
-  public Edge getRecord ( EID eid ) 
+  public Edge getEdge ( EID eid ) 
     throws IOException,  
 	   InvalidSlotNumberException
     {
@@ -562,7 +562,7 @@ public class EHFPage extends Page
 	  offset = getSlotOffset (slotNo);
 	  record = new byte[recLen];
 	  System.arraycopy(data, offset, record, 0, recLen);
-	  Edge edge = new Edge(edge, 0);
+	  Edge edge = new Edge(record, offset);
 	  return edge;
 	}
       
@@ -582,7 +582,7 @@ public class EHFPage extends Page
    * @exception   IOException I/O errors
    * @see 	Tuple
    */  
-  public Edge returnRecord ( EID eid )
+  public Edge returnEdge ( EID eid )
     throws IOException, 
 	   InvalidSlotNumberException
     {
@@ -603,8 +603,8 @@ public class EHFPage extends Page
 	{
 	  
 	  offset = getSlotOffset (slotNo);
-	  Edge edge = new Edge(data, offset, recLen);
-	  return Edge;
+	  Edge edge = new Edge(data, offset);
+	  return edge;
 	}
       
       else {   

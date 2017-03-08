@@ -19,7 +19,6 @@ import heap.InvalidSlotNumberException;
 import heap.InvalidTupleSizeException;
 import heap.InvalidUpdateException;
 import heap.SpaceNotAvailableException;
-import edgeheap.DataPageInfo;
 
 
 interface  Filetype {
@@ -134,8 +133,8 @@ public class EdgeHeapFile {
        user record(eid) and true if record is found.
        If the user record cannot be found, return false.
     */
-    private boolean  _findDataPage(EID nid, PageId dirPageId, EHFPage dirpage,
-                                    PageId dataPageId, EHFPage datapage, NID npDataPageNid)
+    private boolean  _findDataPage(EID eid, PageId dirPageId, EHFPage dirpage,
+                                    PageId dataPageId, EHFPage datapage, EID npDataPageNid)
             throws InvalidSlotNumberException, InvalidTupleSizeException, HFException,
             HFBufMgrException, HFDiskMgrException, Exception {
 
@@ -143,7 +142,7 @@ public class EdgeHeapFile {
 
         EHFPage currentDirPage = new EHFPage();
         EHFPage currentDataPage = new EHFPage();
-        NID currentDataPageNid = new NID();
+        EID currentDataPageEid = new EID();
         PageId nextDirPageId = new PageId();
         // datapageId is stored in dpinfo.pageId
 
@@ -153,11 +152,11 @@ public class EdgeHeapFile {
         Edge atuple = new Edge();
 
         while (currentDirPageId.pid != INVALID_PAGE) {
-            for(currentDataPageNid = currentDirPage.firstRecord();
-                 currentDataPageNid != null;
-                 currentDataPageNid = currentDirPage.nextRecord(currentDataPageNid)) {
+            for(currentDataPageEid = currentDirPage.firstEdge();
+                 currentDataPageEid != null;
+                 currentDataPageEid = currentDirPage.nextEdge(currentDataPageEid)) {
                 try {
-                    atuple = currentDirPage.getRecord(currentDataPageNid);
+                    atuple = currentDirPage.getEdge(currentDataPageEid);
                 } catch (InvalidSlotNumberException e) {// check error! return false(done)
                     return false;
                 }
@@ -179,9 +178,9 @@ public class EdgeHeapFile {
                 // - currentDataPage, currentDataPageNid, dpinfo valid
                 // - currentDataPage pinned
 
-                if(dpinfo.pageId.pid==nid.pageNo.pid)
+                if(dpinfo.pageId.pid==eid.pageNo.pid)
                 {
-                    atuple = currentDataPage.returnRecord(nid);
+                    atuple = currentDataPage.returnEdge(eid);
                     // found user's record on the current datapage which itself
                     // is indexed on the current dirpage.  Return both of these.
 
@@ -191,8 +190,8 @@ public class EdgeHeapFile {
                     datapage.setpage(currentDataPage.getpage());
                     dataPageId.pid = dpinfo.pageId.pid;
 
-                    npDataPageNid.pageNo.pid = currentDataPageNid.pageNo.pid;
-                    npDataPageNid.slotNo = currentDataPageNid.slotNo;
+                    npDataPageNid.pageNo.pid = currentDataPageEid.pageNo.pid;
+                    npDataPageNid.slotNo = currentDataPageEid.slotNo;
                     return true;
                 } else {
                     // user record not found on this datapage; unpin it
@@ -256,8 +255,8 @@ public class EdgeHeapFile {
 
             EID eid = new EID();
             Edge atuple;
-            for (eid = currentDirPage.firstRecord(); eid != null; eid = currentDirPage.nextRecord(eid)) {
-                atuple = currentDirPage.getRecord(eid);
+            for (eid = currentDirPage.firstEdge(); eid != null; eid = currentDirPage.nextEdge(eid)) {
+                atuple = currentDirPage.getEdge(eid);
                 DataPageInfo dpinfo = new DataPageInfo(atuple);
                 answer += dpinfo.recct;
             }
@@ -317,10 +316,10 @@ public class EdgeHeapFile {
         DataPageInfo dpinfo = new DataPageInfo();
         while (found == false) { //Start While01
             // look for suitable dpinfo-struct
-            for (currentDataPageEid = currentDirPage.firstRecord();
+            for (currentDataPageEid = currentDirPage.firstEdge();
                  currentDataPageEid != null;
-                 currentDataPageEid = currentDirPage.nextRecord(currentDataPageEid)) {
-                atuple = currentDirPage.getRecord(currentDataPageEid);
+                 currentDataPageEid = currentDirPage.nextEdge(currentDataPageEid)) {
+                atuple = currentDirPage.getEdge(currentDataPageEid);
                 dpinfo = new DataPageInfo(atuple);
                 // need check the record length == DataPageInfo'slength
                 if(recLen <= dpinfo.availspace) {
@@ -368,11 +367,11 @@ public class EdgeHeapFile {
                     // currentDataPage is pinned: insert its record
                     // calling a HFPage function
 
-                    atuple = dpinfo.convertToTuple();
+                    atuple = dpinfo.convertToEdge();
                     byte [] tmpData = atuple.getTupleByteArray();
-                    currentDataPageEid = currentDirPage.insertNode(tmpData);
+                    currentDataPageEid = currentDirPage.insertEdge(tmpData);
 
-                    EID tmpeid = currentDirPage.firstRecord();
+                    EID tmpeid = currentDirPage.firstEdge();
 
 
                     // need catch error here!
@@ -427,7 +426,7 @@ public class EdgeHeapFile {
                         unpinPage(currentDirPageId, true/*dirty*/);
 
                         currentDirPageId.pid = nextDirPageId.pid;
-                        currentDirPage = newEHFPage(nextDirPage);
+                        currentDirPage = new EHFPage(nextDirPage);
 
                         // remark that MINIBASE_BM->newPage already
                         // pinned the new directory page!
@@ -472,7 +471,7 @@ public class EdgeHeapFile {
 
 
         EID eid;
-        eid = currentDataPage.insertNode(recPtr);
+        eid = currentDataPage.insertEdge(recPtr);
 
         dpinfo.recct++;
         dpinfo.availspace = currentDataPage.available_space();
@@ -481,14 +480,14 @@ public class EdgeHeapFile {
         unpinPage(dpinfo.pageId, true /* = DIRTY */);
 
         // DataPage is now released
-        atuple = currentDirPage.returnRecord(currentDataPageEid);
+        atuple = currentDirPage.returnEdge(currentDataPageEid);
         DataPageInfo dpinfo_ondirpage = new DataPageInfo(atuple);
 
 
         dpinfo_ondirpage.availspace = dpinfo.availspace;
         dpinfo_ondirpage.recct = dpinfo.recct;
         dpinfo_ondirpage.pageId.pid = dpinfo.pageId.pid;
-        dpinfo_ondirpage.flushToTuple();
+        dpinfo_ondirpage.flushToEdge();
         unpinPage(currentDirPageId, true /* = DIRTY */);
 
         return eid;
@@ -501,7 +500,7 @@ public class EdgeHeapFile {
     		   HFBufMgrException,
     		   HFDiskMgrException,
     		   Exception
-    	  
+    		   
     	    {
     	      boolean status;
     	      EHFPage currentDirPage = new EHFPage();
@@ -524,21 +523,21 @@ public class EdgeHeapFile {
     	      // get datapageinfo from the current directory page:
     	      Edge atuple;	
     	      
-    	      atuple = currentDirPage.returnRecord(currentDataPageEid);
+    	      atuple = currentDirPage.returnEdge(currentDataPageEid);
     	      DataPageInfo pdpinfo = new DataPageInfo(atuple);
     	      
     	      // delete the record on the datapage
-    	      currentDataPage.deleteRecord(eid);
+    	      currentDataPage.deleteEdge(eid);
     	      
     	      pdpinfo.recct--;
-    	      pdpinfo.flushToTuple();	//Write to the buffer pool
+    	      pdpinfo.flushToEdge();	//Write to the buffer pool
     	      if (pdpinfo.recct >= 1) 
     		{
     		  // more records remain on datapage so it still hangs around.  
     		  // we just need to modify its directory entry
     		  
     		  pdpinfo.availspace = currentDataPage.available_space();
-    		  pdpinfo.flushToTuple();
+    		  pdpinfo.flushToEdge();
     		  unpinPage(currentDataPageId, true /* = DIRTY*/);
     		  
     		  unpinPage(currentDirPageId, true /* = DIRTY */);
@@ -561,7 +560,7 @@ public class EdgeHeapFile {
     		  // delete corresponding DataPageInfo-entry on the directory page:
     		  // currentDataPageEid points to datapage (from for loop above)
     		  
-    		  currentDirPage.deleteRecord(currentDataPageEid);
+    		  currentDirPage.deleteEdge(currentDataPageEid);
     		  
     		  
     		  // ASSERTIONS:
@@ -570,7 +569,7 @@ public class EdgeHeapFile {
     		  
     		  // now check whether the directory page is empty:
     		  
-    		  currentDataPageEid = currentDirPage.firstRecord();
+    		  currentDataPageEid = currentDirPage.firstEdge();
     		  
     		  // st == OK: we still found a datapageinfo record on this directory page
     		  PageId pageId;
@@ -662,7 +661,7 @@ public class EdgeHeapFile {
 
         if(!status) return status;	// record not found
         Edge aedge = new Edge();
-        aedge = dataPage.returnRecord(eid);
+        aedge = dataPage.returnEdge(eid);
 
         // Assume update a record with a record whose length is equal to
         // the original record
@@ -772,11 +771,11 @@ public class EdgeHeapFile {
         EID eid = new EID();
         while(currentDirPageId.pid != INVALID_PAGE)
         {
-            for(eid = currentDirPage.firstRecord();
+            for(eid = currentDirPage.firstEdge();
                 eid != null;
-                eid = currentDirPage.nextRecord(eid))
+                eid = currentDirPage.nextEdge(eid))
             {
-                aedge = currentDirPage.getRecord(eid);
+                aedge = currentDirPage.getEdge(eid);
                 DataPageInfo dpinfo = new DataPageInfo( aedge);
                 //int dpinfoLen = arecord.length;
 

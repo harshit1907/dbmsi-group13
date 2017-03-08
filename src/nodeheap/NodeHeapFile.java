@@ -20,7 +20,6 @@ import heap.InvalidTupleSizeException;
 import heap.InvalidUpdateException;
 import heap.Scan;
 import heap.SpaceNotAvailableException;
-import heap.Tuple;
 
 /**
  * Created by prakhar on 2/18/17.
@@ -135,7 +134,8 @@ public class NodeHeapFile {
        user record(nid) and true if record is found.
        If the user record cannot be found, return false.
     */
-    private boolean  _findDataPage(NID nid, PageId dirPageId, NHFPage dirpage,
+    @SuppressWarnings("unused")
+	private boolean  _findDataPage(NID nid, PageId dirPageId, NHFPage dirpage,
                                     PageId dataPageId, NHFPage datapage, NID npDataPageNid)
             throws InvalidSlotNumberException, InvalidTupleSizeException, HFException,
             HFBufMgrException, HFDiskMgrException, Exception {
@@ -530,12 +530,12 @@ public class NodeHeapFile {
                 currentDataPageNid);
 
         if(!status) return status;	// record not found
-        Tuple atuple = new Tuple();
-        atuple = dataPage.returnNode(nid);
+        Node anode = new Node();
+        anode = dataPage.returnNode(nid);
 
         // Assume update a record with a record whose length is equal to
         // the original record
-        if(newnode.getLength() != atuple.getLength()) {
+        if(newnode.getLength() != anode.getLength()) {
             unpinPage(currentDataPageId, false /*undirty*/);
             unpinPage(currentDirPageId, false /*undirty*/);
 
@@ -543,7 +543,7 @@ public class NodeHeapFile {
         }
 
         // new copy of this record fits in old space;
-        atuple.tupleCopy(newnode);
+        anode.nodeCopy(newnode);
         unpinPage(currentDataPageId, true /* = DIRTY */);
         unpinPage(currentDirPageId, false /*undirty*/);
 
@@ -563,7 +563,7 @@ public class NodeHeapFile {
      *
      * @return a Tuple. if Tuple==null, no more tuple
      */
-    public  Tuple getNode(NID nid)
+    public  Node getNode(NID nid)
             throws InvalidSlotNumberException,
             InvalidTupleSizeException,
             HFException,
@@ -584,8 +584,8 @@ public class NodeHeapFile {
                 currentDataPageNid);
 
         if(!status) return null; // record not found
-        Tuple atuple = new Tuple();
-        atuple = dataPage.getNode(nid);
+        Node anode = new Node();
+        anode = dataPage.getNode(nid);
 
       /*
        * getNode has copied the contents of nid into recPtr and fixed up
@@ -595,7 +595,7 @@ public class NodeHeapFile {
         unpinPage(currentDataPageId,false /*undirty*/);
         unpinPage(currentDirPageId,false /*undirty*/);
 
-        return  atuple;  //(true?)OK, but the caller need check if atuple==NULL
+        return  anode;  //(true?)OK, but the caller need check if atuple==NULL
     }
 
     /** Initiate a sequential scan.
