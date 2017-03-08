@@ -24,7 +24,8 @@ public class DuplElim extends Iterator
   private AttrType  sortFldType;
   private int       sortFldLen;
   private Tuple    Jtuple;
-  
+  private double distance;
+  private Descriptor ;
   private Tuple TempTuple1, TempTuple2;
   
   /**
@@ -99,6 +100,25 @@ public class DuplElim extends Iterator
       done = false;
     }
 
+  
+  
+  
+  public DuplElim(
+		  AttrType in[],         
+		  short      len_in,     
+		  short    s_sizes[],
+		  Iterator am,          
+		  int       amt_of_mem,  
+		  boolean     inp_sorted,
+		  double distance,
+		  Descriptor target
+		  )throws IOException ,DuplElimException
+    {
+     this(in[],len_in,s_sizes[],am,amt_of_mem,inp_sorted);
+      
+      this.distance=distance;
+      this.target=target;
+    }
   /**
    * The tuple is returned.
    *@return call this function to get the tuple
@@ -143,7 +163,7 @@ public class DuplElim extends Iterator
 	  return null;
 	} 
 	TempTuple2.tupleCopy(t);
-      } while (TupleUtils.Equal(TempTuple1, TempTuple2, _in, in_len));
+      } while (TupleUtils.Equal(TempTuple1, TempTuple2, _in, in_len,distance,target));
       
       // Now copy the the TempTuple2 (new o/p tuple) into TempTuple1.
       TempTuple1.tupleCopy(TempTuple2);
