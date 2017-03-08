@@ -68,17 +68,17 @@ public class DataPageInfo implements GlobalConst {
      *  it will make a copy of the data in the tuple
      * @param atuple: the input tuple
      */
-    public DataPageInfo(Tuple _atuple)
+    public DataPageInfo(Node _anode)
             throws InvalidTupleSizeException, IOException
     {
         // need check _atuple size == this.size ?otherwise, throw new exception
-        if (_atuple.getLength()!=12){
+        if (_anode.getLength()!=12){
             throw new InvalidTupleSizeException(null, "HEAPFILE: TUPLE SIZE ERROR");
         }
 
         else{
-            data = _atuple.returnTupleByteArray();
-            offset = _atuple.getOffset();
+            data = _anode.returnTupleByteArray();
+            offset = _anode.getOffset();
 
             availspace = Convert.getIntValue(offset, data);
             recct = Convert.getIntValue(offset+4, data);
@@ -93,7 +93,7 @@ public class DataPageInfo implements GlobalConst {
      *
      *
      */
-    public Tuple convertToTuple()
+    public Node convertToNode()
             throws IOException
     {
 
@@ -104,10 +104,10 @@ public class DataPageInfo implements GlobalConst {
 
 
         // 2) creat a Tuple object using this array
-        Tuple atuple = new Tuple(data, offset, size);
+        Node anode = new Node(data, offset, size);
 
         // 3) return tuple object
-        return atuple;
+        return anode;
 
     }
 
@@ -116,7 +116,7 @@ public class DataPageInfo implements GlobalConst {
      *  to the data[](may be in buffer pool)
      *
      */
-    public void flushToTuple() throws IOException
+    public void flushToNode() throws IOException
     {
         // write availspace, recct, pageId into "data[]"
         Convert.setIntValue(availspace, offset, data);

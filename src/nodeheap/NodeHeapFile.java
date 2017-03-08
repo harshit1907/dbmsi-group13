@@ -1,16 +1,26 @@
 package nodeheap;
 
+import static global.GlobalConst.INVALID_PAGE;
+import static nodeheap.Filetype.ORDINARY;
+import static nodeheap.Filetype.TEMP;
+
+import java.io.IOException;
+
 import diskmgr.Page;
 import global.NID;
 import global.PageId;
 import global.SystemDefs;
-import heap.Heapfile;
-
-import java.io.IOException;
-
-import static global.GlobalConst.INVALID_PAGE;
-import static nodeheap.Filetype.ORDINARY;
-import static nodeheap.Filetype.TEMP;
+import heap.FileAlreadyDeletedException;
+import heap.HFBufMgrException;
+import heap.HFDiskMgrException;
+import heap.HFException;
+import heap.HFPage;
+import heap.InvalidSlotNumberException;
+import heap.InvalidTupleSizeException;
+import heap.InvalidUpdateException;
+import heap.Scan;
+import heap.SpaceNotAvailableException;
+import heap.Tuple;
 
 /**
  * Created by prakhar on 2/18/17.
@@ -28,7 +38,7 @@ public class NodeHeapFile {
     private String _fileName;
     private static int tempfilecount = 0;
 
-    private HFPage _newDatapage(DataPageInfo dpinfop)
+    private NHFPage _newDatapage(DataPageInfo dpinfop)
             throws HFException, HFBufMgrException, HFDiskMgrException, IOException {
         Page apage = new Page();
         PageId pageId = new PageId();
@@ -37,14 +47,14 @@ public class NodeHeapFile {
         if(pageId == null) throw new HFException(null, "can't new pae");
         // initialize internal values of the new page:
 
-        HFPage hfpage = new HFPage();
-        hfpage.init(pageId, apage);
+        NHFPage nhfpage = new NHFPage();
+        nhfpage.init(pageId, apage);
 
         dpinfop.pageId.pid = pageId.pid;
         dpinfop.recct = 0;
-        dpinfop.availspace = hfpage.available_space();
+        dpinfop.availspace = nhfpage.available_space();
 
-        return hfpage;
+        return nhfpage;
     }
 
     /**
@@ -120,20 +130,20 @@ public class NodeHeapFile {
         }
     }
 
-    /* Internal HeapFile function (used in getRecord and updateRecord):
+    /* Internal HeapFile function (used in getNode and updateRecord):
        returns pinned directory page and pinned data page of the specified
        user record(nid) and true if record is found.
        If the user record cannot be found, return false.
     */
-    private boolean  _findDataPage(NID nid, PageId dirPageId, HFPage dirpage,
-                                    PageId dataPageId, HFPage datapage, NID npDataPageNid)
+    private boolean  _findDataPage(NID nid, PageId dirPageId, NHFPage dirpage,
+                                    PageId dataPageId, NHFPage datapage, NID npDataPageNid)
             throws InvalidSlotNumberException, InvalidTupleSizeException, HFException,
             HFBufMgrException, HFDiskMgrException, Exception {
 
         PageId currentDirPageId = new PageId(_firstDirPageId.pid);
 
-        HFPage currentDirPage = new HFPage();
-        HFPage currentDataPage = new HFPage();
+        NHFPage currentDirPage = new NHFPage();
+        NHFPage currentDataPage = new NHFPage();
         NID currentDataPageNid = new NID();
         PageId nextDirPageId = new PageId();
         // datapageId is stored in dpinfo.pageId
@@ -141,19 +151,19 @@ public class NodeHeapFile {
 
         pinPage(currentDirPageId, currentDirPage, false/*read disk*/);
 
-        Tuple atuple = new Tuple();
+        Node anode = new Node();
 
         while (currentDirPageId.pid != INVALID_PAGE) {
-            for(currentDataPageNid = currentDirPage.firstRecord();
+            for(currentDataPageNid = currentDirPage.firstNode();
                  currentDataPageNid != null;
-                 currentDataPageNid = currentDirPage.nextRecord(currentDataPageNid)) {
+                 currentDataPageNid = currentDirPage.nextNode(currentDataPageNid)) {
                 try {
-                    atuple = currentDirPage.getRecord(currentDataPageNid);
+                    anode = currentDirPage.getNode(currentDataPageNid);
                 } catch (InvalidSlotNumberException e) {// check error! return false(done)
                     return false;
                 }
 
-                DataPageInfo dpinfo = new DataPageInfo(atuple);
+                DataPageInfo dpinfo = new DataPageInfo(anode);
                 try{
                     pinPage(dpinfo.pageId, currentDataPage, false/*Rddisk*/);
 
@@ -172,7 +182,7 @@ public class NodeHeapFile {
 
                 if(dpinfo.pageId.pid==nid.pageNo.pid)
                 {
-                    atuple = currentDataPage.returnRecord(nid);
+                    anode = currentDataPage.returnNode(nid);
                     // found user's record on the current datapage which itself
                     // is indexed on the current dirpage.  Return both of these.
 
@@ -238,7 +248,7 @@ public class NodeHeapFile {
 
         PageId nextDirPageId = new PageId(0);
 
-        HFPage currentDirPage = new HFPage();
+        NHFPage currentDirPage = new NHFPage();
         Page pageinbuffer = new Page();
 
         while(currentDirPageId.pid != INVALID_PAGE)
@@ -246,10 +256,10 @@ public class NodeHeapFile {
             pinPage(currentDirPageId, currentDirPage, false);
 
             NID nid = new NID();
-            Tuple atuple;
-            for (nid = currentDirPage.firstRecord(); nid != null; nid = currentDirPage.nextRecord(nid)) {
-                atuple = currentDirPage.getRecord(nid);
-                DataPageInfo dpinfo = new DataPageInfo(atuple);
+            Node anode;
+            for (nid = currentDirPage.firstNode(); nid != null; nid = currentDirPage.nextNode(nid)) {
+                anode = currentDirPage.getNode(nid);
+                DataPageInfo dpinfo = new DataPageInfo(anode);
                 answer += dpinfo.recct;
             }
 
@@ -294,25 +304,25 @@ public class NodeHeapFile {
         boolean found;
         NID currentDataPageNid = new NID();
         Page pageinbuffer = new Page();
-        HFPage currentDirPage = new HFPage();
-        HFPage currentDataPage = new HFPage();
+        NHFPage currentDirPage = new NHFPage();
+        NHFPage currentDataPage = new NHFPage();
 
-        HFPage nextDirPage = new HFPage();
+        NHFPage nextDirPage = new NHFPage();
         PageId currentDirPageId = new PageId(_firstDirPageId.pid);
         PageId nextDirPageId = new PageId();  // OK
 
         pinPage(currentDirPageId, currentDirPage, false/*Rdisk*/);
 
         found = false;
-        Tuple atuple;
+        Node anode;
         DataPageInfo dpinfo = new DataPageInfo();
         while (found == false) { //Start While01
             // look for suitable dpinfo-struct
-            for (currentDataPageNid = currentDirPage.firstRecord();
+            for (currentDataPageNid = currentDirPage.firstNode();
                  currentDataPageNid != null;
-                 currentDataPageNid = currentDirPage.nextRecord(currentDataPageNid)) {
-                atuple = currentDirPage.getRecord(currentDataPageNid);
-                dpinfo = new DataPageInfo(atuple);
+                 currentDataPageNid = currentDirPage.nextNode(currentDataPageNid)) {
+                anode = currentDirPage.getNode(currentDataPageNid);
+                dpinfo = new DataPageInfo(anode);
                 // need check the record length == DataPageInfo'slength
                 if(recLen <= dpinfo.availspace) {
                     found = true;
@@ -359,11 +369,11 @@ public class NodeHeapFile {
                     // currentDataPage is pinned: insert its record
                     // calling a HFPage function
 
-                    atuple = dpinfo.convertToTuple();
-                    byte [] tmpData = atuple.getTupleByteArray();
+                    anode = dpinfo.convertToNode();
+                    byte [] tmpData = anode.getTupleByteArray();
                     currentDataPageNid = currentDirPage.insertNode(tmpData);
 
-                    NID tmpnid = currentDirPage.firstRecord();
+                    NID tmpnid = currentDirPage.firstNode();
 
 
                     // need catch error here!
@@ -418,7 +428,7 @@ public class NodeHeapFile {
                         unpinPage(currentDirPageId, true/*dirty*/);
 
                         currentDirPageId.pid = nextDirPageId.pid;
-                        currentDirPage = new HFPage(nextDirPage);
+                        currentDirPage = new NHFPage(nextDirPage);
 
                         // remark that MINIBASE_BM->newPage already
                         // pinned the new directory page!
@@ -472,14 +482,14 @@ public class NodeHeapFile {
         unpinPage(dpinfo.pageId, true /* = DIRTY */);
 
         // DataPage is now released
-        atuple = currentDirPage.returnRecord(currentDataPageNid);
-        DataPageInfo dpinfo_ondirpage = new DataPageInfo(atuple);
+        anode = currentDirPage.returnNode(currentDataPageNid);
+        DataPageInfo dpinfo_ondirpage = new DataPageInfo(anode);
 
 
         dpinfo_ondirpage.availspace = dpinfo.availspace;
         dpinfo_ondirpage.recct = dpinfo.recct;
         dpinfo_ondirpage.pageId.pid = dpinfo.pageId.pid;
-        dpinfo_ondirpage.flushToTuple();
+        dpinfo_ondirpage.flushToNode();
         unpinPage(currentDirPageId, true /* = DIRTY */);
 
         return nid;
@@ -499,7 +509,7 @@ public class NodeHeapFile {
      * @exception Exception other exception
      * @return ture:update success   false: can't find the record
      */
-    public boolean updateNode(NID nid, Tuple newtuple)
+    public boolean updateNode(NID nid, Node newnode)
             throws InvalidSlotNumberException,
             InvalidUpdateException,
             InvalidTupleSizeException,
@@ -508,9 +518,9 @@ public class NodeHeapFile {
             HFBufMgrException,
             Exception {
         boolean status;
-        HFPage dirPage = new HFPage();
+        NHFPage dirPage = new NHFPage();
         PageId currentDirPageId = new PageId();
-        HFPage dataPage = new HFPage();
+        NHFPage dataPage = new NHFPage();
         PageId currentDataPageId = new PageId();
         NID currentDataPageNid = new NID();
 
@@ -521,11 +531,11 @@ public class NodeHeapFile {
 
         if(!status) return status;	// record not found
         Tuple atuple = new Tuple();
-        atuple = dataPage.returnRecord(nid);
+        atuple = dataPage.returnNode(nid);
 
         // Assume update a record with a record whose length is equal to
         // the original record
-        if(newtuple.getLength() != atuple.getLength()) {
+        if(newnode.getLength() != atuple.getLength()) {
             unpinPage(currentDataPageId, false /*undirty*/);
             unpinPage(currentDirPageId, false /*undirty*/);
 
@@ -533,7 +543,7 @@ public class NodeHeapFile {
         }
 
         // new copy of this record fits in old space;
-        atuple.tupleCopy(newtuple);
+        atuple.tupleCopy(newnode);
         unpinPage(currentDataPageId, true /* = DIRTY */);
         unpinPage(currentDirPageId, false /*undirty*/);
 
@@ -562,9 +572,9 @@ public class NodeHeapFile {
             Exception
     {
         boolean status;
-        HFPage dirPage = new HFPage();
+        NHFPage dirPage = new NHFPage();
         PageId currentDirPageId = new PageId();
-        HFPage dataPage = new HFPage();
+        NHFPage dataPage = new NHFPage();
         PageId currentDataPageId = new PageId();
         NID currentDataPageNid = new NID();
 
@@ -594,11 +604,11 @@ public class NodeHeapFile {
      *
      */
     //TODO: NScan
-    public Scan openScan()
+    public NScan openScan()
             throws InvalidTupleSizeException,
             IOException
     {
-        Scan newscan = new Scan(this);
+        NScan newscan = new NScan(this);
         return newscan;
     }
 
@@ -616,8 +626,8 @@ public class NodeHeapFile {
         PageId nextDirPageId = new PageId();
         nextDirPageId.pid = 0;
         Page pageinbuffer = new Page();
-        HFPage currentDirPage =  new HFPage();
-        Tuple atuple;
+        NHFPage currentDirPage =  new NHFPage();
+        Node anode;
 
         pinPage(currentDirPageId, currentDirPage, false);
         //currentDirPage.openHFpage(pageinbuffer);
@@ -625,12 +635,12 @@ public class NodeHeapFile {
         NID nid = new NID();
         while(currentDirPageId.pid != INVALID_PAGE)
         {
-            for(nid = currentDirPage.firstRecord();
+            for(nid = currentDirPage.firstNode();
                 nid != null;
-                nid = currentDirPage.nextRecord(nid))
+                nid = currentDirPage.nextNode(nid))
             {
-                atuple = currentDirPage.getRecord(nid);
-                DataPageInfo dpinfo = new DataPageInfo( atuple);
+                anode = currentDirPage.getNode(nid);
+                DataPageInfo dpinfo = new DataPageInfo( anode);
                 //int dpinfoLen = arecord.length;
 
                 freePage(dpinfo.pageId);

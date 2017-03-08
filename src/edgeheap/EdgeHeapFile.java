@@ -1,16 +1,25 @@
 package edgeheap;
 
-import diskmgr.Page;
-import global.EID;
-import global.PageId;
-import global.SystemDefs;
-import heap.Heapfile;
+import static edgeheap.Filetype.ORDINARY;
+import static edgeheap.Filetype.TEMP;
+import static global.GlobalConst.INVALID_PAGE;
 
 import java.io.IOException;
 
-import static global.GlobalConst.INVALID_PAGE;
-import static nodeheap.Filetype.ORDINARY;
-import static nodeheap.Filetype.TEMP;
+import diskmgr.Page;
+import global.EID;
+import global.NID;
+import global.PageId;
+import global.SystemDefs;
+import heap.FileAlreadyDeletedException;
+import heap.HFBufMgrException;
+import heap.HFDiskMgrException;
+import heap.HFException;
+import heap.InvalidSlotNumberException;
+import heap.InvalidTupleSizeException;
+import heap.InvalidUpdateException;
+import heap.SpaceNotAvailableException;
+import edgeheap.DataPageInfo;
 
 
 interface  Filetype {
@@ -26,7 +35,7 @@ public class EdgeHeapFile {
     private String _fileName;
     private static int tempfilecount = 0;
 
-    private HFPage _newDatapage(DataPageInfo dpinfop)
+    private EHFPage _newDatapage(DataPageInfo dpinfop)
             throws HFException, HFBufMgrException, HFDiskMgrException, IOException {
         Page apage = new Page();
         PageId pageId = new PageId();
@@ -35,7 +44,7 @@ public class EdgeHeapFile {
         if(pageId == null) throw new HFException(null, "can't new pae");
         // initialize internal values of the new page:
 
-        HFPage hfpage = new HFPage();
+        EHFPage hfpage = new EHFPage();
         hfpage.init(pageId, apage);
 
         dpinfop.pageId.pid = pageId.pid;
@@ -103,7 +112,7 @@ public class EdgeHeapFile {
             add_file_entry(_fileName, _firstDirPageId);
             // check error(new exception: Could not add file entry
             
-            HFPage firstDirPage = new HFPage();
+            EHFPage firstDirPage = new EHFPage();
             firstDirPage.init(_firstDirPageId, apage);
             PageId pageId = new PageId(INVALID_PAGE);
 
@@ -125,15 +134,15 @@ public class EdgeHeapFile {
        user record(eid) and true if record is found.
        If the user record cannot be found, return false.
     */
-    private boolean  _findDataPage(NID nid, PageId dirPageId, HFPage dirpage,
-                                    PageId dataPageId, HFPage datapage, NID npDataPageNid)
+    private boolean  _findDataPage(EID nid, PageId dirPageId, EHFPage dirpage,
+                                    PageId dataPageId, EHFPage datapage, NID npDataPageNid)
             throws InvalidSlotNumberException, InvalidTupleSizeException, HFException,
             HFBufMgrException, HFDiskMgrException, Exception {
 
         PageId currentDirPageId = new PageId(_firstDirPageId.pid);
 
-        HFPage currentDirPage = new HFPage();
-        HFPage currentDataPage = new HFPage();
+        EHFPage currentDirPage = new EHFPage();
+        EHFPage currentDataPage = new EHFPage();
         NID currentDataPageNid = new NID();
         PageId nextDirPageId = new PageId();
         // datapageId is stored in dpinfo.pageId
@@ -141,7 +150,7 @@ public class EdgeHeapFile {
 
         pinPage(currentDirPageId, currentDirPage, false/*read disk*/);
 
-        Tuple atuple = new Tuple();
+        Edge atuple = new Edge();
 
         while (currentDirPageId.pid != INVALID_PAGE) {
             for(currentDataPageNid = currentDirPage.firstRecord();
@@ -310,7 +319,7 @@ public class EdgeHeapFile {
             // look for suitable dpinfo-struct
             for (currentDataPageEid = currentDirPage.firstRecord();
                  currentDataPageEid != null;
-                 currentDataPageEid = currentDirPage.nextRecord(currentDataPageNid)) {
+                 currentDataPageEid = currentDirPage.nextRecord(currentDataPageEid)) {
                 atuple = currentDirPage.getRecord(currentDataPageEid);
                 dpinfo = new DataPageInfo(atuple);
                 // need check the record length == DataPageInfo'slength
@@ -418,7 +427,7 @@ public class EdgeHeapFile {
                         unpinPage(currentDirPageId, true/*dirty*/);
 
                         currentDirPageId.pid = nextDirPageId.pid;
-                        currentDirPage = new HFPage(nextDirPage);
+                        currentDirPage = newEHFPage(nextDirPage);
 
                         // remark that MINIBASE_BM->newPage already
                         // pinned the new directory page!
@@ -573,7 +582,7 @@ public class EdgeHeapFile {
     		      
     		      // point previous page around deleted page:
     		      
-    		      HFPage prevDirPage = new HFPage();
+    		      EHFPage prevDirPage = new EHFPage();
     		      pinPage(pageId, prevDirPage, false);
 
     		      pageId = currentDirPage.getNextPage();
@@ -586,7 +595,7 @@ public class EdgeHeapFile {
     		      pageId = currentDirPage.getNextPage();
     		      if(pageId.pid != INVALID_PAGE)
     			{
-    			  HFPage nextDirPage = new HFPage();
+    			  EHFPage nextDirPage = new EHFPage();
     			  pageId = currentDirPage.getNextPage();
     			  pinPage(pageId, nextDirPage, false);
     			  
@@ -631,7 +640,7 @@ public class EdgeHeapFile {
      * @exception Exception other exception
      * @return ture:update success   false: can't find the record
      */
-    public boolean updateEdge(Eid eid, Edge newtuple)
+    public boolean updateEdge(EID eid, Edge newedge)
             throws InvalidSlotNumberException,
             InvalidUpdateException,
             InvalidTupleSizeException,
@@ -652,12 +661,12 @@ public class EdgeHeapFile {
                 currentDataPageEid);
 
         if(!status) return status;	// record not found
-        Edge atuple = new Tuple();
-        atuple = dataPage.returnRecord(eid);
+        Edge aedge = new Edge();
+        aedge = dataPage.returnRecord(eid);
 
         // Assume update a record with a record whose length is equal to
         // the original record
-        if(newtuple.getLength() != atuple.getLength()) {
+        if(newedge.getLength() != aedge.getLength()) {
             unpinPage(currentDataPageId, false /*undirty*/);
             unpinPage(currentDirPageId, false /*undirty*/);
 
@@ -665,7 +674,7 @@ public class EdgeHeapFile {
         }
 
         // new copy of this record fits in old space;
-        atuple.tupleCopy(newtuple);
+        aedge.edgeCopy(newedge);
         unpinPage(currentDataPageId, true /* = DIRTY */);
         unpinPage(currentDirPageId, false /*undirty*/);
 
@@ -685,7 +694,7 @@ public class EdgeHeapFile {
      *
      * @return a Tuple. if Tuple==null, no more tuple
      */
-    public  Edge getEdge(Eid eid)
+    public  Edge getEdge(EID eid)
             throws InvalidSlotNumberException,
             InvalidTupleSizeException,
             HFException,
@@ -706,8 +715,8 @@ public class EdgeHeapFile {
                 currentDataPageEid);
 
         if(!status) return null; // record not found
-        Edge atuple = new Tuple();
-        atuple = dataPage.getNode(eid);
+        Edge aedge = new Edge();
+        aedge = dataPage.getEdge(eid);
 
       /*
        * getNode has copied the contents of nid into recPtr and fixed up
@@ -717,7 +726,7 @@ public class EdgeHeapFile {
         unpinPage(currentDataPageId,false /*undirty*/);
         unpinPage(currentDirPageId,false /*undirty*/);
 
-        return  atuple;  //(true?)OK, but the caller need check if atuple==NULL
+        return  aedge;  //(true?)OK, but the caller need check if atuple==NULL
     }
 
     /** Initiate a sequential scan.
@@ -755,7 +764,7 @@ public class EdgeHeapFile {
         Page pageinbuffer = new Page();
         //n=should change
         EHFPage currentDirPage =  new EHFPage();
-        Edge atuple;
+        Edge aedge;
 
         pinPage(currentDirPageId, currentDirPage, false);
         //currentDirPage.openHFpage(pageinbuffer);
@@ -767,8 +776,8 @@ public class EdgeHeapFile {
                 eid != null;
                 eid = currentDirPage.nextRecord(eid))
             {
-                atuple = currentDirPage.getRecord(eid);
-                DataPageInfo dpinfo = new DataPageInfo( atuple);
+                aedge = currentDirPage.getRecord(eid);
+                DataPageInfo dpinfo = new DataPageInfo( aedge);
                 //int dpinfoLen = arecord.length;
 
                 freePage(dpinfo.pageId);
@@ -845,7 +854,7 @@ public class EdgeHeapFile {
             tmpId = SystemDefs.JavabaseBM.newPage(page,num);
         }
         catch (Exception e) {
-            throw new HFBufMgrException(e,"Heapfile.java: newPage() failed");
+            throw new HFBufMgrException(e,"EHeapfile.java: newPage() failed");
         }
 
         return tmpId;
@@ -861,7 +870,7 @@ public class EdgeHeapFile {
             tmpId = SystemDefs.JavabaseDB.get_file_entry(filename);
         }
         catch (Exception e) {
-            throw new HFDiskMgrException(e,"Heapfile.java: get_file_entry() failed");
+            throw new HFDiskMgrException(e,"EHeapfile.java: get_file_entry() failed");
         }
 
         return tmpId;
