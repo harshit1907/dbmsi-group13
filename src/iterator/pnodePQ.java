@@ -24,18 +24,12 @@ public abstract class pnodePQ
 
   /** the sorting order (Ascending or Descending) */
   protected TupleOrder            sort_order;
-  protected double distance;
-  protected Descriptor target;
+
   /**
    * class constructor, set <code>count</code> to <code>0</code>.
    */
   public pnodePQ() { count = 0; } 
-  public pnodePQ(double distance,Descriptor target)
-  {
-	  this();
-	  this.distance=distance;
-	  this.target=target;
-  }
+
   /**
    * returns the number of elements in the tree.
    * @return number of elements in the tree.
@@ -82,7 +76,7 @@ public abstract class pnodePQ
    */
   public int pnodeCMP(pnode a, pnode b) 
          throws IOException, UnknowAttrType, TupleUtilsException {
-    int ans = TupleUtils.CompareTupleWithTuple(fld_type, a.tuple, fld_no, b.tuple, fld_no,distance,target);
+    int ans = TupleUtils.CompareTupleWithTuple(fld_type, a.tuple, fld_no, b.tuple, fld_no);
     return ans;
   }
 
