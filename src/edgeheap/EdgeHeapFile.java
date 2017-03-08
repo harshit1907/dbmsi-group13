@@ -238,15 +238,15 @@ public class EdgeHeapFile {
 
         PageId nextDirPageId = new PageId(0);
 
-        HFPage currentDirPage = new HFPage();
+        EHFPage currentDirPage = new EHFPage();
         Page pageinbuffer = new Page();
 
         while(currentDirPageId.pid != INVALID_PAGE)
         {
             pinPage(currentDirPageId, currentDirPage, false);
 
-            EID nid = new EID();
-            Tuple atuple;
+            EID eid = new EID();
+            Edge atuple;
             for (eid = currentDirPage.firstRecord(); eid != null; eid = currentDirPage.nextRecord(eid)) {
                 atuple = currentDirPage.getRecord(eid);
                 DataPageInfo dpinfo = new DataPageInfo(atuple);
@@ -294,17 +294,17 @@ public class EdgeHeapFile {
         boolean found;
         EID currentDataPageEid = new EID();
         Page pageinbuffer = new Page();
-        HFPage currentDirPage = new HFPage();
-        HFPage currentDataPage = new HFPage();
+        EHFPage currentDirPage = new EHFPage();
+        EHFPage currentDataPage = new EHFPage();
 
-        HFPage nextDirPage = new HFPage();
+        EHFPage nextDirPage = new EHFPage();
         PageId currentDirPageId = new PageId(_firstDirPageId.pid);
         PageId nextDirPageId = new PageId();  // OK
 
         pinPage(currentDirPageId, currentDirPage, false/*Rdisk*/);
 
         found = false;
-        Tuple atuple;
+        Edge atuple;
         DataPageInfo dpinfo = new DataPageInfo();
         while (found == false) { //Start While01
             // look for suitable dpinfo-struct
@@ -495,9 +495,9 @@ public class EdgeHeapFile {
     	  
     	    {
     	      boolean status;
-    	      HFPage currentDirPage = new HFPage();
+    	      EHFPage currentDirPage = new EHFPage();
     	      PageId currentDirPageId = new PageId();
-    	      HFPage currentDataPage = new HFPage();
+    	      EHFPage currentDataPage = new EHFPage();
     	      PageId currentDataPageId = new PageId();
     	      EID currentDataPageEid = new EID();
     	      
@@ -513,7 +513,7 @@ public class EdgeHeapFile {
     	      // - currentDataPage, currentDataPageid valid and pinned
     	      
     	      // get datapageinfo from the current directory page:
-    	      Tuple atuple;	
+    	      Edge atuple;	
     	      
     	      atuple = currentDirPage.returnRecord(currentDataPageEid);
     	      DataPageInfo pdpinfo = new DataPageInfo(atuple);
@@ -631,7 +631,7 @@ public class EdgeHeapFile {
      * @exception Exception other exception
      * @return ture:update success   false: can't find the record
      */
-    public boolean updateEdge(Eid eid, Tuple newtuple)
+    public boolean updateEdge(Eid eid, Edge newtuple)
             throws InvalidSlotNumberException,
             InvalidUpdateException,
             InvalidTupleSizeException,
@@ -640,9 +640,9 @@ public class EdgeHeapFile {
             HFBufMgrException,
             Exception {
         boolean status;
-        HFPage dirPage = new HFPage();
+        EHFPage dirPage = new EHFPage();
         PageId currentDirPageId = new PageId();
-        HFPage dataPage = new HFPage();
+        EHFPage dataPage = new EHFPage();
         PageId currentDataPageId = new PageId();
         EID currentDataPageEid = new EID();
 
@@ -652,7 +652,7 @@ public class EdgeHeapFile {
                 currentDataPageEid);
 
         if(!status) return status;	// record not found
-        Tuple atuple = new Tuple();
+        Edge atuple = new Tuple();
         atuple = dataPage.returnRecord(eid);
 
         // Assume update a record with a record whose length is equal to
@@ -685,7 +685,7 @@ public class EdgeHeapFile {
      *
      * @return a Tuple. if Tuple==null, no more tuple
      */
-    public  Tuple getEdge(Eid eid)
+    public  Edge getEdge(Eid eid)
             throws InvalidSlotNumberException,
             InvalidTupleSizeException,
             HFException,
@@ -694,9 +694,9 @@ public class EdgeHeapFile {
             Exception
     {
         boolean status;
-        HFPage dirPage = new HFPage();
+        EHFPage dirPage = new EHFPage();
         PageId currentDirPageId = new PageId();
-        HFPage dataPage = new HFPage();
+        EHFPage dataPage = new EHFPage();
         PageId currentDataPageId = new PageId();
         EID currentDataPageEid = new EID();
 
@@ -706,7 +706,7 @@ public class EdgeHeapFile {
                 currentDataPageEid);
 
         if(!status) return null; // record not found
-        Tuple atuple = new Tuple();
+        Edge atuple = new Tuple();
         atuple = dataPage.getNode(eid);
 
       /*
@@ -726,11 +726,11 @@ public class EdgeHeapFile {
      *
      */
     //TODO: EScan
-    public Scan openScan()
+    public EScan openScan()
             throws InvalidTupleSizeException,
             IOException
     {
-        Scan newscan = new Scan(this);
+        EScan newscan = new EScan(this);
         return newscan;
     }
 
@@ -753,8 +753,9 @@ public class EdgeHeapFile {
         PageId nextDirPageId = new PageId();
         nextDirPageId.pid = 0;
         Page pageinbuffer = new Page();
-        HFPage currentDirPage =  new HFPage();
-        Tuple atuple;
+        //n=should change
+        EHFPage currentDirPage =  new EHFPage();
+        Edge atuple;
 
         pinPage(currentDirPageId, currentDirPage, false);
         //currentDirPage.openHFpage(pageinbuffer);
