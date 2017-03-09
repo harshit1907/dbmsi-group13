@@ -1,0 +1,1 @@
+java -cp /home/hadoop/git/dbmsi-group13/src tests/BatchEdgeInsert $1 $2
