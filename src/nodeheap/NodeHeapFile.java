@@ -15,10 +15,8 @@ import heap.HFBufMgrException;
 import heap.HFDiskMgrException;
 import heap.HFException;
 import heap.HFPage;
-import heap.InvalidSlotNumberException;
 import heap.InvalidTupleSizeException;
 import heap.InvalidUpdateException;
-import heap.Scan;
 import heap.SpaceNotAvailableException;
 
 /**
