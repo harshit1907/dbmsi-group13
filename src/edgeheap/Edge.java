@@ -26,8 +26,6 @@ public class Edge extends Tuple{
     public static final int max_size = MINIBASE_PAGESIZE;
     public static NID Source;//TODO : change to NID
     public static NID Destination;//TODO : change to NID
-    public static int Label=AttrType.attrString;
-    public static int Weight=AttrType.attrInteger;
 
     public static void setSource(NID source) {
         Source = source;
@@ -37,12 +35,12 @@ public class Edge extends Tuple{
         Destination = destination;
     }
 
-    public static void setLabel(int label) {
-        Label = label;
+    public void setLabel(String label) throws IOException {
+        Convert.setStrValue(label, 4, data);
     }
 
-    public static void setWeight(int weight) {
-        Weight = weight;
+    public void setWeight(int weight) throws IOException {
+        Convert.setIntValue(weight, 0, data);
     }
 
 
@@ -55,12 +53,12 @@ public class Edge extends Tuple{
         return Destination;
     }
 
-    public static int getLabel() {
-        return Label;
+    public String getLabel() throws IOException {
+        return Convert.getStrValue(4, data, data.length-4);
     }
 
-    public static int getWeight() {
-        return Weight;
+    public int getWeight() throws IOException {
+        return Convert.getIntValue(0, data);
     }
 
     /**

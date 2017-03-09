@@ -45,8 +45,6 @@ public class Node extends Tuple{
 	 
 	  private short [] fldOffset;
 	  
-	  public static int Label=AttrType.attrString;
-	  public static int Descriptor=AttrType.attrDesc;
 
    /**
     * Class constructor
@@ -88,20 +86,20 @@ public class Node extends Tuple{
          // what's this? I think we do not require this, as there are no variable fields in here 
      }
      
-     public static int getLabel() {
-         return Label;
+     public String getLabel() throws IOException {
+         return Convert.getStrValue(20, data, data.length-20);
      }
      
-     public static int getDesc() {
-         return Descriptor;
+     public Descriptor getDesc() throws IOException {
+         return Convert.getDescValue(0, data);
      }
      
-     public static void setLabel(int label) {
-         Label = label;
+     public void setLabel(String label) throws IOException {
+         Convert.setStrValue(label, 20, data);
      }
 
-     public static void setDesc(int Desc) {
-         Descriptor = Desc;
+     public void setDesc(Descriptor desc) throws IOException {
+         Convert.setDescValue(desc, 0, data);
      }
      
      /** Copy the node byte array out
@@ -196,7 +194,7 @@ public class Node extends Tuple{
      {
          data = anode;
          node_offset = offset;
-         node_length = data.length;//Not sure
+         node_length = data.length; //Not sure
      }
 
      public void nodeSet(byte [] fromnode, int offset)
