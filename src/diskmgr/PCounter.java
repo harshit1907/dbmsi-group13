@@ -16,7 +16,7 @@ public class PCounter
 	}
 	public static void writeIncrement()
 	{
-		writeCounter++;
+		writeCounter++;	
 	}
 		
 }
