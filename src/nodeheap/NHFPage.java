@@ -2,12 +2,15 @@
 
 package nodeheap;
 
-import java.io.*;
-import java.lang.*;
+import java.io.IOException;
 
-import global.*;
+import diskmgr.Page;
+import global.Convert;
+import global.GlobalConst;
+import global.NID;
+import global.PageId;
 import heap.InvalidSlotNumberException;
-import diskmgr.*;
+import heap.Tuple;
 
 
 

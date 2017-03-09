@@ -11,7 +11,6 @@ import diskmgr.Page;
 import global.GlobalConst;
 import global.NID;
 import global.PageId;
-import global.RID;
 import global.SystemDefs;
 import heap.HFBufMgrException;
 import heap.InvalidTupleSizeException;
@@ -584,10 +583,10 @@ public class NScan implements GlobalConst{
   }
 
 
-  private boolean peekNext(RID rid) {
+  private boolean peekNext(NID nid) {
     
-    rid.pageNo.pid = userrid.pageNo.pid;
-    rid.slotNo = userrid.slotNo;
+    nid.pageNo.pid = userrid.pageNo.pid;
+    nid.slotNo = userrid.slotNo;
     return true;
     
   }

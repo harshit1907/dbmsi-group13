@@ -1,11 +1,12 @@
 package nodeheap;
 
-import heap.Tuple; //not sure
-import java.io.*;
-import java.lang.*;
+import java.io.IOException;
 
-import edgeheap.Edge;
-import global.*;
+import global.AttrType;
+import global.Convert;
+import global.Descriptor;
+import heap.Tuple;
+
 
 
 
@@ -99,7 +100,7 @@ public class Node extends Tuple{
          Label = label;
      }
 
-     public static void setWeight(int Desc) {
+     public static void setDesc(int Desc) {
          Descriptor = Desc;
      }
      

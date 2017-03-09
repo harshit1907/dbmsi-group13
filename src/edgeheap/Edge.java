@@ -1,9 +1,12 @@
 package edgeheap;
 
+import java.io.IOException;
+
+import global.AttrType;
+import global.Convert;
+import global.NID;
 import heap.Tuple;//not sure
-import java.io.*;
-import java.lang.*;
-import global.*;
+
 
 
 

@@ -2,12 +2,15 @@
 
 package edgeheap;
 
-import java.io.*;
-import java.lang.*;
 
-import global.*;
+import java.io.IOException;
+
+import diskmgr.Page;
+import global.Convert;
+import global.EID;
+import global.GlobalConst;
+import global.PageId;
 import heap.InvalidSlotNumberException;
-import diskmgr.*;
 
 
 

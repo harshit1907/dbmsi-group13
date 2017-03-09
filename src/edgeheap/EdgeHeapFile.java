@@ -8,7 +8,6 @@ import java.io.IOException;
 
 import diskmgr.Page;
 import global.EID;
-import global.NID;
 import global.PageId;
 import global.SystemDefs;
 import heap.FileAlreadyDeletedException;

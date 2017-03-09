@@ -4,7 +4,6 @@ import global.Convert;
 import global.GlobalConst;
 import global.PageId;
 import heap.InvalidTupleSizeException;
-import heap.Tuple;
 
 import java.io.IOException;
 

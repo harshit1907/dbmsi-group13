@@ -14,11 +14,9 @@ import heap.FileAlreadyDeletedException;
 import heap.HFBufMgrException;
 import heap.HFDiskMgrException;
 import heap.HFException;
-import heap.HFPage;
 import heap.InvalidSlotNumberException;
 import heap.InvalidTupleSizeException;
 import heap.InvalidUpdateException;
-import heap.Scan;
 import heap.SpaceNotAvailableException;
 
 /**
@@ -112,7 +110,7 @@ public class NodeHeapFile {
             add_file_entry(_fileName, _firstDirPageId);
             // check error(new exception: Could not add file entry
 
-            HFPage firstDirPage = new HFPage();
+            NHFPage firstDirPage = new NHFPage();
             firstDirPage.init(_firstDirPageId, apage);
             PageId pageId = new PageId(INVALID_PAGE);
 
@@ -229,7 +227,7 @@ public class NodeHeapFile {
         return false;
     }
 
-    /** Return number of records in file.
+    /** Return number of nodes in node heap file.
      *
      * @exception InvalidSlotNumberException invalid slot number
      * @exception InvalidTupleSizeException invalid tuple size
@@ -237,7 +235,7 @@ public class NodeHeapFile {
      * @exception HFDiskMgrException exception thrown from diskmgr layer
      * @exception IOException I/O errors
      */
-    public int getRecCnt()
+    public int getNodeCnt()
             throws InvalidSlotNumberException,
             InvalidTupleSizeException,
             HFDiskMgrException,
@@ -763,4 +761,150 @@ public class NodeHeapFile {
         }
 
     } // end of delete_file_entry
+    
+    /** Delete record from file with given rid.
+    *
+    * @exception InvalidSlotNumberException invalid slot number
+    * @exception InvalidTupleSizeException invalid tuple size
+    * @exception HFException heapfile exception
+    * @exception HFBufMgrException exception thrown from bufmgr layer
+    * @exception HFDiskMgrException exception thrown from diskmgr layer
+    * @exception Exception other exception
+    *
+    * @return true record deleted  false:record not found
+    */
+   public boolean deleteNode(NID nid)  
+     throws InvalidSlotNumberException, 
+ 	   InvalidTupleSizeException, 
+ 	   HFException, 
+ 	   HFBufMgrException,
+ 	   HFDiskMgrException,
+ 	   Exception
+   
+     {
+       boolean status;
+       NHFPage currentDirPage = new NHFPage();
+       PageId currentDirPageId = new PageId();
+       NHFPage currentDataPage = new NHFPage();
+       PageId currentDataPageId = new PageId();
+       NID currentDataPageRid = new NID();
+       
+       status = _findDataPage(nid,
+ 			     currentDirPageId, currentDirPage, 
+ 			     currentDataPageId, currentDataPage,
+ 			     currentDataPageRid);
+       
+       if(status != true) return status;	// record not found
+       
+       // ASSERTIONS:
+       // - currentDirPage, currentDirPageId valid and pinned
+       // - currentDataPage, currentDataPageid valid and pinned
+       
+       // get datapageinfo from the current directory page:
+       Node anode;	
+       
+       anode = currentDirPage.returnNode(currentDataPageRid);
+       DataPageInfo pdpinfo = new DataPageInfo(anode);
+       
+       // delete the record on the datapage
+       currentDataPage.deleteNode(nid);
+       
+       pdpinfo.recct--;
+       pdpinfo.flushToNode();	//Write to the buffer pool
+       if (pdpinfo.recct >= 1) 
+ 	{
+ 	  // more records remain on datapage so it still hangs around.  
+ 	  // we just need to modify its directory entry
+ 	  
+ 	  pdpinfo.availspace = currentDataPage.available_space();
+ 	  pdpinfo.flushToNode();
+ 	  unpinPage(currentDataPageId, true /* = DIRTY*/);
+ 	  
+ 	  unpinPage(currentDirPageId, true /* = DIRTY */);
+ 	  
+ 	  
+ 	}
+       else
+ 	{
+ 	  // the record is already deleted:
+ 	  // we're removing the last record on datapage so free datapage
+ 	  // also, free the directory page if 
+ 	  //   a) it's not the first directory page, and 
+ 	  //   b) we've removed the last DataPageInfo record on it.
+ 	  
+ 	  // delete empty datapage: (does it get unpinned automatically? -NO, Ranjani)
+ 	  unpinPage(currentDataPageId, false /*undirty*/);
+ 	  
+ 	  freePage(currentDataPageId);
+ 	  
+ 	  // delete corresponding DataPageInfo-entry on the directory page:
+ 	  // currentDataPageRid points to datapage (from for loop above)
+ 	  
+ 	  currentDirPage.deleteNode(currentDataPageRid);
+ 	  
+ 	  
+ 	  // ASSERTIONS:
+ 	  // - currentDataPage, currentDataPageId invalid
+ 	  // - empty datapage unpinned and deleted
+ 	  
+ 	  // now check whether the directory page is empty:
+ 	  
+ 	  currentDataPageRid = currentDirPage.firstNode();
+ 	  
+ 	  // st == OK: we still found a datapageinfo record on this directory page
+ 	  PageId pageId;
+ 	  pageId = currentDirPage.getPrevPage();
+ 	  if((currentDataPageRid == null)&&(pageId.pid != INVALID_PAGE))
+ 	    {
+ 	      // the directory-page is not the first directory page and it is empty:
+ 	      // delete it
+ 	      
+ 	      // point previous page around deleted page:
+ 	      
+ 	      NHFPage prevDirPage = new NHFPage();
+ 	      pinPage(pageId, prevDirPage, false);
+
+ 	      pageId = currentDirPage.getNextPage();
+ 	      prevDirPage.setNextPage(pageId);
+ 	      pageId = currentDirPage.getPrevPage();
+ 	      unpinPage(pageId, true /* = DIRTY */);
+ 	      
+ 	      
+ 	      // set prevPage-pointer of next Page
+ 	      pageId = currentDirPage.getNextPage();
+ 	      if(pageId.pid != INVALID_PAGE)
+ 		{
+ 		  NHFPage nextDirPage = new NHFPage();
+ 		  pageId = currentDirPage.getNextPage();
+ 		  pinPage(pageId, nextDirPage, false);
+ 		  
+ 		  //nextDirPage.openHFpage(apage);
+ 		  
+ 		  pageId = currentDirPage.getPrevPage();
+ 		  nextDirPage.setPrevPage(pageId);
+ 		  pageId = currentDirPage.getNextPage();
+ 		  unpinPage(pageId, true /* = DIRTY */);
+ 		  
+ 		}
+ 	      
+ 	      // delete empty directory page: (automatically unpinned?)
+ 	      unpinPage(currentDirPageId, false/*undirty*/);
+ 	      freePage(currentDirPageId);
+ 	      
+ 	      
+ 	    }
+ 	  else
+ 	    {
+ 	      // either (the directory page has at least one more datapagerecord
+ 	      // entry) or (it is the first directory page):
+ 	      // in both cases we do not delete it, but we have to unpin it:
+ 	      
+ 	      unpinPage(currentDirPageId, true /* == DIRTY */);
+ 	      
+ 	      
+ 	    }
+ 	}
+       return true;
+     }
+   
 }
