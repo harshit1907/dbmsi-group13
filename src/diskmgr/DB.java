@@ -50,7 +50,9 @@ public class DB implements GlobalConst {
   
   /** default constructor.
    */
-  public DB() { }
+  public DB() { 
+	  PCounter.initialize();
+  }
   
   
   /** DB Constructors.
@@ -148,6 +150,7 @@ public class DB implements GlobalConst {
     // Read the appropriate number of bytes.
     byte [] buffer = apage.getpage();  //new byte[MINIBASE_PAGESIZE];
     try{
+    	PCounter.readIncrement();
       fp.read(buffer);
     }
     catch (IOException e) {
@@ -178,6 +181,7 @@ public class DB implements GlobalConst {
     
     // Write the appropriate number of bytes.
     try{
+    	PCounter.writeIncrement();
       fp.write(apage.getpage());
     }
     catch (IOException e) {
