@@ -7,7 +7,10 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.HashSet;
 
+import btree.AddFileEntryException;
 import btree.BTreeFile;
+import btree.ConstructPageException;
+import btree.GetFileEntryException;
 import edgeheap.EHFPage;
 import edgeheap.Edge;
 import edgeheap.EdgeHeapFile;
@@ -31,8 +34,26 @@ public class GraphDB implements GlobalConst {
 
   
   private static final int bits_per_page = MAX_SPACE * 8;
+private static final int REC_LEN1 = 32;
   
   
+  
+  /** default constructor.
+   */
+  public GraphDB() { }
+  
+  public NodeHeapFile nhfile ;
+  public EdgeHeapFile ehfile ;
+  public BTreeFile btNodeLabel ;
+  public BTreeFile btEdgeLabel;
+  public BTreeFile btEdgeWeight ;
+  public int type;
+  public GraphDB(int type){
+	PCounter.initialize();
+	this.type=type;	 
+  }
+  
+
   /** Open the database with the given name.
    *
    * @param name DB_name
@@ -41,14 +62,23 @@ public class GraphDB implements GlobalConst {
    * @exception FileIOException file I/O error
    * @exception InvalidPageNumberException invalid page number
    * @exception DiskMgrException error caused by other layers
+ * @throws HFDiskMgrException 
+ * @throws HFBufMgrException 
+ * @throws HFException 
+ * @throws AddFileEntryException 
+ * @throws ConstructPageException 
+ * @throws GetFileEntryException 
    */
   public void openDB( String fname)
     throws IOException, 
 	   InvalidPageNumberException, 
 	   FileIOException,
-	   DiskMgrException {
+	   DiskMgrException, HFException, HFBufMgrException, HFDiskMgrException, GetFileEntryException, ConstructPageException, AddFileEntryException {
     
     name = fname;
+    
+   
+    
     
     // Creaat a random access file
     fp = new RandomAccessFile(fname, "rw");
@@ -67,37 +97,27 @@ public class GraphDB implements GlobalConst {
     num_pages = firstpg.getNumDBPages();
     
     unpinPage(pageId, false /* undirty*/);
-  }
-  
-  /** default constructor.
-   */
-  public GraphDB() { }
-  
-  public GraphDB(int type) throws HFException, HFBufMgrException, HFDiskMgrException, IOException {
-	  
-	  PCounter.initialize();
-	  
-	  // Create node and edge data files
-	  NodeHeapFile nhfile = new NodeHeapFile(name+"n");
-	  EdgeHeapFile ehfile = new EdgeHeapFile(name+"e");
-	
-	  // Create index files
-	  switch(type) {
-		  case 0: 
-			  //btf = new BTreeFile("BTreeIndex", AttrType.attrString, , 1);
-			  break;
-		  case 1:
-			  
-			  break;
-		  case 2: 
-			  
-			  break;
-		  case 4:
-			  
-			  break;
-		  default:
-			  break;
-	  }
+    
+    nhfile  = new NodeHeapFile(name+"_Node");
+   	ehfile  = new EdgeHeapFile(name+"_Edge");
+   	 switch(type) {
+   	  case 1: 
+   		  btNodeLabel = new BTreeFile(name+"_BTreeNodeIndex", AttrType.attrString, REC_LEN1, 1/*delete*/); 
+   		  break;
+   	  case 2:
+   		  
+   		  break;
+   	  case 3: 
+   		  btEdgeLabel = new BTreeFile(name+"_BTreeNodeIndex", AttrType.attrString, REC_LEN1, 1/*delete*/); 
+   			 
+   		  break;
+   	  case 4:
+   		  btEdgeWeight = new BTreeFile(name+"_BTreeNodeIndex", AttrType.attrInteger, 4, 1/*delete*/); 
+   			
+   		  break;
+   	  default:
+   		  break;
+    }
   }
   
   /** DB Constructors.
@@ -111,23 +131,33 @@ public class GraphDB implements GlobalConst {
    * @exception InvalidPageNumberException invalid page number
    * @exception FileIOException file I/O error
    * @exception DiskMgrException error caused by other layers
+ * @throws HFDiskMgrException 
+ * @throws HFBufMgrException 
+ * @throws HFException 
+ * @throws AddFileEntryException 
+ * @throws ConstructPageException 
+ * @throws GetFileEntryException 
    */
   public void openDB( String fname, int num_pgs)
     throws IOException, 
 	   InvalidPageNumberException,
 	   FileIOException,
-	   DiskMgrException {
+	   DiskMgrException, HFException, HFBufMgrException, HFDiskMgrException, GetFileEntryException, ConstructPageException, AddFileEntryException {
     
     name = new String(fname);
     num_pages = (num_pgs > 2) ? num_pgs : 2;
     
+	  // Create node and edge data files
+    
+	
     File DBfile = new File(name);
     
     DBfile.delete();
     
     // Creaat a random access file
-    fp = new RandomAccessFile(fname, "rw");
     
+    fp = new RandomAccessFile(fname, "rw");
+    System.out.println(fp.toString());
     // Make the file num_pages pages long, filled with zeroes.
     fp.seek((long)(num_pages*MINIBASE_PAGESIZE-1));
     fp.writeByte(0);
@@ -150,6 +180,27 @@ public class GraphDB implements GlobalConst {
     int num_map_pages = (num_pages + bits_per_page -1)/bits_per_page;
     
     set_bits(pageId, 1+num_map_pages, 1);
+    
+    nhfile  = new NodeHeapFile(name+"_Node");
+	ehfile  = new EdgeHeapFile(name+"_Edge");
+	 switch(type) {
+	  case 1: 
+		  btNodeLabel = new BTreeFile(name+"_BTreeNodeIndex", AttrType.attrString, REC_LEN1, 1/*delete*/); 
+		  break;
+	  case 2:
+		  
+		  break;
+	  case 3: 
+		  btEdgeLabel = new BTreeFile(name+"_BTreeNodeIndex", AttrType.attrString, REC_LEN1, 1/*delete*/); 
+			 
+		  break;
+	  case 4:
+		  btEdgeWeight = new BTreeFile(name+"_BTreeNodeIndex", AttrType.attrInteger, 4, 1/*delete*/); 
+			
+		  break;
+	  default:
+		  break;
+ }
     
   }
   
@@ -634,6 +685,7 @@ public class GraphDB implements GlobalConst {
         hpid.pid = nexthpid.pid;
 	
         // Pin the header page.
+        
         pinPage(hpid, apage, false /*no diskIO*/);
 	
 	// This complication is because the first page has a different

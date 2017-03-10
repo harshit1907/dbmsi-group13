@@ -15,7 +15,7 @@ public class Node extends Tuple{
 	 /** 
 	  * Maximum size of any tuple
 	  */
-	  public static final int max_size = MINIBASE_PAGESIZE;
+	  public static final int max_size = 50;
 
 	 /** 
 	   * a byte array to hold data
@@ -66,6 +66,7 @@ public class Node extends Tuple{
 
      public Node(byte [] anode, int offset, int length)
      {
+    	super(anode,  offset,  length);
         data = anode;
         node_offset = offset;
         node_length = length; // let's keep this for now
