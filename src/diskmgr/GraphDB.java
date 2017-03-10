@@ -23,6 +23,8 @@ import heap.HFDiskMgrException;
 import heap.HFException;
 import heap.InvalidSlotNumberException;
 import heap.InvalidTupleSizeException;
+import nodeheap.NHFPage;
+import nodeheap.Node;
 import nodeheap.NodeHeapFile;
 
 public class GraphDB implements GlobalConst {
@@ -72,6 +74,9 @@ public class GraphDB implements GlobalConst {
   public GraphDB() { }
   
   public GraphDB(int type) throws HFException, HFBufMgrException, HFDiskMgrException, IOException {
+	  
+	  PCounter.initialize();
+	  
 	  // Create node and edge data files
 	  NodeHeapFile nhfile = new NodeHeapFile(name+"n");
 	  EdgeHeapFile ehfile = new EdgeHeapFile(name+"e");
@@ -184,6 +189,8 @@ public class GraphDB implements GlobalConst {
     if((pageno.pid < 0)||(pageno.pid >= num_pages))
       throw new InvalidPageNumberException(null, "BAD_PAGE_NUMBER");
     
+    PCounter.readIncrement();
+    
     // Seek to the correct page
     fp.seek((long)(pageno.pid *MINIBASE_PAGESIZE));
     
@@ -215,6 +222,7 @@ public class GraphDB implements GlobalConst {
     if((pageno.pid < 0)||(pageno.pid >= num_pages))
       throw new InvalidPageNumberException(null, "INVALID_PAGE_NUMBER");
     
+    PCounter.writeIncrement();
     // Seek to the correct page
     fp.seek((long)(pageno.pid *MINIBASE_PAGESIZE));
     
@@ -892,13 +900,11 @@ public class GraphDB implements GlobalConst {
 	  return e.getEdgeCnt();
   }
   
-//TODO: Fatega tab dekhega
+  // TODO: Fatega tab dekhega
   public int getLabelCnt() throws HFException, HFBufMgrException, HFDiskMgrException, IOException, InvalidTupleSizeException, InvalidSlotNumberException {
-	  /*EdgeHeapFile e = new EdgeHeapFile(name);
-	  EScan escan = new EScan(e); */
+	  
+	  // Count Number of Edges label
 	  EHFPage epage = new EHFPage();
-	  //PageId fpage = e._firstDirPageId;
-	  //DBFirstPage fpage = new DBFirstPage();
 	  EID eid = epage.firstEdge();
 	  HashSet<String> labelSet = new HashSet<String>();
 	  while(eid!=null) {
@@ -906,6 +912,16 @@ public class GraphDB implements GlobalConst {
 		  labelSet.add(aedge.getLabel());
 		  eid = epage.nextEdge(eid);
 	  }
+	  
+	  // Count Number of Nodes label
+	  NHFPage npage = new NHFPage();
+	  NID nid = npage.firstNode();
+	  while(nid!=null) {
+		  Node anode = npage.getNode(nid);
+		  labelSet.add(anode.getLabel());
+		  nid = npage.nextNode(nid);
+	  }
+	  
 	  return labelSet.size();
   }
   public int getDestinationCnt() throws IOException, InvalidSlotNumberException {
