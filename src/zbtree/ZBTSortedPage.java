@@ -19,7 +19,7 @@ public class ZBTSortedPage extends NHFPage {
         super();
         try {
             SystemDefs.JavabaseBM.pinPage(pageno, this, false/*Rdisk*/);
-            this.keyType=keyType;
+            this.keyType = keyType;
         } catch (Exception e) {
             throw new ConstructPageException(e, "construct sorted page failed");
         }
@@ -27,7 +27,7 @@ public class ZBTSortedPage extends NHFPage {
 
     public ZBTSortedPage(Page page, int keyType) {
         super(page);
-        this.keyType=keyType;
+        this.keyType = keyType;
     }
 
     public ZBTSortedPage(int keyType) throws ConstructPageException {
@@ -114,7 +114,6 @@ public class ZBTSortedPage extends NHFPage {
      */
     public boolean deleteSortedRecord(NID nid) throws DeleteDescException {
         try {
-
             deleteNode(nid);
             compact_slot_dir();
             return true;

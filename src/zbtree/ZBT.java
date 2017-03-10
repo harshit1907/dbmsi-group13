@@ -121,6 +121,45 @@ public class ZBT implements GlobalConst {
         }
     }
 
+    protected final static byte[] getBytesFromEntry(DescriptorDataEntry entry ) throws KeyNotMatchException,
+            NodeNotMatchException, ConvertException, DescriptorNotMatchException {
+        byte[] data;
+        int n, m;
+        try {
+            n = getKeyLength(entry.key);
+            m=n;
+            if( entry.data instanceof IndexData )
+                n+=4;
+            else if (entry.data instanceof LeafData )
+                n+=8;
+
+            data=new byte[n];
+
+            if ( entry.key instanceof DescriptorKey) {
+                Convert.setDescValue(((DescriptorKey) entry.key).getDesc(),
+                        0, data);
+            } else {
+                throw new KeyNotMatchException(null, "key types do not match");
+            }
+
+            if ( entry.data instanceof IndexData ) {
+                Convert.setIntValue( ((IndexData)entry.data).getData().pid,
+                        m, data);
+            } else if ( entry.data instanceof LeafData ) {
+                Convert.setIntValue( ((LeafData)entry.data).getData().slotNo,
+                        m, data);
+                Convert.setIntValue( ((LeafData)entry.data).getData().pageNo.pid,
+                        m+4, data);
+
+            } else {
+                throw new NodeNotMatchException(null, "node types do not match");
+            }
+            return data;
+        } catch (IOException e) {
+            throw new  ConvertException(e, "convert failed");
+        }
+    }
+
     public static void printPage(PageId pageno, int keyType)
             throws IOException, IteratorException, ConstructPageException,
             HashEntryNotFoundException, ReplacerException,
@@ -155,10 +194,10 @@ public class ZBT implements GlobalConst {
             System.out.println("Left Link      : " + leafPage.getPrevPage().pid);
             System.out.println("Right Link     : " + leafPage.getNextPage().pid);
 
-            RID rid = new RID();
+            NID nid = new NID();
 
-            for (DescriptorDataEntry entry = leafPage.getFirst(rid); entry != null;
-                 entry = leafPage.getNext(rid)) {
+            for (DescriptorDataEntry entry = leafPage.getFirst(nid); entry != null;
+                 entry = leafPage.getNext(nid)) {
                 if (keyType == AttrType.attrInteger)
                     System.out.println(i + " (key, [pageNo, slotNo]):   (" +
                             (DescriptorKey) entry.key + ",  " + (LeafData) entry.data + " )");
@@ -170,5 +209,97 @@ public class ZBT implements GlobalConst {
             System.out.println("Sorry!!! This page is neither Index nor Leaf page.");
         }
         SystemDefs.JavabaseBM.unpinPage(pageno, true/*dirty*/);
+    }
+
+    public static void printBTree(ZBTreeHeaderPage header) throws IOException, ConstructPageException,
+            IteratorException, HashEntryNotFoundException, InvalidFrameNumberException,
+            PageUnpinnedException, ReplacerException {
+        if(header.get_rootId().pid == INVALID_PAGE) {
+            System.out.println("The Tree is Empty!!!");
+            return;
+        }
+
+        System.out.println("");
+        System.out.println("");
+        System.out.println("");
+        System.out.println("---------------The B+ Tree Structure---------------");
+
+
+        System.out.println(1 + "     " + header.get_rootId());
+
+        _printTree(header.get_rootId(), "     ", 1, header.get_keyType());
+
+        System.out.println("--------------- End ---------------");
+        System.out.println("");
+        System.out.println("");
+    }
+
+    private static void _printTree(PageId currentPageId, String prefix, int i,
+                                   int keyType) throws IOException,
+            ConstructPageException, IteratorException, HashEntryNotFoundException,
+            InvalidFrameNumberException, PageUnpinnedException, ReplacerException {
+        ZBTSortedPage sortedPage = new ZBTSortedPage(currentPageId, keyType);
+        prefix = prefix+"       ";
+        i++;
+        if(sortedPage.getType() == NodeType.INDEX) {
+            ZBTIndexPage indexPage = new ZBTIndexPage((Page)sortedPage, keyType);
+
+            System.out.println(i+prefix+ indexPage.getPrevPage());
+            _printTree( indexPage.getPrevPage(), prefix, i, keyType);
+
+            NID nid=new NID();
+            for(DescriptorDataEntry entry=indexPage.getFirst(nid); entry!=null;
+                 entry=indexPage.getNext(nid)) {
+                System.out.println(i+prefix+(IndexData)entry.data);
+                _printTree( ((IndexData)entry.data).getData(), prefix, i, keyType);
+            }
+        }
+        SystemDefs.JavabaseBM.unpinPage(currentPageId , true/*dirty*/);
+    }
+
+    public static void printAllLeafPages(ZBTreeHeaderPage header) throws IOException, ConstructPageException,
+            IteratorException, HashEntryNotFoundException, InvalidFrameNumberException, PageUnpinnedException,
+            ReplacerException {
+        if (header.get_rootId().pid == INVALID_PAGE) {
+            System.out.println("The Tree is Empty!!!");
+            return;
+        }
+
+        System.out.println("");
+        System.out.println("");
+        System.out.println("");
+        System.out.println("---------------The B+ Tree Leaf Pages---------------");
+
+
+        _printAllLeafPages(header.get_rootId(), header.get_keyType());
+
+        System.out.println("");
+        System.out.println("");
+        System.out.println("------------- All Leaf Pages Have Been Printed --------");
+        System.out.println("");
+        System.out.println("");
+    }
+
+    private static void _printAllLeafPages(PageId currentPageId,  int keyType) throws IOException,
+            ConstructPageException, IteratorException, InvalidFrameNumberException, HashEntryNotFoundException,
+            PageUnpinnedException, ReplacerException {
+        ZBTSortedPage sortedPage = new ZBTSortedPage(currentPageId, keyType);
+
+        if(sortedPage.getType() == NodeType.INDEX) {
+            ZBTIndexPage indexPage = new ZBTIndexPage((Page)sortedPage, keyType);
+
+            _printAllLeafPages( indexPage.getPrevPage(),  keyType);
+
+            NID nid=new NID();
+            for(DescriptorDataEntry entry=indexPage.getFirst(nid); entry!=null;
+                 entry=indexPage.getNext(nid)) {
+                _printAllLeafPages( ((IndexData)entry.data).getData(),  keyType);
+            }
+        }
+
+        if( sortedPage.getType()==NodeType.LEAF) {
+            printPage(currentPageId, keyType);
+        }
+        SystemDefs.JavabaseBM.unpinPage(currentPageId , true/*dirty*/);
     }
 }

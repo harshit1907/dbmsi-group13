@@ -8,9 +8,11 @@ import global.Descriptor;
  */
 public class DescriptorKey extends KeyClass {
     private String key;
+    private Descriptor desc;
 
     public DescriptorKey(Descriptor desc) {
-        key = BitShufflingUtils.bitShuffle(desc);
+        this.desc = desc;
+        this.key = BitShufflingUtils.bitShuffle(desc);
     }
 
     public String getKey() {
@@ -23,5 +25,9 @@ public class DescriptorKey extends KeyClass {
 
     public String toString() {
         return key;
+    }
+
+    public Descriptor getDesc() {
+        return desc;
     }
 }
