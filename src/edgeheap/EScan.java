@@ -40,7 +40,7 @@ public class EScan implements GlobalConst{
     private PageId dirpageId = new PageId();
 
     /** pointer to in-core data of dirpageId (page is pinned) */
-    private EHFPage dirpage = new EHFPage();
+    public EHFPage dirpage = new EHFPage();
 
     /** record ID of the DataPageInfo struct (in the directory page) which
      * describes the data page where our current record lives.

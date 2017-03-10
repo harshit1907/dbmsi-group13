@@ -45,11 +45,11 @@ public class Edge extends Tuple{
 
 
 
-    public static NID getSource() {
+    public NID getSource() {
         return Source;
     }
 
-    public static NID getDestination() {
+    public NID getDestination() {
         return Destination;
     }
 
