@@ -31,7 +31,6 @@ public class BatchNodeInsert
 	    boolean status = OK;
 	    BufferedReader br = null ;
 	    System.out.println ("  - Create a heap file\n");
-	    NID  nidOne=null;
 	    int i=0;
 	   
 	    if ( status == OK && SystemDefs.JavabaseBM.getNumUnpinnedBuffers()
@@ -61,7 +60,6 @@ public class BatchNodeInsert
 	    		
 	    		try {
 	    		NID  nid = SystemDefs.JavabaseDB.nhfile.insertNode(currentNode.getNodeByteArray());
-	    		  if(i==0) { nidOne=nid;i++;}
 	    		}
 	    		catch (Exception e) {
 	    		  status = FAIL;
@@ -78,9 +76,6 @@ public class BatchNodeInsert
 	    		  System.err.println ("*** Insertion left a page pinned\n");
 	    		  status = FAIL;
 	    		}
-	            
-	            
-	            System.out.println("");
 
 	            
 	            
@@ -103,8 +98,8 @@ public class BatchNodeInsert
 	    	}	
 	    }
 	    
-	/*    //////////////scanning
-	    NScan scan = null;
+	    //////////////scanning
+/*	    NScan scan = null;
 	    
 	    if ( status == OK ) {	
 	      System.out.println ("  - Scan the records just inserted\n");
@@ -124,13 +119,14 @@ public class BatchNodeInsert
 		status = FAIL;
 	      }
 	    }
-	    System.out.println("hiiii");
+	    NID nidTmp = new NID();
+
 	    if ( status == OK ) {
 	         Node node = null;
 	        
 	        boolean done = false;
 	        while (!done) { 
-	  		node = scan.getNext(nidOne);
+	  		node = scan.getNext(nidTmp);
 	  	 if (node == null) {
 	  	    done = true;
 	  	    break;
@@ -141,9 +137,9 @@ public class BatchNodeInsert
 	        }
 	        
 
-	      }*/
+	      }
 	      
-	    
+	*/    
 	    
 	    return true;
 	  }
