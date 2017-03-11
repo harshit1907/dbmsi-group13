@@ -25,8 +25,8 @@ public class BatchNodeInsert
 	  
 
 	  protected  boolean batchNodeInsert (String nodefilename,String graphDbName) throws InvalidSlotNumberException, InvalidTupleSizeException, HFException, HFDiskMgrException, HFBufMgrException, IOException, Exception {
-		  System.out.println(nodefilename+" defrgthyjukilo;p"+graphDbName);
-		SystemDefs sysdef = new SystemDefs(graphDbName,10000,1000,"Clock");
+		System.out.println(nodefilename+" defrgthyjukilo;p"+graphDbName);
+		
 		System.out.println ("\n  Test 1: Insert and scan fixed-size records\n");
 	    boolean status = OK;
 	    BufferedReader br = null ;
@@ -59,7 +59,8 @@ public class BatchNodeInsert
 	    		currentNode.setLabel(label);
 	    		
 	    		try {
-	    		NID  nid = SystemDefs.JavabaseDB.nhfile.insertNode(currentNode.getNodeByteArray());
+	    		
+	    			NID  nid = SystemDefs.JavabaseDB.nhfile.insertNode(currentNode.getNodeByteArray());
 	    		}
 	    		catch (Exception e) {
 	    		  status = FAIL;
@@ -99,7 +100,7 @@ public class BatchNodeInsert
 	    }
 	    
 	    //////////////scanning
-/*	    NScan scan = null;
+	    NScan scan = null;
 	    
 	    if ( status == OK ) {	
 	      System.out.println ("  - Scan the records just inserted\n");
@@ -139,15 +140,10 @@ public class BatchNodeInsert
 
 	      }
 	      
-	*/    
+
 	    
 	    return true;
 	  }
-   public static void main(String[] args) throws InvalidSlotNumberException, InvalidTupleSizeException, HFException, HFDiskMgrException, HFBufMgrException, IOException, Exception {
-	String nodefilename=args[0];
-   	String graphdbname=args[1];
-    new BatchNodeInsert().batchNodeInsert(nodefilename,graphdbname);
-    
-}  
+
 
 }
