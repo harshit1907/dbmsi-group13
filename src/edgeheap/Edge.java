@@ -23,15 +23,15 @@ public class Edge extends Tuple{
      * length of this tuple
      */
 
-    public static final int max_size = MINIBASE_PAGESIZE;
+    public static final int max_size = 50;
     public static NID Source;//TODO : change to NID
     public static NID Destination;//TODO : change to NID
 
-    public static void setSource(NID source) {
+    public  void setSource(NID source) {
         Source = source;
     }
 
-    public static void setDestination(NID destination) {
+    public  void setDestination(NID destination) {
         Destination = destination;
     }
 
@@ -76,6 +76,7 @@ public class Edge extends Tuple{
     }
     public Edge(byte [] aedge, int offset)
     {
+    	super(aedge,offset,aedge.length);
         data = aedge;
         edge_offset = offset;
         edge_length = aedge.length; //not sure: should keep or not because not in construct argument
