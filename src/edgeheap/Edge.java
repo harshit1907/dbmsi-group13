@@ -4,206 +4,229 @@ import java.io.IOException;
 
 import global.AttrType;
 import global.Convert;
+import global.Descriptor;
 import global.NID;
-import heap.Tuple;//not sure
+import heap.Tuple;
 
 
 
 
 public class Edge extends Tuple{
 
-    private short fldCnt;
+	 /** 
+	  * Maximum size of any tuple
+	  */
+	  public static final int max_size = 50;
 
-    private short [] fldOffset;
+	 /** 
+	   * a byte array to hold data
+	   */
+	  private byte [] data;
 
-    private int edge_offset;
-    private int edge_length;
+	  /**
+	   * start position of this tuple in data[]
+	   */
+	  private int edge_offset;
 
-    /**
-     * length of this tuple
-     */
+	  /**
+	   * length of this node
+	   */
+	  private int edge_length;
 
-    public static final int max_size = 50;
-    public static NID Source;//TODO : change to NID
-    public static NID Destination;//TODO : change to NID
+	  /** 
+	   * private field
+	   * Number of fields in this tuple
+	   */
+	  private short fldCnt;
 
-    public  void setSource(NID source) {
-        Source = source;
-    }
+	  /** 
+	   * private field
+	   * Array of offsets of the fields
+	   */
+	 
+	  private short [] fldOffset;
+	  
+	  public NID source;
 
-    public  void setDestination(NID destination) {
-        Destination = destination;
-    }
+	public NID getSource() {
+		return source;
+	}
 
-    public void setLabel(String label) throws IOException {
-        Convert.setStrValue(label, 4, data);
-    }
+	public void setSource(NID source) {
+		this.source = source;
+	}
 
-    public void setWeight(int weight) throws IOException {
-        Convert.setIntValue(weight, 0, data);
-    }
+	public NID getDestination() {
+		return destination;
+	}
 
+	public void setDestination(NID destination) {
+		this.destination = destination;
+	}
 
+	public NID destination;
 
-    public NID getSource() {
-        return Source;
-    }
-
-    public NID getDestination() {
-        return Destination;
-    }
-
-    public String getLabel() throws IOException {
-        return Convert.getStrValue(4, data, data.length-4);
-    }
-
-    public int getWeight() throws IOException {
-        return Convert.getIntValue(0, data);
-    }
-
-    /**
-
-     * a byte array to hold data
-     */
-    private byte [] data;
-
-    public  Edge()
+   /**
+    * Class constructor
+    * Create a new node with length = max_size,node offset = 0.
+    */
+    public Edge()
     {
-        // Creat a new edge
-        data = new byte[max_size];
-        edge_offset = 0;
-
+         // Create a new tuple
+         data = new byte[max_size];
+         edge_offset = 0;
+         edge_length = max_size;
     }
-    public Edge(byte [] aedge, int offset)
-    {
-    	super(aedge,offset,aedge.length);
-        data = aedge;
+     
+     /** Constructor
+      * @param atuple a byte array which contains the node
+      * @param offset the offset of the node in the byte array
+      * @param length the length of the node
+      */
+
+     public Edge(byte [] anode, int offset, int length)
+     {
+    	super(anode,  offset,  length);
+        data = anode;
         edge_offset = offset;
-        edge_length = aedge.length; //not sure: should keep or not because not in construct argument
-        //  fldCnt = getShortValue(offset, data);
-    }
-    public Edge(Edge fromEdge)
-    {
-        data = fromEdge.getEdgeByteArray();
-        edge_length = fromEdge.getLength();
-        edge_offset = 0;
-        fldCnt = fromEdge.noOfFlds();
-        fldOffset = fromEdge.copyFldOffset();
-    }
-    public void edgeCopy(Edge fromEdge)
-    {
-        byte [] temparray = fromEdge.getEdgeByteArray();
-        System.arraycopy(temparray, 0, data, edge_offset, temparray.length);//Not sure: edge_length
-//       fldCnt = fromTuple.noOfFlds();
-//       fldOffset = fromTuple.copyFldOffset();
-    }
-    public void edgeInit(byte [] aedge, int offset)
-    {
-        data = aedge;
-        edge_offset = offset;
-        edge_length = data.length;//Not sure
-    }
+        edge_length = length; // let's keep this for now
+      //  fldCnt = getShortValue(offset, data);
+     }
+     
+     /** Constructor(used as node copy)
+      * @param fromNode   a byte array which contains the tuple
+      * 
+      */
+     public Edge(Edge fromNode)
+     {
+         data = fromNode.getEdgeByteArray();
+         edge_length = fromNode.getLength();
+         edge_offset = 0;
+         fldCnt = 4; // fixed two fields in node
+         // fldOffset = 0; 
+         // what's this? I think we do not require this, as there are no variable fields in here 
+     }
+     
+     public String getLabel() throws IOException {
+         return Convert.getStrValue(4, data, data.length-4);
+     }
+     
+     public int getWeight() throws IOException {
+         return Convert.getIntValue(0, data);
+     }
+     
+     public void setLabel(String label) throws IOException {
+         Convert.setStrValue(label, 4, data);
+     }
 
-    public void edgeSet(byte [] fromedge, int offset)
-    {
-        System.arraycopy(fromedge, offset, data, 0, fromedge.length);
-        edge_offset = 0;
-        edge_length = fromedge.length;
-    }
+     public void setWeight(int weight) throws IOException {
+         Convert.setIntValue(weight, 0, data);
+     }
+     
+     /** Copy the node byte array out
+      *  @return  byte[], a byte array contains the node
+      *		the length of byte[] = length of the node
+      */
+      
+     public byte [] getEdgeByteArray() 
+     {
+         byte [] nodecopy = new byte [edge_length];
+         System.arraycopy(data, edge_offset, nodecopy, 0, edge_length);
+         return nodecopy;
+     }
+     
+     public void print(AttrType type[]) //TODO : print() after NID class
+             throws IOException
+     {
+         int i, val;
+         float fval;
+         String sval;
+         Descriptor dval; 
 
-    public byte [] getEdgeByteArray()
-    {
-        byte [] edgecopy = new byte [data.length];
-        System.arraycopy(data, edge_offset, edgecopy, 0, data.length);//Not Sure
-        return edgecopy;
-    }
+         System.out.print("[");
+         for (i=0; i< fldCnt-1; i++)
+         {
+             switch(type[i].attrType) {
 
-    public int getLength()
-    {
-        return edge_length;
-    }
+                 case AttrType.attrInteger:
+                     val = Convert.getIntValue(fldOffset[i], data);
+                     System.out.print(val);
+                     break;
 
-    public short noOfFlds()
-    {
-        return fldCnt;
-    }
+                 case AttrType.attrReal:
+                     fval = Convert.getFloValue(fldOffset[i], data);
+                     System.out.print(fval);
+                     break;
 
-    public short[] copyFldOffset()
-    {
-        short[] newFldOffset = new short[fldCnt + 1];
-        for (int i=0; i<=fldCnt; i++) {
-            newFldOffset[i] = fldOffset[i];
-        }
+                 case AttrType.attrString:
+                     sval = Convert.getStrValue(fldOffset[i], data,fldOffset[i+1] - fldOffset[i]);
+                     System.out.print(sval);
+                     break;
+                 
+                 case AttrType.attrDesc:
+                     dval = Convert.getDescValue(fldOffset[i], data);
+                     System.out.print(dval);
+                     break;
 
-        return newFldOffset;
-    }
+                 case AttrType.attrNull:
+                 case AttrType.attrSymbol:
+                     break;
+             }
+             System.out.print(", ");
+         }
+         switch(type[fldCnt-1].attrType) {
 
-    public byte [] getNodeByteArray()
-    {
-        byte [] edgecopy = new byte [data.length];
-        System.arraycopy(data, edge_offset, edgecopy, 0, data.length);
-        return edgecopy;
-    }
+             case AttrType.attrInteger:
+                 val = Convert.getIntValue(fldOffset[i], data);
+                 System.out.print(val);
+                 break;
 
-    public void print(AttrType type[]) //TODO : print() after NID class
-            throws IOException
-    {
-        int i, val;
-        float fval;
-        String sval;
+             case AttrType.attrReal:
+                 fval = Convert.getFloValue(fldOffset[i], data);
+                 System.out.print(fval);
+                 break;
 
-        System.out.print("[");
-        for (i=0; i< fldCnt-1; i++)
-        {
-            switch(type[i].attrType) {
+             case AttrType.attrString:
+                 sval = Convert.getStrValue(fldOffset[i], data,fldOffset[i+1] - fldOffset[i]);
+                 System.out.print(sval);
+                 break;
+             
+             case AttrType.attrDesc:
+                 dval = Convert.getDescValue(fldOffset[i], data);
+                 System.out.print(dval);
+                 break;
 
-                case AttrType.attrInteger:
-                    val = Convert.getIntValue(fldOffset[i], data);
-                    System.out.print(val);
-                    break;
+             case AttrType.attrNull:
+             case AttrType.attrSymbol:
+                 break;
+         }
+         System.out.println("]");
 
-                case AttrType.attrReal:
-                    fval = Convert.getFloValue(fldOffset[i], data);
-                    System.out.print(fval);
-                    break;
+     }
+     
+     public void nodeCopy(Edge fromNode)
+     {
+         byte [] temparray = fromNode.getEdgeByteArray();
+         System.arraycopy(temparray, 0, data, edge_offset, temparray.length);//Not sure: edge_length
+//        fldCnt = fromTuple.noOfFlds();
+//        fldOffset = fromTuple.copyFldOffset();
+     }
+     public void nodeInit(byte [] anode, int offset)
+     {
+         data = anode;
+         edge_offset = offset;
+         edge_length = data.length; //Not sure
+     }
 
-                case AttrType.attrString:
-                    sval = Convert.getStrValue(fldOffset[i], data,fldOffset[i+1] - fldOffset[i]);
-                    System.out.print(sval);
-                    break;
-
-                case AttrType.attrNull:
-                case AttrType.attrSymbol:
-                    break;
-            }
-            System.out.print(", ");
-        }
-        switch(type[fldCnt-1].attrType) {
-
-            case AttrType.attrInteger:
-                val = Convert.getIntValue(fldOffset[i], data);
-                System.out.print(val);
-                break;
-
-            case AttrType.attrReal:
-                fval = Convert.getFloValue(fldOffset[i], data);
-                System.out.print(fval);
-                break;
-
-            case AttrType.attrString:
-                sval = Convert.getStrValue(fldOffset[i], data,fldOffset[i+1] - fldOffset[i]);
-                System.out.print(sval);
-                break;
-
-            case AttrType.attrNull:
-            case AttrType.attrSymbol:
-                break;
-        }
-        System.out.println("]");
-
-    }
-    public short size()
-    {
-        return ((short) (fldOffset[fldCnt] - edge_offset));
-    }
-    }
+     public void nodeSet(byte [] fromnode, int offset)
+     {
+         System.arraycopy(fromnode, offset, data, 0, fromnode.length);
+         edge_offset = 0;
+         edge_length = fromnode.length;
+     }
+     
+     public short size()
+     {
+         return ((short) (fldOffset[fldCnt] - edge_offset));
+     }
+}

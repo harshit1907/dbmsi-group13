@@ -1,14 +1,13 @@
-/* File HFPage.java */
+/* File NHFPage.java */
 
 package edgeheap;
-
 
 import java.io.IOException;
 
 import diskmgr.Page;
 import global.Convert;
-import global.EID;
 import global.GlobalConst;
+import global.EID;
 import global.PageId;
 import heap.InvalidSlotNumberException;
 
@@ -107,7 +106,7 @@ public class EHFPage extends Page
    * @param  apage   a page in buffer pool
    */
   
-  public void openHFpage(Page apage)
+  public void openEHFpage(Page apage)
     {
       data = apage.getpage();
     }
@@ -332,16 +331,16 @@ public class EHFPage extends Page
   
   
   /**
-   * inserts a new record onto the page, returns RID of this record 
+   * inserts a new record onto the page, returns NID of this record 
    * @param	record 	a record to be inserted
-   * @return	RID of record, null if sufficient space does not exist
+   * @return	NID of record, null if sufficient space does not exist
    * @exception IOException I/O errors
-   * in C++ Status insertRecord(char *recPtr, int recLen, RID& rid)
+   * in C++ Status insertRecord(char *recPtr, int recLen, NID& NID)
    */
   public EID insertEdge ( byte [] record)		
     throws IOException
     {
-      EID rid = new EID();
+      EID nid = new EID();
       
       int recLen = record.length;
       int spaceNeeded = recLen + SIZE_OF_SLOT;
@@ -393,24 +392,24 @@ public class EHFPage extends Page
 	// insert data onto the data page
 	System.arraycopy (record, 0, data, usedPtr, recLen);
 	curPage.pid = Convert.getIntValue (CUR_PAGE, data);
-	rid.pageNo.pid = curPage.pid;
-	rid.slotNo = i;
-	return   rid ;
+	nid.pageNo.pid = curPage.pid;
+	nid.slotNo = i;
+	return   nid ;
       }
     } 
   
   /**
-   * delete the record with the specified rid
-   * @param	rid 	the record ID
+   * delete the record with the specified NID
+   * @param	NID 	the record ID
    * @exception	InvalidSlotNumberException Invalid slot number
    * @exception IOException I/O errors
-   * in C++ Status deleteRecord(const RID& rid)
+   * in C++ Status deleteRecord(const NID& NID)
    */
-  public void deleteEdge ( EID rid )
+  public void deleteEdge ( EID nid )
     throws IOException,  
 	   InvalidSlotNumberException
     {
-      int slotNo = rid.slotNo;
+      int slotNo = nid.slotNo;
       short recLen = getSlotLength (slotNo);
       slotCnt = Convert.getShortValue (SLOT_CNT, data);
       
@@ -463,15 +462,15 @@ public class EHFPage extends Page
     }
   
   /**
-   * @return RID of first record on page, null if page contains no records.  
+   * @return NID of first record on page, null if page contains no records.  
    * @exception  IOException I/O errors
-   * in C++ Status firstRecord(RID& firstRid)
+   * in C++ Status firstRecord(NID& firstNID)
    * 
    */ 
   public EID firstEdge() 
     throws IOException
     {
-      EID rid = new EID();
+      EID nid = new EID();
       // find the first non-empty slot
       
       
@@ -491,27 +490,27 @@ public class EHFPage extends Page
       
       // found a non-empty slot
       
-      rid.slotNo = i;
+      nid.slotNo = i;
       curPage.pid= Convert.getIntValue(CUR_PAGE, data);
-      rid.pageNo.pid = curPage.pid;
+      nid.pageNo.pid = curPage.pid;
       
-      return rid;
+      return nid;
     }
   
   /**
-   * @return RID of next record on the page, null if no more 
+   * @return NID of next record on the page, null if no more 
    * records exist on the page
-   * @param 	curRid	current record ID
+   * @param 	curNID	current record ID
    * @exception  IOException I/O errors
-   * in C++ Status nextRecord (RID curRid, RID& nextRid)
+   * in C++ Status nextRecord (NID curNID, NID& nextNID)
    */
-  public EID nextEdge (EID curRid) 
+  public EID nextEdge (EID curNid) 
     throws IOException 
     {
-      EID rid = new EID();
+      EID nid = new EID();
       slotCnt = Convert.getShortValue (SLOT_CNT, data);
       
-      int i=curRid.slotNo;
+      int i=curNid.slotNo;
       short length; 
       
       // find the next non-empty slot
@@ -527,24 +526,24 @@ public class EHFPage extends Page
       
       // found a non-empty slot
       
-      rid.slotNo = i;
+      nid.slotNo = i;
       curPage.pid = Convert.getIntValue(CUR_PAGE, data);
-      rid.pageNo.pid = curPage.pid;
+      nid.pageNo.pid = curPage.pid;
       
-      return rid;
+      return nid;
     }
   
   /**
-   * copies out record with RID rid into record pointer.
+   * copies out record with NID NID into record pointer.
    * <br>
-   * Status getRecord(RID rid, char *recPtr, int& recLen)
-   * @param	rid 	the record ID
+   * Status getRecord(NID NID, char *recPtr, int& recLen)
+   * @param	NID 	the record ID
    * @return 	a tuple contains the record
    * @exception   InvalidSlotNumberException Invalid slot number
    * @exception  	IOException I/O errors
    * @see 	Tuple
    */
-  public Edge getEdge ( EID eid ) 
+  public Edge getEdge ( EID nid ) 
     throws IOException,  
 	   InvalidSlotNumberException
     {
@@ -552,9 +551,9 @@ public class EHFPage extends Page
       short offset;
       byte []record;
       PageId pageNo = new PageId();
-      pageNo.pid= eid.pageNo.pid;
+      pageNo.pid= nid.pageNo.pid;
       curPage.pid = Convert.getIntValue (CUR_PAGE, data);
-      int slotNo = eid.slotNo;
+      int slotNo = nid.slotNo;
       
       // length of record being returned
       recLen = getSlotLength (slotNo);
@@ -565,37 +564,38 @@ public class EHFPage extends Page
 	  offset = getSlotOffset (slotNo);
 	  record = new byte[recLen];
 	  System.arraycopy(data, offset, record, 0, recLen);
-	  Edge edge = new Edge(record, offset);
-	  return edge;
+	  Edge node = new Edge(record, 0, recLen);
+	  return node;
 	}
       
       else {
-        throw new InvalidSlotNumberException (null, "HEAPFILE: INVALID_SLOTNO");
+        throw new InvalidSlotNumberException (null, "NHEAPFILE: INVALID_SLOTNO");
       }
      
+      
     }
   
   /**
-   * returns a tuple in a byte array[pageSize] with given RID rid.
+   * returns a tuple in a byte array[pageSize] with given NID NID.
    * <br>
-   * in C++	Status returnRecord(RID rid, char*& recPtr, int& recLen)
-   * @param       rid     the record ID
+   * in C++	Status returnRecord(NID NID, char*& recPtr, int& recLen)
+   * @param       NID     the record ID
    * @return      a tuple  with its length and offset in the byte array
    * @exception   InvalidSlotNumberException Invalid slot number
    * @exception   IOException I/O errors
    * @see 	Tuple
    */  
-  public Edge returnEdge ( EID eid )
+  public Edge returnEdge ( EID nid )
     throws IOException, 
 	   InvalidSlotNumberException
     {
       short recLen;
       short offset;
       PageId pageNo = new PageId();
-      pageNo.pid = eid.pageNo.pid;
+      pageNo.pid = nid.pageNo.pid;
       
       curPage.pid = Convert.getIntValue (CUR_PAGE, data);
-      int slotNo = eid.slotNo;
+      int slotNo = nid.slotNo;
       
       // length of record being returned
       recLen = getSlotLength (slotNo);
@@ -606,12 +606,12 @@ public class EHFPage extends Page
 	{
 	  
 	  offset = getSlotOffset (slotNo);
-	  Edge edge = new Edge(data, offset);
-	  return edge;
+	  Edge node = new Edge(data, offset, recLen);
+	  return node;
 	}
       
       else {   
-        throw new InvalidSlotNumberException (null, "HEAPFILE: INVALID_SLOTNO");
+        throw new InvalidSlotNumberException (null, "NHEAPFILE: INVALID_SLOTNO");
       }
       
     }
@@ -653,7 +653,7 @@ public class EHFPage extends Page
   
   /**
    * Compacts the slot directory on an HFPage.
-   * WARNING -- this will probably lead to a change in the RIDs of
+   * WARNING -- this will probably lead to a change in the NIDs of
    * records on the page.  You CAN'T DO THIS on most kinds of pages.
    * @exception  IOException I/O errors
    */
