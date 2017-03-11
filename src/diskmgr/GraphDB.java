@@ -157,7 +157,7 @@ private static final int REC_LEN1 = 32;
     // Creaat a random access file
     
     fp = new RandomAccessFile(fname, "rw");
-    System.out.println(fp.toString());
+    //System.out.println(fp.toString());
     // Make the file num_pages pages long, filled with zeroes.
     fp.seek((long)(num_pages*MINIBASE_PAGESIZE-1));
     fp.writeByte(0);

@@ -21,7 +21,7 @@ public class BatchNodeDelete {
 	
 
 	protected  boolean batchNodeDelete (String nodefilename,String graphDbName) throws InvalidSlotNumberException, InvalidTupleSizeException, HFException, HFDiskMgrException, HFBufMgrException, IOException, Exception {
-		System.out.println ("\n  Test 2: Delete fixed-size records\n");
+		System.out.println ("\n  Task 12: Batch Delete Nodes\n");
 	    BufferedReader br = null ;
 	    
 	    

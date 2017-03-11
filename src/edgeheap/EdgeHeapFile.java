@@ -5,6 +5,7 @@ import java.io.IOException;
 import diskmgr.Page;
 import global.EID;
 import global.GlobalConst;
+import global.NID;
 import global.PageId;
 import global.SystemDefs;
 import heap.FileAlreadyDeletedException;
@@ -15,6 +16,8 @@ import heap.InvalidSlotNumberException;
 import heap.InvalidTupleSizeException;
 import heap.InvalidUpdateException;
 import heap.SpaceNotAvailableException;
+import nodeheap.NScan;
+import nodeheap.Node;
 
 /**  This heapfile implementation is directory-based. We maintain a
  *  directory of info about the data pages (which are of type HFPage
@@ -1049,6 +1052,62 @@ public class EdgeHeapFile implements Filetype,  GlobalConst {
     }
 
   } // end of delete_file_entry
+
+public EID getEID(Edge nd) throws IOException {
+	boolean OK = true;
+	boolean FAIL = false;
+	EScan scan = null;
+	boolean status = OK;
+	EID nid = new EID();
+	int found=0;
+	if (status == OK) {
+		try {
+			scan = SystemDefs.JavabaseDB.ehfile.openScan();
+			
+		} catch (Exception e) {
+			status = FAIL;
+			System.err.println("*** Error opening scan\n");
+			e.printStackTrace();
+			return nid;
+		}
+	}
+	if (status == OK) {
+		Edge node = new Edge();
+		boolean done = false;
+
+		while (!done) {
+			try {
+				node = scan.getNext(nid);
+				if (node == null) {
+					done = true;
+				}
+				//System.out.println(nid+"   "+SystemDefs.JavabaseDB.nhfile.getNode(nid));
+				
+			} catch (Exception e) {
+				status = FAIL;
+				e.printStackTrace();
+				
+			}
+
+			//System.out.println("Deleting this .."+node.getLabel()+" ^^^ "+nodelabel);
+			
+			if (!done && status == OK) {
+				if (nd.getLabel().equals(node.getLabel()))
+				{
+					done = true;
+					found=1;
+					//System.out.print("Deleting this .."+nodelabel);
+				}
+			}
+		}
+	}
+	scan.closescan();
+	if(found==1)
+		return nid;
+	else
+		return null;
+
+}
 
 
   

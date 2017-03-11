@@ -20,6 +20,7 @@ import heap.InvalidTupleSizeException;
 // batchnodeinsert /Users/mihir/dev/NodeTestData.txt db1
 // batchnodedelete /Users/mihir/dev/NodeTestData2.txt db1
 // batchedgeinsert /Users/mihir/dev/EdgeTestData.txt db1
+// batchedgedelete /Users/mihir/dev/EdgeTestData2.txt db1
 
 // fullnodescan db1
 // fulledgescan db1
@@ -74,7 +75,11 @@ public class G13App {
 			   		}
 			   		new BatchEdgeInsert().batchEdgeInsert(inputFile);
 			   	} else if (operation.equalsIgnoreCase("batchedgedelete")) {
-			   		
+			   		if(graphdbname==null) {
+			   			graphdbname = DBName;
+			   			createDB(DBName);
+			   		}
+			   		new BatchEdgeDelete().batchEdgeDelete(inputFile);
 			   	} else {
 			   		System.out.println(operation + " is not recognized as a command.\nType help for more information.");
 			   	}

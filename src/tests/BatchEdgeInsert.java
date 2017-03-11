@@ -19,11 +19,12 @@ public class BatchEdgeInsert {
 	private final static boolean FAIL = false;
 
 	protected boolean batchEdgeInsert(String nodefilename) throws IOException, InvalidTupleSizeException, InvalidSlotNumberException {
-		System.out.println("\n  Test 1: Insert and scan fixed-size records\n");
+		System.out.println("\n  Task 11: Batch Insert Edges\n");
 		boolean status = OK;
 		BufferedReader br = null;
 		System.out.println("  - Create a edge heap file\n");
-	
+		int countE=0, countT=0;
+		
 		if (status == OK && SystemDefs.JavabaseBM.getNumUnpinnedBuffers() != SystemDefs.JavabaseBM.getNumBuffers()) {
 			System.err.println("*** The heap file has left pages pinned\n");
 			status = FAIL;
@@ -38,41 +39,44 @@ public class BatchEdgeInsert {
 				while (line != null) {
 					String[] strList = line.split(" ");
 					line = br.readLine();
-
+					countT++;
 					Edge currEdge = new Edge();
 					NID srcNid = getNodeNID(strList[0]);
 					NID destNid = getNodeNID(strList[1]);
-					if(srcNid!=null||destNid!=null)
+					if(srcNid!=null&&destNid!=null)
 					{
-					currEdge.setSource(srcNid);
-					currEdge.setDestination(destNid);
-					currEdge.setLabel(strList[2]);
-					currEdge.setWeight(Integer.parseInt(strList[3]));
+						currEdge.setSource(srcNid);
+						currEdge.setDestination(destNid);
+						currEdge.setLabel(strList[2]);
+						currEdge.setWeight(Integer.parseInt(strList[3]));
 
-					try {
-						EID eid = SystemDefs.JavabaseDB.ehfile.insertEdge(currEdge.getEdgeByteArray());
+						try {
+							EID eid = SystemDefs.JavabaseDB.ehfile.insertEdge(currEdge.getEdgeByteArray());
+							countE++;
 
-					} catch (Exception e) {
-						status = FAIL;
-						System.err.println("*** Error inserting record " + "\n");
-						e.printStackTrace();
-					}
+						} catch (Exception e) {
+							status = FAIL;
+							System.err.println("*** Error inserting record " + "\n");
+							e.printStackTrace();
+						}
 
-					if (status == OK
-							&& SystemDefs.JavabaseBM.getNumUnpinnedBuffers() != SystemDefs.JavabaseBM.getNumBuffers()) {
+						if (status == OK
+								&& SystemDefs.JavabaseBM.getNumUnpinnedBuffers() != SystemDefs.JavabaseBM.getNumBuffers()) {
 
-						System.err.println("*** Insertion left a page pinned\n");
-						status = FAIL;
-					}
+							System.err.println("*** Insertion left a page pinned\n");
+							status = FAIL;
+						}
 
-					System.out.println("");
+						//System.out.println("");
 					}
 				}
 			} finally {
 				br.close();
 			}
-
+			System.out.println();
+			  System.out.println("Inserted "+countE+" Edges. Edges given in file to insert "+countT);
 		}
+		
 		return true;
 	}
 
@@ -99,7 +103,7 @@ public class BatchEdgeInsert {
 				status = FAIL;
 			}
 		}
-		
+
 		NID nidTmp = new NID();
 
 		if ( status == OK ) {
@@ -112,19 +116,16 @@ public class BatchEdgeInsert {
 					done = true;
 					break;
 				}
-				
+
 				if(node.getLabel().equalsIgnoreCase(label)) break;
-				
-				}
+
+			}
 			scan.closescan();
 			if(node!=null)
 			{
-				System.out.println(node.getLabel());
+				//System.out.println(node.getLabel());
 				nid= SystemDefs.JavabaseDB.nhfile.getNID(node);
 			}
-			
-
-
 		}
 		return nid;
 	}
