@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
+import diskmgr.PCounter;
 import edgeheap.Edge;
 import global.EID;
 import global.NID;
@@ -14,14 +15,11 @@ import heap.HFException;
 import heap.InvalidSlotNumberException;
 import heap.InvalidTupleSizeException;
 
-import nodeheap.NScan;
-import nodeheap.Node;
-
 public class BatchEdgeInsert {
 	private final static boolean OK = true;
 	private final static boolean FAIL = false;
 
-	protected boolean batchEdgeInsert(String nodefilename) throws IOException, InvalidTupleSizeException, InvalidSlotNumberException {
+	protected boolean batchEdgeInsert(String nodefilename) throws IOException, InvalidTupleSizeException, InvalidSlotNumberException, HFException, HFBufMgrException, HFDiskMgrException {
 		System.out.println("\n  Task 11: Batch Insert Edges\n");
 		boolean status = OK;
 		BufferedReader br = null;
