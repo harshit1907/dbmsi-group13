@@ -8,6 +8,9 @@ import edgeheap.Edge;
 import global.EID;
 import global.NID;
 import global.SystemDefs;
+import heap.HFBufMgrException;
+import heap.HFDiskMgrException;
+import heap.HFException;
 import heap.InvalidSlotNumberException;
 import heap.InvalidTupleSizeException;
 
@@ -41,8 +44,8 @@ public class BatchEdgeInsert {
 					line = br.readLine();
 					countT++;
 					Edge currEdge = new Edge();
-					NID srcNid = getNodeNID(strList[0]);
-					NID destNid = getNodeNID(strList[1]);
+					NID srcNid = SystemDefs.JavabaseDB.nhfile.getNID(strList[0]);
+					NID destNid = SystemDefs.JavabaseDB.nhfile.getNID(strList[1]);
 					if(srcNid!=null&&destNid!=null)
 					{
 						currEdge.setSource(srcNid);
@@ -76,57 +79,14 @@ public class BatchEdgeInsert {
 			System.out.println();
 			  System.out.println("Inserted "+countE+" Edges. Edges given in file to insert "+countT);
 		}
-		
+		System.out.println("Node Count: "+SystemDefs.JavabaseDB.getNodeCnt());
+
+		System.out.println("Edge Count: "+SystemDefs.JavabaseDB.getEdgeCnt());
+
+		System.out.println("Disk Read Count: "+PCounter.readCounter);
+
+		System.out.println("Disk Write Count: "+PCounter.writeCounter);
+
 		return true;
-	}
-
-	public NID getNodeNID(String label) throws InvalidTupleSizeException, IOException, InvalidSlotNumberException {
-		boolean status = OK;
-
-		NScan scan = null;
-		NID nid = null;
-
-		if (status == OK) {
-			//System.out.println("  - Scan the records just inserted\n");
-
-			try {
-				scan = SystemDefs.JavabaseDB.nhfile.openScan();
-			} catch (Exception e) {
-				status = FAIL;
-				System.err.println("*** Error opening scan\n");
-				e.printStackTrace();
-			}
-
-			if (status == OK
-					&& SystemDefs.JavabaseBM.getNumUnpinnedBuffers() == SystemDefs.JavabaseBM.getNumBuffers()) {
-				System.err.println("*** The heap-file scan has not pinned the first page\n");
-				status = FAIL;
-			}
-		}
-
-		NID nidTmp = new NID();
-
-		if ( status == OK ) {
-			Node node = null;
-
-			boolean done = false;
-			while (!done) { 
-				node = scan.getNext(nidTmp);
-				if (node == null) {
-					done = true;
-					break;
-				}
-
-				if(node.getLabel().equalsIgnoreCase(label)) break;
-
-			}
-			scan.closescan();
-			if(node!=null)
-			{
-				//System.out.println(node.getLabel());
-				nid= SystemDefs.JavabaseDB.nhfile.getNID(node);
-			}
-		}
-		return nid;
 	}
 }

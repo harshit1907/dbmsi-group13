@@ -52,6 +52,7 @@ public class FullScanEdge {
 				System.out.println(" Weight: "+edge.getWeight());
 			}
 		}
+		scan.closescan();
 		return false;
 	}
 }

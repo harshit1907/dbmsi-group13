@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
+import diskmgr.PCounter;
 import global.Descriptor;
 import global.NID;
 import global.SystemDefs;
@@ -94,18 +95,28 @@ public class BatchNodeInsert
 					e.printStackTrace();
 					return false;
 				}
+	    	    
+	    	}	
+	    }
+	  System.out.println();
+	  System.out.println("Inserted "+insertI+" Nodes. Nodes given in file to insert "+insertA);
+	  
+	  System.out.println("Node Count: "+SystemDefs.JavabaseDB.getNodeCnt());
 
-			}	
-		}
-		System.out.println();
-		System.out.println("Inserted "+insertI+" Nodes. Nodes given in file to insert "+insertA);
-		//new FullScanNode().fullScanNode(graphDbName);
+	  System.out.println("Edge Count: "+SystemDefs.JavabaseDB.getEdgeCnt());
 
+	  System.out.println("Disk Read Count: "+PCounter.readCounter);
+	  
+	  System.out.println("Disk Write Count: "+PCounter.writeCounter);
+	  
+	 
+	//new FullScanNode().fullScanNode(graphDbName);
+	
+	      
 
-
-
-		return true;
-	}
+	    
+	    return true;
+	  }
 
 
 }

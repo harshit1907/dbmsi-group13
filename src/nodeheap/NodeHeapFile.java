@@ -127,6 +127,61 @@ public class NodeHeapFile {
         }
     }
 
+    public NID getNID(String Nd) throws IOException
+    {
+    	boolean OK = true;
+    	boolean FAIL = false;
+    	NScan scan = null;
+    	boolean status = OK;
+    	NID nid = new NID();
+    	int found=0;
+    	if (status == OK) {
+			try {
+				scan = SystemDefs.JavabaseDB.nhfile.openScan();
+				
+			} catch (Exception e) {
+				status = FAIL;
+				System.err.println("*** Error opening scan\n");
+				e.printStackTrace();
+				return nid;
+			}
+		}
+		if (status == OK) {
+			Node node = new Node();
+			boolean done = false;
+
+			while (!done) {
+				try {
+					node = scan.getNext(nid);
+					if (node == null) {
+						done = true;
+					}
+					//System.out.println(nid+"   "+SystemDefs.JavabaseDB.nhfile.getNode(nid));
+					
+				} catch (Exception e) {
+					status = FAIL;
+					e.printStackTrace();
+					
+				}
+
+				//System.out.println("Deleting this .."+node.getLabel()+" ^^^ "+nodelabel);
+				
+				if (!done && status == OK) {
+					if (Nd.equals(node.getLabel()))
+					{
+						done = true;
+						found=1;
+						//System.out.print("Deleting this .."+nodelabel);
+					}
+				}
+			}
+		}
+		scan.closescan();
+		if(found==1)
+			return nid;
+		else
+			return null;
+    }
     
     public NID getNID(Node Nd) throws IOException
     {
