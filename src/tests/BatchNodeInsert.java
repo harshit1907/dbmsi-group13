@@ -25,13 +25,9 @@ public class BatchNodeInsert
 	  
 
 	  protected  boolean batchNodeInsert (String nodefilename,String graphDbName) throws InvalidSlotNumberException, InvalidTupleSizeException, HFException, HFDiskMgrException, HFBufMgrException, IOException, Exception {
-		System.out.println(nodefilename+" defrgthyjukilo;p"+graphDbName);
-		
-		System.out.println ("\n  Test 1: Insert and scan fixed-size records\n");
-	    boolean status = OK;
+		boolean status = OK;
 	    BufferedReader br = null ;
-	    System.out.println ("  - Create a heap file\n");
-	    int i=0;
+	    int insertA=0,insertI=0;
 	   
 	    if ( status == OK && SystemDefs.JavabaseBM.getNumUnpinnedBuffers()
 		 != SystemDefs.JavabaseBM.getNumBuffers() ) {
@@ -46,6 +42,7 @@ public class BatchNodeInsert
 	    	    		
 	    	    String line = br.readLine();
 	    	    while (line != null) {
+	    	    insertA++;
 	    	    String[] strList=line.split(" ");
 	    	    line = br.readLine();
 	            
@@ -61,6 +58,7 @@ public class BatchNodeInsert
 	    		try {
 	    		
 	    			NID  nid = SystemDefs.JavabaseDB.nhfile.insertNode(currentNode.getNodeByteArray());
+	    			insertI++;
 	    		}
 	    		catch (Exception e) {
 	    		  status = FAIL;
@@ -98,47 +96,10 @@ public class BatchNodeInsert
 	    	    
 	    	}	
 	    }
-	    
-	    //////////////scanning
-	    NScan scan = null;
-	    
-	    if ( status == OK ) {	
-	      System.out.println ("  - Scan the records just inserted\n");
-	      
-	      try {
-		scan = SystemDefs.JavabaseDB.nhfile.openScan();
-	      }
-	      catch (Exception e) {
-		status = FAIL;
-		System.err.println ("*** Error opening scan\n");
-		e.printStackTrace();
-	      }
-
-	      if ( status == OK &&  SystemDefs.JavabaseBM.getNumUnpinnedBuffers() 
-		   == SystemDefs.JavabaseBM.getNumBuffers() ) {
-		System.err.println ("*** The heap-file scan has not pinned the first page\n");
-		status = FAIL;
-	      }
-	    }
-	    NID nidTmp = new NID();
-
-	    if ( status == OK ) {
-	         Node node = null;
-	        
-	        boolean done = false;
-	        while (!done) { 
-	  		node = scan.getNext(nidTmp);
-	  	 if (node == null) {
-	  	    done = true;
-	  	    break;
-	  	  }
-	 	System.out.println(node.getLabel());
-	  	 
-	  
-	        }
-	        
-
-	      }
+	  System.out.println();
+	  System.out.println("Inserted "+insertI+" Nodes. Nodes given in file to insert "+insertA);
+	//new FullScanNode().fullScanNode(graphDbName);
+	
 	      
 
 	    

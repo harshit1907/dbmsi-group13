@@ -28,12 +28,13 @@ public class BatchNodeDelete {
 		try {
 			br= new BufferedReader(new FileReader(nodefilename));
 			String line = br.readLine();
+			int countA=0,countD=0;
 			while (line != null) {
 				String nodelabel = line;
 				NScan scan = null;
 				NID nid = new NID();
 				boolean status = OK;
-				
+				countA++;
 				//SystemDefs.JavabaseDB.
 				//System.out.println("  - Open the same heap file as test 1\n");
 				
@@ -73,17 +74,18 @@ public class BatchNodeDelete {
 							if (nodelabel.equals(node.getLabel()))
 							{
 								del = true;
-								System.out.print("Deleting this .."+nodelabel);
+								//System.out.print("Deleting this .."+nodelabel);
 							}
 							if (del) { 
 								try {
 									status = SystemDefs.JavabaseDB.nhfile.deleteNode(nid);
+									scan.getNext(nid);
+									countD++;
 									done=true;
 								} catch (Exception e) {
 									status = FAIL;
 									System.err.println("*** Error deleting record " + node.getLabel() + "\n");
 									e.printStackTrace();
-									
 								}
 							}
 						}
@@ -93,10 +95,11 @@ public class BatchNodeDelete {
 				line=br.readLine();
 			}
 
+			System.out.println("Deleted "+countD+" Nodes. Nodes given in file to delete "+countA);
+			
 		} finally {
 			br.close();
 		}
-		
 		return true;
 	}
 
