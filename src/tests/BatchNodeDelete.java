@@ -31,67 +31,83 @@ public class BatchNodeDelete {
 			int countA=0,countD=0;
 			while (line != null) {
 				String nodelabel = line;
-				NScan scan = null;
 				NID nid = new NID();
-				boolean status = OK;
 				countA++;
 				//SystemDefs.JavabaseDB.
 				//System.out.println("  - Open the same heap file as test 1\n");
 				
-				if (status == OK) {
+				Node nd=new Node();
+				nd.setLabel(nodelabel);
+				nid=SystemDefs.JavabaseDB.nhfile.getNID(nd);
+				if(nid!=null){
 					try {
-						scan = SystemDefs.JavabaseDB.nhfile.openScan();
-						
+						SystemDefs.JavabaseDB.nhfile.deleteNode(nid);
+						countD++;
 					} catch (Exception e) {
-						status = FAIL;
-						System.err.println("*** Error opening scan\n");
+						System.err.println("*** Error deleting record " + nd.getLabel() + "\n");
 						e.printStackTrace();
-						return false;
 					}
 				}
-				if (status == OK) {
-					Node node = new Node();
-					boolean done = false;
-
-					while (!done) {
-						try {
-							node = scan.getNext(nid);
-							if (node == null) {
-								done = true;
-							}
-							//System.out.println(nid+"   "+SystemDefs.JavabaseDB.nhfile.getNode(nid));
-							
-						} catch (Exception e) {
-							status = FAIL;
-							e.printStackTrace();
-							
-						}
-
-						//System.out.println("Deleting this .."+node.getLabel()+" ^^^ "+nodelabel);
-						
-						if (!done && status == OK) {
-							boolean del = false;
-							if (nodelabel.equals(node.getLabel()))
-							{
-								del = true;
-								//System.out.print("Deleting this .."+nodelabel);
-							}
-							if (del) { 
-								try {
-									status = SystemDefs.JavabaseDB.nhfile.deleteNode(nid);
-									scan.getNext(nid);
-									countD++;
-									done=true;
-								} catch (Exception e) {
-									status = FAIL;
-									System.err.println("*** Error deleting record " + node.getLabel() + "\n");
-									e.printStackTrace();
-								}
-							}
-						}
-					}
-				}
-				scan.closescan();
+				
+//				if (status == OK) {
+//					try {
+//						scan = SystemDefs.JavabaseDB.nhfile.openScan();
+//						
+//					} catch (Exception e) {
+//						status = FAIL;
+//						System.err.println("*** Error opening scan\n");
+//						e.printStackTrace();
+//						return false;
+//					}
+//				}
+//				if (status == OK) {
+//					Node node = new Node();
+//					boolean done = false;
+//
+//					while (!done) {
+//						try {
+//							node = scan.getNext(nid);
+//							if (node == null) {
+//								done = true;
+//							}
+//							//System.out.println(nid+"   "+SystemDefs.JavabaseDB.nhfile.getNode(nid));
+//							
+//						} catch (Exception e) {
+//							status = FAIL;
+//							e.printStackTrace();
+//							
+//						}
+//
+//						//System.out.println("Deleting this .."+node.getLabel()+" ^^^ "+nodelabel);
+//						
+//						if (!done && status == OK) {
+//							boolean del = false;
+//							if (nodelabel.equals(node.getLabel()))
+//							{
+//								del = true;
+//								//System.out.print("Deleting this .."+nodelabel);
+//							}
+//							if (del) { 
+//								try {
+//									status = SystemDefs.JavabaseDB.nhfile.deleteNode(nid);
+//									scan.getNext(nid);
+//									countD++;
+//									done=true;
+//								} catch (Exception e) {
+//									status = FAIL;
+//									System.err.println("*** Error deleting record " + node.getLabel() + "\n");
+//									e.printStackTrace();
+//								}
+//							}
+//						}
+//					}
+//				}
+//				scan.closescan();
+				
+				
+				
+				
+				
 				line=br.readLine();
 			}
 
