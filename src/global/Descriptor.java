@@ -25,6 +25,16 @@ public int value[] = new int[5];
 		else 
 			return 0;
 	}
+	
+	public String getString()
+	{
+		String str="";
+		for(int val:value)
+		{
+			str=str+val+"\t";
+		}
+		return str;
+	}
 
 	public double distance(Descriptor desc) {
 		double d;

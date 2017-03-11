@@ -1,6 +1,7 @@
 package tests;
 
 import java.io.BufferedReader;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -11,10 +12,15 @@ import heap.HFException;
 import heap.InvalidSlotNumberException;
 import heap.InvalidTupleSizeException;
 
+// Shobhit
+// batchnodeinsert /home/anjoy92/Documents/dbmsi-group13/src/tests/NodeTestDataI.txt db1
+// batchnodedelete /home/anjoy92/Documents/dbmsi-group13/src/tests/NodeTestDataD.txt db1
+// fullnodescan db1
+// Mihir
 // batchnodeinsert /Users/mihir/dev/NodeTestData.txt db1
 // batchnodedelete /Users/mihir/dev/NodeTestData2.txt db1
-// 
-//
+// fullnodescan db1
+
 
 
 public class G13App {
@@ -36,7 +42,9 @@ public class G13App {
 		   			System.out.println("");
 		   		}
 		   		String inputFile = tokens[1];
-		   		String DBName = tokens[2];
+		   		String DBName="db1";
+		   		if(tokens.length>2)
+		   			DBName = tokens[2];
 			   	//System.out.println("You entered the command: "+operation+" -- "+nodefile);
 			   	if(operation.equalsIgnoreCase("batchnodeinsert")) {
 			   		//System.out.println("You entered the command: "+operation+" -- "+inputFile);
@@ -52,6 +60,8 @@ public class G13App {
 			   			createDB(DBName);
 			   		}
 			   		new BatchNodeDelete().batchNodeDelete(inputFile, graphdbname);
+			   	} else if (operation.equalsIgnoreCase("fullnodescan")) {
+			   		new FullScanNode().fullScanNode( graphdbname);
 			   	} else if (operation.equalsIgnoreCase("batchedgeinsert")) {
 			   		
 			   	} else if (operation.equalsIgnoreCase("batchedgedelete")) {
@@ -63,7 +73,7 @@ public class G13App {
 		   	
 		}  
 	   public static void createDB(String graphDbName) {
-		   SystemDefs sysdef = new SystemDefs(graphDbName,10000,1000,"Clock");
+		   SystemDefs sysdef = new SystemDefs(graphDbName,10000,10000,"Clock");
 	   }
 	   
 }
