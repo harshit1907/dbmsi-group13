@@ -4,15 +4,14 @@ import bufmgr.PageNotReadException;
 import edgeheap.EdgeHeapFile;
 import global.AttrType;
 import global.IndexType;
+import global.NID;
 import heap.InvalidTupleSizeException;
 import heap.InvalidTypeException;
 import heap.Tuple;
 import index.IndexException;
 import iterator.*;
-import zbtree.IndexFileScan;
-import zbtree.ZBTFileScan;
-import zbtree.ZBTreeFile;
-import zbtree.ZIndexFile;
+import nodeheap.NodeHeapFile;
+import zbtree.*;
 
 import java.io.IOException;
 
@@ -28,7 +27,7 @@ public class ZIndexScan extends Iterator {
     private CondExpr[] _selects;
     private int _noInFlds;
     private int _noOutFlds;
-    private EdgeHeapFile f;
+    private NodeHeapFile f;
     private Tuple tuple1;
     private Tuple Jtuple;
     private int t1_size;
@@ -80,7 +79,7 @@ public class ZIndexScan extends Iterator {
         index_only = indexOnly;  // added by bingjie miao
 
         try {
-            f = new EdgeHeapFile(relName);
+            f = new NodeHeapFile(relName);
         } catch (Exception e) {
             throw new IndexException(e, "IndexScan.java: Heapfile not created");
         }
@@ -115,11 +114,93 @@ public class ZIndexScan extends Iterator {
             InvalidTupleSizeException, InvalidTypeException, PageNotReadException,
             TupleUtilsException, PredEvalException, SortException, LowMemException, UnknowAttrType,
             UnknownKeyTypeException, Exception {
+        NID nid;
+        int unused;
+        DescriptorDataEntry nextentry = null;
+
+        try {
+            nextentry = indScan.get_next();
+        } catch (Exception e) {
+            throw new IndexException(e, "IndexScan.java: BTree error");
+        }
+
+        while (nextentry != null) {
+            if (index_only) {
+                // only need to return the key
+                AttrType[] attrType = new AttrType[1];
+                short[] s_sizes = new short[1];
+
+                if (_types[_fldNum -1].attrType == AttrType.attrDesc) {
+                    attrType[0] = new AttrType(AttrType.attrDesc);
+                    try {
+                        Jtuple.setHdr((short) 1, attrType, s_sizes);
+                    } catch (Exception e) {
+                        throw new IndexException(e, "IndexScan.java: Heapfile error");
+                    }
+
+                    try {
+                        Jtuple.setDescFld(1, ((DescriptorKey)nextentry.key).getDesc());
+                    } catch (Exception e) {
+                        throw new IndexException(e, "ZIndexScan.java: NodeHeapfile error");
+                    }
+                } else {
+                    // attrReal not supported for now
+                    throw new UnknownKeyTypeException("Only Integer and String keys are supported so far");
+                }
+                return Jtuple;
+            }
+
+            // not index_only, need to return the whole tuple
+            nid = ((LeafData)nextentry.data).getData();
+            try {
+                tuple1 = f.getNode(nid);
+            } catch (Exception e) {
+                throw new IndexException(e, "IndexScan.java: getRecord failed");
+            }
+
+            try {
+                tuple1.setHdr((short) _noInFlds, _types, _s_sizes);
+            } catch (Exception e) {
+                throw new IndexException(e, "IndexScan.java: Heapfile error");
+            }
+
+            boolean eval;
+            try {
+                eval = PredEval.Eval(_selects, tuple1, null, _types, null);
+            } catch (Exception e) {
+                throw new IndexException(e, "IndexScan.java: Heapfile error");
+            }
+
+            if (eval) {
+                // need projection.java
+                try {
+                    Projection.Project(tuple1, _types, Jtuple, perm_mat, _noOutFlds);
+                } catch (Exception e) {
+                    throw new IndexException(e, "IndexScan.java: Heapfile error");
+                }
+                return Jtuple;
+            }
+
+            try {
+                nextentry = indScan.get_next();
+            } catch (Exception e) {
+                throw new IndexException(e, "IndexScan.java: BTree error");
+            }
+        }
         return null;
     }
 
     @Override
     public void close() throws IOException, JoinsException, SortException, IndexException {
-
+        if (!closeFlag) {
+            if (indScan instanceof ZBTFileScan) {
+                try {
+                    ((ZBTFileScan)indScan).DestroyZBTreeFileScan();
+                } catch(Exception e) {
+                    throw new IndexException(e, "ZBTree error in destroying index scan.");
+                }
+            }
+            closeFlag = true;
+        }
     }
 }
