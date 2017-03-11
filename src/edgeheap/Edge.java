@@ -46,25 +46,19 @@ public class Edge extends Tuple{
 	 
 	  private short [] fldOffset;
 	  
-	  public NID source;
-
-	public NID getSource() {
-		return source;
+	  
+	public NID getSource() throws IOException {
+		return Convert.getNIDValue(4, data);
 	}
 
-	public void setSource(NID source) {
-		this.source = source;
+
+	public NID getDestination() throws IOException {
+		return Convert.getNIDValue(12, data);
 	}
 
-	public NID getDestination() {
-		return destination;
-	}
 
-	public void setDestination(NID destination) {
-		this.destination = destination;
-	}
 
-	public NID destination;
+	
 
    /**
     * Class constructor
@@ -108,20 +102,28 @@ public class Edge extends Tuple{
      }
      
      public String getLabel() throws IOException {
-         return Convert.getStrValue(4, data, data.length-4);
+         return Convert.getStrValue(20, data, data.length-20);
      }
      
      public int getWeight() throws IOException {
          return Convert.getIntValue(0, data);
      }
      
+     public void setSource(NID source) throws IOException {
+    	 Convert.setNIDValue(source,4, data);
+ 	}
+     
      public void setLabel(String label) throws IOException {
-         Convert.setStrValue(label, 4, data);
+         Convert.setStrValue(label, 20, data);
      }
 
      public void setWeight(int weight) throws IOException {
          Convert.setIntValue(weight, 0, data);
      }
+     
+ 	public void setDestination(NID destination) throws IOException {
+ 		Convert.setNIDValue(destination, 12, data);
+	}
      
      /** Copy the node byte array out
       *  @return  byte[], a byte array contains the node

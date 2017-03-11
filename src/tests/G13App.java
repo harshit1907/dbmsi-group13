@@ -19,7 +19,10 @@ import heap.InvalidTupleSizeException;
 // Mihir
 // batchnodeinsert /Users/mihir/dev/NodeTestData.txt db1
 // batchnodedelete /Users/mihir/dev/NodeTestData2.txt db1
+// batchedgeinsert /Users/mihir/dev/EdgeTestData.txt db1
+
 // fullnodescan db1
+// fulledgescan db1
 
 
 
@@ -62,8 +65,14 @@ public class G13App {
 			   		new BatchNodeDelete().batchNodeDelete(inputFile, graphdbname);
 			   	} else if (operation.equalsIgnoreCase("fullnodescan")) {
 			   		new FullScanNode().fullScanNode( graphdbname);
+			   	} else if (operation.equalsIgnoreCase("fulledgescan")) {
+			   		new FullScanEdge().fullScanEdge( graphdbname);
 			   	} else if (operation.equalsIgnoreCase("batchedgeinsert")) {
-			   		
+			   		if(graphdbname==null) {
+			   			graphdbname = DBName;
+			   			createDB(DBName);
+			   		}
+			   		new BatchEdgeInsert().batchEdgeInsert(inputFile);
 			   	} else if (operation.equalsIgnoreCase("batchedgedelete")) {
 			   		
 			   	} else {
@@ -75,5 +84,5 @@ public class G13App {
 	   public static void createDB(String graphDbName) {
 		   SystemDefs sysdef = new SystemDefs(graphDbName,10000,10000,"Clock");
 	   }
-	   
+
 }

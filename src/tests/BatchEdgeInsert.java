@@ -50,7 +50,7 @@ public class BatchEdgeInsert {
 					currEdge.setWeight(Integer.parseInt(strList[3]));
 
 					try {
-						EID eid = SystemDefs.JavabaseDB.ehfile.insertEdge(currEdge.getNodeByteArray());
+						EID eid = SystemDefs.JavabaseDB.ehfile.insertEdge(currEdge.getEdgeByteArray());
 
 					} catch (Exception e) {
 						status = FAIL;
