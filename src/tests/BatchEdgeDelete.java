@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import diskmgr.PCounter;
 import global.EID;
 import global.NID;
 import global.SystemDefs;
@@ -29,46 +30,47 @@ public class BatchEdgeDelete {
 
 		try {
 			br = new BufferedReader(new FileReader(nodefilename));
-			
+
 			int countA=0, countD=0;
 			String line = br.readLine();
 			while (line != null) {
 				String []tokens = line.trim().split(" ");
 
-				NID srcNid = new BatchEdgeInsert().getNodeNID(tokens[0]);
-				String srcLabel = SystemDefs.JavabaseDB.nhfile.getNode(srcNid).getLabel();
-				
-				NID desNid = new BatchEdgeInsert().getNodeNID(tokens[1]);
-				String destLabel = SystemDefs.JavabaseDB.nhfile.getNode(desNid).getLabel();
-
 				String edgeLabel = tokens[2];
-				String edgeLabel_ = srcLabel+"_"+destLabel;
+
 				countA++;
 
-				if(edgeLabel_.equalsIgnoreCase(edgeLabel)) {
-					EID eid = new EID();
-					
-					Edge nd=new Edge();
-					nd.setLabel(edgeLabel);
-					eid=SystemDefs.JavabaseDB.ehfile.getEID(nd);
-					if(eid!=null){
-						try {
-							SystemDefs.JavabaseDB.ehfile.deleteEdge(eid);
-							countD++;
-						} catch (Exception e) {
-							System.err.println("*** Error deleting record " + nd.getLabel() + "\n");
-							e.printStackTrace();
-						}
-					}			
-				}
+				EID eid = new EID();
 
+				Edge nd=new Edge();
+				nd.setLabel(edgeLabel);
+				eid=SystemDefs.JavabaseDB.ehfile.getEID(nd, tokens[0], tokens[1]);
+				if(eid!=null){
+					try {
+						SystemDefs.JavabaseDB.ehfile.deleteEdge(eid);
+						countD++;
+					} catch (Exception e) {
+						System.err.println("*** Error deleting record " + nd.getLabel() + "\n");
+						e.printStackTrace();
+					}
+				}
 				line=br.readLine();
+
 			}
+
+			
 			System.out.println("Deleted "+countD+" Edges. Edges given in file to delete "+countA);
 
 		} finally {
 			br.close();
 		}
+		System.out.println("Node Count: "+SystemDefs.JavabaseDB.getNodeCnt());
+
+		System.out.println("Edge Count: "+SystemDefs.JavabaseDB.getEdgeCnt());
+
+		System.out.println("Disk Read Count: "+PCounter.readCounter);
+
+		System.out.println("Disk Write Count: "+PCounter.writeCounter);
 		return true;
 	}
 
