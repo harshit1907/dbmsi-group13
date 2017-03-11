@@ -1,14 +1,12 @@
 package ZIndex;
 
 import bufmgr.PageNotReadException;
-import edgeheap.EdgeHeapFile;
 import global.AttrType;
 import global.IndexType;
 import global.NID;
 import heap.InvalidTupleSizeException;
 import heap.InvalidTypeException;
 import heap.Tuple;
-import index.IndexException;
 import iterator.*;
 import nodeheap.NodeHeapFile;
 import zbtree.*;
@@ -46,7 +44,7 @@ public class ZIndexScan extends Iterator {
             CondExpr selects[],
             final int fldNum,
             final boolean indexOnly
-    ) throws IndexException, InvalidTypeException,
+    ) throws ZIndexException, InvalidTypeException,
             InvalidTupleSizeException, UnknownIndexTypeException, IOException {
         _fldNum = fldNum;
         _noInFlds = noInFlds;
@@ -60,9 +58,9 @@ public class ZIndexScan extends Iterator {
         try {
             ts_sizes = TupleUtils.setup_op_tuple(Jtuple, Jtypes, types, noInFlds, str_sizes, outFlds, noOutFlds);
         } catch (TupleUtilsException e) {
-            throw new IndexException(e, "IndexScan.java: TupleUtilsException caught from TupleUtils.setup_op_tuple()");
+            throw new ZIndexException(e, "IndexScan.java: TupleUtilsException caught from TupleUtils.setup_op_tuple()");
         } catch (InvalidRelation e) {
-            throw new IndexException(e, "IndexScan.java: InvalidRelation caught from TupleUtils.setup_op_tuple()");
+            throw new ZIndexException(e, "IndexScan.java: InvalidRelation caught from TupleUtils.setup_op_tuple()");
         }
 
         _selects = selects;
@@ -72,7 +70,7 @@ public class ZIndexScan extends Iterator {
         try {
             tuple1.setHdr((short) noInFlds, types, str_sizes);
         } catch (Exception e) {
-            throw new IndexException(e, "IndexScan.java: Heapfile error");
+            throw new ZIndexException(e, "IndexScan.java: Heapfile error");
         }
 
         t1_size = tuple1.size();
@@ -81,7 +79,7 @@ public class ZIndexScan extends Iterator {
         try {
             f = new NodeHeapFile(relName);
         } catch (Exception e) {
-            throw new IndexException(e, "IndexScan.java: Heapfile not created");
+            throw new ZIndexException(e, "IndexScan.java: Heapfile not created");
         }
 
         switch(index.indexType) {
@@ -93,13 +91,13 @@ public class ZIndexScan extends Iterator {
                 try {
                     indFile = new ZBTreeFile(indName);
                 } catch (Exception e) {
-                    throw new IndexException(e, "IndexScan.java: BTreeFile exceptions caught from BTreeFile constructor");
+                    throw new ZIndexException(e, "IndexScan.java: BTreeFile exceptions caught from BTreeFile constructor");
                 }
 
                 try {
                     indScan = (ZBTFileScan) ZIndexUtils.BTree_scan(selects, indFile);
                 } catch (Exception e) {
-                    throw new IndexException(e, "IndexScan.java: BTreeFile exceptions caught from IndexUtils.BTree_scan().");
+                    throw new ZIndexException(e, "IndexScan.java: BTreeFile exceptions caught from IndexUtils.BTree_scan().");
                 }
 
                 break;
@@ -110,7 +108,7 @@ public class ZIndexScan extends Iterator {
     }
 
     @Override
-    public Tuple get_next() throws IOException, JoinsException, IndexException,
+    public Tuple get_next() throws IOException, JoinsException, ZIndexException,
             InvalidTupleSizeException, InvalidTypeException, PageNotReadException,
             TupleUtilsException, PredEvalException, SortException, LowMemException, UnknowAttrType,
             UnknownKeyTypeException, Exception {
@@ -121,7 +119,11 @@ public class ZIndexScan extends Iterator {
         try {
             nextentry = indScan.get_next();
         } catch (Exception e) {
+<<<<<<< HEAD
             throw new IndexException(e, "IndexScan.java: BTree error");
+=======
+            throw new ZIndexException(e, "IndexScan.java: BTree error");
+>>>>>>> fc9e087f7bd88acaf6dfccc7b9a7e67902898eea
         }
 
         while (nextentry != null) {
@@ -135,13 +137,21 @@ public class ZIndexScan extends Iterator {
                     try {
                         Jtuple.setHdr((short) 1, attrType, s_sizes);
                     } catch (Exception e) {
+<<<<<<< HEAD
                         throw new IndexException(e, "IndexScan.java: Heapfile error");
+=======
+                        throw new ZIndexException(e, "IndexScan.java: Heapfile error");
+>>>>>>> fc9e087f7bd88acaf6dfccc7b9a7e67902898eea
                     }
 
                     try {
                         Jtuple.setDescFld(1, ((DescriptorKey)nextentry.key).getDesc());
                     } catch (Exception e) {
+<<<<<<< HEAD
                         throw new IndexException(e, "ZIndexScan.java: NodeHeapfile error");
+=======
+                        throw new ZIndexException(e, "ZIndexScan.java: NodeHeapfile error");
+>>>>>>> fc9e087f7bd88acaf6dfccc7b9a7e67902898eea
                     }
                 } else {
                     // attrReal not supported for now
@@ -155,20 +165,20 @@ public class ZIndexScan extends Iterator {
             try {
                 tuple1 = f.getNode(nid);
             } catch (Exception e) {
-                throw new IndexException(e, "IndexScan.java: getRecord failed");
+                throw new ZIndexException(e, "IndexScan.java: getRecord failed");
             }
 
             try {
                 tuple1.setHdr((short) _noInFlds, _types, _s_sizes);
             } catch (Exception e) {
-                throw new IndexException(e, "IndexScan.java: Heapfile error");
+                throw new ZIndexException(e, "IndexScan.java: Heapfile error");
             }
 
             boolean eval;
             try {
                 eval = PredEval.Eval(_selects, tuple1, null, _types, null);
             } catch (Exception e) {
-                throw new IndexException(e, "IndexScan.java: Heapfile error");
+                throw new ZIndexException(e, "IndexScan.java: Heapfile error");
             }
 
             if (eval) {
@@ -176,7 +186,7 @@ public class ZIndexScan extends Iterator {
                 try {
                     Projection.Project(tuple1, _types, Jtuple, perm_mat, _noOutFlds);
                 } catch (Exception e) {
-                    throw new IndexException(e, "IndexScan.java: Heapfile error");
+                    throw new ZIndexException(e, "IndexScan.java: Heapfile error");
                 }
                 return Jtuple;
             }
@@ -184,20 +194,20 @@ public class ZIndexScan extends Iterator {
             try {
                 nextentry = indScan.get_next();
             } catch (Exception e) {
-                throw new IndexException(e, "IndexScan.java: BTree error");
+                throw new ZIndexException(e, "IndexScan.java: BTree error");
             }
         }
         return null;
     }
 
     @Override
-    public void close() throws IOException, JoinsException, SortException, IndexException {
+    public void close() throws IOException, JoinsException, SortException, ZIndexException {
         if (!closeFlag) {
             if (indScan instanceof ZBTFileScan) {
                 try {
                     ((ZBTFileScan)indScan).DestroyZBTreeFileScan();
                 } catch(Exception e) {
-                    throw new IndexException(e, "ZBTree error in destroying index scan.");
+                    throw new ZIndexException(e, "ZBTree error in destroying index scan.");
                 }
             }
             closeFlag = true;
