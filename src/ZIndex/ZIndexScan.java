@@ -95,7 +95,7 @@ public class ZIndexScan extends Iterator {
                 }
 
                 try {
-                    indScan = (ZBTFileScan) ZIndexUtils.BTree_scan(selects, indFile);
+                    indScan = ZIndexUtils.ZBTree_scan(selects, indFile);
                 } catch (Exception e) {
                     throw new ZIndexException(e, "IndexScan.java: BTreeFile exceptions caught from IndexUtils.BTree_scan().");
                 }
@@ -119,11 +119,7 @@ public class ZIndexScan extends Iterator {
         try {
             nextentry = indScan.get_next();
         } catch (Exception e) {
-<<<<<<< HEAD
-            throw new IndexException(e, "IndexScan.java: BTree error");
-=======
             throw new ZIndexException(e, "IndexScan.java: BTree error");
->>>>>>> fc9e087f7bd88acaf6dfccc7b9a7e67902898eea
         }
 
         while (nextentry != null) {
@@ -137,21 +133,13 @@ public class ZIndexScan extends Iterator {
                     try {
                         Jtuple.setHdr((short) 1, attrType, s_sizes);
                     } catch (Exception e) {
-<<<<<<< HEAD
-                        throw new IndexException(e, "IndexScan.java: Heapfile error");
-=======
                         throw new ZIndexException(e, "IndexScan.java: Heapfile error");
->>>>>>> fc9e087f7bd88acaf6dfccc7b9a7e67902898eea
                     }
 
                     try {
                         Jtuple.setDescFld(1, ((DescriptorKey)nextentry.key).getDesc());
                     } catch (Exception e) {
-<<<<<<< HEAD
-                        throw new IndexException(e, "ZIndexScan.java: NodeHeapfile error");
-=======
                         throw new ZIndexException(e, "ZIndexScan.java: NodeHeapfile error");
->>>>>>> fc9e087f7bd88acaf6dfccc7b9a7e67902898eea
                     }
                 } else {
                     // attrReal not supported for now

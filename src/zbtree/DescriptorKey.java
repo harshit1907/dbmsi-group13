@@ -15,6 +15,11 @@ public class DescriptorKey extends KeyClass {
         this.key = BitShufflingUtils.bitShuffle(desc);
     }
 
+    public DescriptorKey(String key) {
+        this.key = key;
+        this.desc = BitShufflingUtils.descFromKey(key);
+    }
+
     public String getKey() {
         return key;
     }

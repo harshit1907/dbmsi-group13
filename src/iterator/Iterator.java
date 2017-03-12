@@ -1,4 +1,5 @@
 package iterator;
+import ZIndex.ZIndexException;
 import global.*;
 import heap.*;
 import diskmgr.*;
@@ -62,7 +63,7 @@ public abstract class Iterator implements Flags {
     throws IOException, 
 	   JoinsException, 
 	   SortException,
-	   IndexException;
+	   IndexException, ZIndexException;
   
   /**
    * tries to get n_pages of buffer space

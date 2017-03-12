@@ -1,12 +1,14 @@
 package ZIndex;
 
+import global.*;
 import zbtree.*;
-import global.AttrOperator;
-import global.AttrType;
 import iterator.CondExpr;
 import iterator.UnknownKeyTypeException;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 
 /**
@@ -151,8 +153,7 @@ public class ZIndexUtils {
    * @exception UnknownKeyTypeException only int and string keys are supported 
    */
   private static KeyClass getValue(CondExpr cd, AttrType type, int choice)
-       throws UnknownKeyTypeException
-  {
+       throws UnknownKeyTypeException {
     // error checking
     if (cd == null) {
       return null;
@@ -173,7 +174,98 @@ public class ZIndexUtils {
     default:
 	throw new UnknownKeyTypeException("IndexUtils.java: Only Integer and String keys are supported so far");
     }
-    
   }
-  
+
+  public static DescriptorRangePair getDiagonalDescFromDistance(KeyClass key, int distance) {
+  	  int value[] = ((DescriptorKey) key).getDesc().value;
+  	  int res1[] = new int[5];
+	  int res2[] = new int[5];
+	  for (int i = 0; i < 5; i++) {
+	      int topDist = value[i] + (int) (distance / Math.sqrt(5.0));
+		  int botDist = value[i] - (int) (distance / Math.sqrt(5.0));
+		  res1[i] = topDist;
+		  res2[i] = (botDist < 0)? 0: botDist;
+	  }
+
+	  Descriptor desc1 = new Descriptor();
+	  Descriptor desc2 = new Descriptor();
+	  desc1.set(res1[0], res1[1], res1[2], res1[3], res1[4]);
+	  desc2.set(res2[0], res2[1], res2[2], res2[3], res2[4]);
+	  KeyClass key1 = new DescriptorKey(desc1);
+	  KeyClass key2 = new DescriptorKey(desc2);
+
+	  return new DescriptorRangePair((DescriptorKey) key1, (DescriptorKey) key2);
+  }
+
+  public static List<DescriptorRangePair> getRangesForDescRange(DescriptorRangePair pair,
+																List<DescriptorRangePair> result) {
+      String startKey = pair.getStart().getKey();
+      String endKey = pair.getEnd().getKey();
+
+	  for (int i = 0; i < startKey.length(); i++) {
+		  if (startKey.charAt(i) != endKey.charAt(i)) {
+		      int axis = i % 5;
+		      int posOnAxis = i / 5;
+		      String[] lit = BitShufflingUtils.stringsFromKey(startKey);
+		      String[] big = BitShufflingUtils.stringsFromKey(endKey);
+
+		      String litMax = getLitMax(posOnAxis);
+			  String bigMin = getBigMin(posOnAxis);
+
+			  String[] litStart = lit.clone();
+			  String[] litEnd = big.clone();
+			  litEnd[axis] = litMax;
+			  DescriptorRangePair lower = new DescriptorRangePair(
+			  		BitShufflingUtils.keyFromStrings(litStart),
+					BitShufflingUtils.keyFromStrings(litEnd));
+
+			  String[] bigStart = lit.clone();
+			  bigStart[axis] = bigMin;
+			  String[] bigEnd = big.clone();
+			  DescriptorRangePair upper = new DescriptorRangePair(
+					  BitShufflingUtils.keyFromStrings(bigStart),
+					  BitShufflingUtils.keyFromStrings(bigEnd));
+
+			  if ((lower.getEnd().getKey().compareTo(lower.getStart().getKey()) > 0)) {
+				  if (result.contains(pair)) {
+					  result.remove(pair);
+				  }
+				  result.add(lower);
+				  getRangesForDescRange(lower, result);
+			  }
+			  if (upper.getEnd().getKey().compareTo(upper.getEnd().getKey()) > 0) {
+				  if (result.contains(pair)) {
+					  result.remove(pair);
+				  }
+			      result.add(upper);
+				  getRangesForDescRange(upper, result);
+			  }
+		  }
+	  }
+	  if (result.size() == 0) {
+	      List<DescriptorRangePair> res = new ArrayList<>();
+	      res.add(pair);
+	      return res;
+	  } else {
+	      return result;
+	  }
+  }
+
+  private static String getBigMin(int pos) {
+      StringBuilder res = new StringBuilder();
+	  for (int i = 0; i < 32 ; i++) {
+		  if (i <= pos) res.append("0");
+		  else res.append("1");
+	  }
+	  return res.toString();
+  }
+
+  private static String getLitMax(int pos) {
+	  StringBuilder res = new StringBuilder();
+	  for (int i = 0; i < 32 ; i++) {
+		  if (i <= pos) res.append("1");
+		  else res.append("0");
+	  }
+	  return res.toString();
+  }
 }
