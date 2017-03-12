@@ -1774,7 +1774,8 @@ public class BTreeFile extends IndexFile
 	   UnpinPageException
 	   
     {
-      BTFileScan scan = new BTFileScan();
+	  BTFileScan scan = new BTFileScan();
+     
       if ( headerPage.get_rootId().pid==INVALID_PAGE) {
 	scan.leafPage=null;
 	return scan;
@@ -1809,8 +1810,8 @@ public class BTreeFile extends IndexFile
 	PageId childPageId;
 	KeyClass key;
 	KeyDataEntry entry;
-	sortedPage=new BTSortedPage( pinPage( id), headerPage.get_keyType());
 	
+	sortedPage=new BTSortedPage( pinPage( id), headerPage.get_keyType());
 	
 	// Now print all the child nodes of the page.  
 	if( sortedPage.getType()==NodeType.INDEX) {

@@ -206,21 +206,21 @@ public class Edge extends Tuple{
 
      }
      
-     public void nodeCopy(Edge fromNode)
+     public void edgeCopy(Edge fromNode)
      {
          byte [] temparray = fromNode.getEdgeByteArray();
          System.arraycopy(temparray, 0, data, edge_offset, temparray.length);//Not sure: edge_length
 //        fldCnt = fromTuple.noOfFlds();
 //        fldOffset = fromTuple.copyFldOffset();
      }
-     public void nodeInit(byte [] anode, int offset)
+     public void edgeInit(byte [] anode, int offset)
      {
          data = anode;
          edge_offset = offset;
          edge_length = data.length; //Not sure
      }
 
-     public void nodeSet(byte [] fromnode, int offset)
+     public void edgeSet(byte [] fromnode, int offset)
      {
          System.arraycopy(fromnode, offset, data, 0, fromnode.length);
          edge_offset = 0;

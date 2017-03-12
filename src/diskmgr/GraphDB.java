@@ -11,6 +11,10 @@ import btree.AddFileEntryException;
 import btree.BTreeFile;
 import btree.ConstructPageException;
 import btree.GetFileEntryException;
+import bufmgr.HashEntryNotFoundException;
+import bufmgr.InvalidFrameNumberException;
+import bufmgr.PageUnpinnedException;
+import bufmgr.ReplacerException;
 import edgeheap.EHFPage;
 import edgeheap.EScan;
 import edgeheap.Edge;
@@ -37,6 +41,7 @@ public class GraphDB implements GlobalConst {
   
   private static final int bits_per_page = MAX_SPACE * 8;
 private static final int REC_LEN1 = 32;
+//private static final int REC_LEN2 = 50;
   
   
   
@@ -52,7 +57,9 @@ private static final int REC_LEN1 = 32;
   public int type;
   public GraphDB(int type){
 	PCounter.initialize();
-	this.type=type;	 
+	
+	this.type=type;
+	
   }
   
 
@@ -70,12 +77,16 @@ private static final int REC_LEN1 = 32;
  * @throws AddFileEntryException 
  * @throws ConstructPageException 
  * @throws GetFileEntryException 
+ * @throws ReplacerException 
+ * @throws HashEntryNotFoundException 
+ * @throws InvalidFrameNumberException 
+ * @throws PageUnpinnedException 
    */
   public void openDB( String fname)
     throws IOException, 
 	   InvalidPageNumberException, 
 	   FileIOException,
-	   DiskMgrException, HFException, HFBufMgrException, HFDiskMgrException, GetFileEntryException, ConstructPageException, AddFileEntryException {
+	   DiskMgrException, HFException, HFBufMgrException, HFDiskMgrException, GetFileEntryException, ConstructPageException, AddFileEntryException, PageUnpinnedException, InvalidFrameNumberException, HashEntryNotFoundException, ReplacerException {
     
     name = fname;
     
@@ -102,6 +113,7 @@ private static final int REC_LEN1 = 32;
     
     nhfile  = new NodeHeapFile(name+"_Node");
    	ehfile  = new EdgeHeapFile(name+"_Edge");
+   	//System.out.println("hiii111"+type);
    	 switch(type) {
    	  case 1: 
    		  btNodeLabel = new BTreeFile(name+"_BTreeNodeIndex", AttrType.attrString, REC_LEN1, 1/*delete*/); 
@@ -118,6 +130,10 @@ private static final int REC_LEN1 = 32;
    			
    		  break;
    	  default:
+   		btNodeLabel = new BTreeFile(name+"_BTreeNodeIndex", AttrType.attrString, REC_LEN1, 1/*delete*/);
+		  
+		  btNodeLabel.close();
+		 
    		  break;
     }
   }
@@ -139,12 +155,16 @@ private static final int REC_LEN1 = 32;
  * @throws AddFileEntryException 
  * @throws ConstructPageException 
  * @throws GetFileEntryException 
+ * @throws ReplacerException 
+ * @throws HashEntryNotFoundException 
+ * @throws InvalidFrameNumberException 
+ * @throws PageUnpinnedException 
    */
   public void openDB( String fname, int num_pgs)
     throws IOException, 
 	   InvalidPageNumberException,
 	   FileIOException,
-	   DiskMgrException, HFException, HFBufMgrException, HFDiskMgrException, GetFileEntryException, ConstructPageException, AddFileEntryException {
+	   DiskMgrException, HFException, HFBufMgrException, HFDiskMgrException, GetFileEntryException, ConstructPageException, AddFileEntryException, PageUnpinnedException, InvalidFrameNumberException, HashEntryNotFoundException, ReplacerException {
     
     name = new String(fname);
     num_pages = (num_pgs > 2) ? num_pgs : 2;
@@ -185,6 +205,7 @@ private static final int REC_LEN1 = 32;
     
     nhfile  = new NodeHeapFile(name+"_Node");
 	ehfile  = new EdgeHeapFile(name+"_Edge");
+	//System.out.println("hiii"+type);
 	 switch(type) {
 	  case 1: 
 		  btNodeLabel = new BTreeFile(name+"_BTreeNodeIndex", AttrType.attrString, REC_LEN1, 1/*delete*/); 
@@ -193,14 +214,21 @@ private static final int REC_LEN1 = 32;
 		  
 		  break;
 	  case 3: 
-		  btEdgeLabel = new BTreeFile(name+"_BTreeNodeIndex", AttrType.attrString, REC_LEN1, 1/*delete*/); 
-			 
+		  btEdgeLabel = new BTreeFile(name+"_BTreeEdgeIndex", AttrType.attrString, REC_LEN1, 1/*delete*/); 
+		  btEdgeLabel.close();
 		  break;
 	  case 4:
 		  btEdgeWeight = new BTreeFile(name+"_BTreeNodeIndex", AttrType.attrInteger, 4, 1/*delete*/); 
 			
 		  break;
 	  default:
+			 btNodeLabel = new BTreeFile(name+"_BTreeNodeIndex", AttrType.attrString, REC_LEN1, 1/*delete*/);
+			  
+			  btNodeLabel.close();
+			  btEdgeLabel = new BTreeFile(name+"_BTreeEdgeIndex", AttrType.attrString, REC_LEN1, 1/*delete*/); 
+			  btEdgeLabel.close();
+		
+		  //System.out.println("Hiii");
 		  break;
  }
     

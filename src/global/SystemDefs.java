@@ -17,7 +17,7 @@ public class SystemDefs {
   public SystemDefs (){};
   
   public SystemDefs(String dbname, int num_pgs, int bufpoolsize,
-		    String replacement_policy )
+		    String replacement_policy, int type)
     {
       int logsize;
       
@@ -35,13 +35,13 @@ public class SystemDefs {
 	replacement_policy = new String("Clock");
       }
       init(real_dbname,real_logname, num_pgs, logsize,
-	   bufpoolsize, replacement_policy);
+	   bufpoolsize, replacement_policy, type);
     }
   
   
   public void init( String dbname, String logname,
 		    int num_pgs, int maxlogsize,
-		    int bufpoolsize, String replacement_policy )
+		    int bufpoolsize, String replacement_policy, int type )
     {
       
       boolean status = true;
@@ -53,7 +53,7 @@ public class SystemDefs {
       
       try {
 	JavabaseBM = new BufMgr(bufpoolsize, replacement_policy);
-	JavabaseDB = new GraphDB();
+	JavabaseDB = new GraphDB(type);
 /*
 	JavabaseCatalog = new Catalog(); 
 */

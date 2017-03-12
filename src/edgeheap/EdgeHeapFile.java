@@ -2,7 +2,30 @@ package edgeheap;
 
 import java.io.IOException;
 
+import btree.AddFileEntryException;
+import btree.BTreeFile;
+import btree.ConstructPageException;
+import btree.ConvertException;
+import btree.DeleteRecException;
+import btree.GetFileEntryException;
+import btree.IndexInsertRecException;
+import btree.IndexSearchException;
+import btree.InsertException;
+import btree.IteratorException;
+import btree.KeyNotMatchException;
+import btree.KeyTooLongException;
+import btree.LeafDeleteException;
+import btree.LeafInsertRecException;
+import btree.NodeNotMatchException;
+import btree.PinPageException;
+import btree.StringKey;
+import btree.UnpinPageException;
+import bufmgr.HashEntryNotFoundException;
+import bufmgr.InvalidFrameNumberException;
+import bufmgr.PageUnpinnedException;
+import bufmgr.ReplacerException;
 import diskmgr.Page;
+import global.AttrType;
 import global.EID;
 import global.GlobalConst;
 import global.NID;
@@ -61,7 +84,7 @@ public class EdgeHeapFile implements Filetype,  GlobalConst {
 	private     boolean     _file_deleted;
 	private     String 	 _fileName;
 	private static int tempfilecount = 0;
-
+	private static final int REC_LEN1 = 32;
 
 
 	/* get a new datapage from the buffer manager and initialize dpinfo
@@ -374,6 +397,26 @@ public class EdgeHeapFile implements Filetype,  GlobalConst {
 	 * @exception IOException I/O errors
 	 *
 	 * @return the rid of the record
+	 * @throws InsertException 
+	 * @throws LeafDeleteException 
+	 * @throws IteratorException 
+	 * @throws IndexSearchException 
+	 * @throws DeleteRecException 
+	 * @throws ConvertException 
+	 * @throws NodeNotMatchException 
+	 * @throws PinPageException 
+	 * @throws UnpinPageException 
+	 * @throws ConstructPageException 
+	 * @throws IndexInsertRecException 
+	 * @throws LeafInsertRecException 
+	 * @throws KeyNotMatchException 
+	 * @throws KeyTooLongException 
+	 * @throws AddFileEntryException 
+	 * @throws GetFileEntryException 
+	 * @throws ReplacerException 
+	 * @throws HashEntryNotFoundException 
+	 * @throws InvalidFrameNumberException 
+	 * @throws PageUnpinnedException 
 	 */
 	public EID insertEdge(byte[] recPtr) 
 			throws InvalidSlotNumberException,  
@@ -382,9 +425,8 @@ public class EdgeHeapFile implements Filetype,  GlobalConst {
 			HFException,
 			HFBufMgrException,
 			HFDiskMgrException,
-			IOException
+			IOException, KeyTooLongException, KeyNotMatchException, LeafInsertRecException, IndexInsertRecException, ConstructPageException, UnpinPageException, PinPageException, NodeNotMatchException, ConvertException, DeleteRecException, IndexSearchException, IteratorException, LeafDeleteException, InsertException, GetFileEntryException, AddFileEntryException, PageUnpinnedException, InvalidFrameNumberException, HashEntryNotFoundException, ReplacerException
 	{
-		int dpinfoLen = 0;	
 		int recLen = recPtr.length;
 		boolean found;
 		EID currentDataPageRid = new EID();
@@ -605,7 +647,16 @@ public class EdgeHeapFile implements Filetype,  GlobalConst {
 
 
 		unpinPage(currentDirPageId, true /* = DIRTY */);
-
+		
+		Edge nn= new Edge();
+		nn.edgeInit(recPtr,0);
+		System.out.println(""+SystemDefs.JavabaseDBName);
+		
+		if(SystemDefs.JavabaseDB.btEdgeLabel!=null) { 
+			SystemDefs.JavabaseDB.btEdgeLabel = new BTreeFile(SystemDefs.JavabaseDBName+"_BTreeEdgeIndex", AttrType.attrString, 32, 1/*delete*/);
+			SystemDefs.JavabaseDB.btEdgeLabel.insert(new StringKey(nn.getLabel()),rid);
+			SystemDefs.JavabaseDB.btEdgeLabel.close();
+		}
 
 		return rid;
 
@@ -631,6 +682,11 @@ public class EdgeHeapFile implements Filetype,  GlobalConst {
 			Exception
 
 	{
+		if(SystemDefs.JavabaseDB.btEdgeLabel!=null) { 
+			SystemDefs.JavabaseDB.btEdgeLabel = new BTreeFile(SystemDefs.JavabaseDBName+"_BTreeEdgeIndex", AttrType.attrString, REC_LEN1, 1/*delete*/);
+			SystemDefs.JavabaseDB.btEdgeLabel.Delete(new StringKey(SystemDefs.JavabaseDB.ehfile.getEdge(rid).getLabel()),rid);
+			SystemDefs.JavabaseDB.btEdgeLabel.close();
+		}
 		boolean status;
 		EHFPage currentDirPage = new EHFPage();
 		PageId currentDirPageId = new PageId();

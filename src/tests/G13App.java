@@ -5,6 +5,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import bufmgr.BufMgr;
+import bufmgr.BufMgrException;
+import bufmgr.HashOperationException;
+import bufmgr.PageNotFoundException;
+import bufmgr.PagePinnedException;
+import bufmgr.PageUnpinnedException;
+import diskmgr.PCounter;
 import global.SystemDefs;
 import heap.HFBufMgrException;
 import heap.HFDiskMgrException;
@@ -24,7 +31,8 @@ import heap.InvalidTupleSizeException;
 
 // fullnodescan db1
 // fulledgescan db1
-
+// nodequery /Users/mihir/dev/NodeTestData.txt db1
+// edgequery /Users/mihir/dev/EdgeTestData.txt db1
 
 
 public class G13App {
@@ -33,6 +41,7 @@ public class G13App {
 		   	String graphdbname=null;
 		   	
 		   	while(true) {
+		   		PCounter.initialize();
 		   		System.out.print("Group13> ");
 		   		BufferedReader input = new BufferedReader (new InputStreamReader (System.in));
 		   		String line = input.readLine();
@@ -46,25 +55,33 @@ public class G13App {
 		   			System.out.println("");
 		   		}
 		   		String inputFile = tokens[1];
-		   		String DBName="db1";
+		   		String DBName=null;
 		   		if(tokens.length>2)
 		   			DBName = tokens[2];
-			   	//System.out.println("You entered the command: "+operation+" -- "+nodefile);
+			   	
 			   	if(operation.equalsIgnoreCase("batchnodeinsert")) {
-			   		//System.out.println("You entered the command: "+operation+" -- "+inputFile);
+
 			   		if(graphdbname==null) {
 			   			graphdbname = DBName;
 			   			createDB(DBName);
 			   		}
-			   		
+			   		//SystemDefs.JavabaseBM.flushAllPages();
+			   		//SystemDefs.JavabaseBM = new BufMgr(40, "Clock");
+			   		//SystemDefs.JavabaseBM.flushAllPages();
 			   		new BatchNodeInsert().batchNodeInsert(inputFile, graphdbname);
 			   	} else if (operation.equalsIgnoreCase("batchnodedelete")) {
 			   		if(graphdbname==null) {
 			   			graphdbname = DBName;
 			   			createDB(DBName);
 			   		}
+			   		/*SystemDefs.JavabaseBM.flushAllPages();
+			   		SystemDefs.JavabaseBM = new BufMgr(30, "Clock");
+			   		SystemDefs.JavabaseBM.flushAllPages();*/
 			   		new BatchNodeDelete().batchNodeDelete(inputFile, graphdbname);
 			   	} else if (operation.equalsIgnoreCase("fullnodescan")) {
+			   		SystemDefs.JavabaseBM.flushAllPages();
+			   		SystemDefs.JavabaseBM = new BufMgr(50, "Clock");
+			   		SystemDefs.JavabaseBM.flushAllPages();
 			   		new FullScanNode().fullScanNode( graphdbname);
 			   	} else if (operation.equalsIgnoreCase("fulledgescan")) {
 			   		new FullScanEdge().fullScanEdge( graphdbname);
@@ -72,22 +89,42 @@ public class G13App {
 			   		if(graphdbname==null) {
 			   			graphdbname = DBName;
 			   			createDB(DBName);
-			   		}
+			   		} //else 
+			   		//	openDB(DBName);
+			   		//SystemDefs.JavabaseBM.flushAllPages();
 			   		new BatchEdgeInsert().batchEdgeInsert(inputFile);
+			   	} else if (operation.equalsIgnoreCase("nodequery")) {
+			   		//int numBuf = Integer.parseInt(tokens[3]);
+			   		if(graphdbname==null) {
+			   			graphdbname = DBName;
+			   		}
+			   		new NodeQuery().nodeQuery(graphdbname, 40,0,1,2);
+			   	} else if (operation.equalsIgnoreCase("edgequery")) {
+				   		//int numBuf = Integer.parseInt(tokens[3]);
+				   		if(graphdbname==null) {
+				   			graphdbname = DBName;
+				   		}
+				   		//System.out.println("Whuy!!");
+				   	new EdgeQuery().edgeQuery(graphdbname, 40,0,1,2);
+				   //	System.out.println("Whuy!!--");
 			   	} else if (operation.equalsIgnoreCase("batchedgedelete")) {
 			   		if(graphdbname==null) {
 			   			graphdbname = DBName;
 			   			createDB(DBName);
-			   		}
+			   		}// else 
+			   		//	openDB(DBName);
 			   		new BatchEdgeDelete().batchEdgeDelete(inputFile);
 			   	} else {
 			   		System.out.println(operation + " is not recognized as a command.\nType help for more information.");
 			   	}
 		   	}
-		   	
 		}  
 	   public static void createDB(String graphDbName) {
-		   SystemDefs sysdef = new SystemDefs(graphDbName,10000,10000,"Clock");
+		   SystemDefs sysdef = new SystemDefs(graphDbName,10000,20,"Clock",0);
 	   }
-
+	   public static void openDB(String graphDbName) throws HashOperationException, PageUnpinnedException, PagePinnedException, PageNotFoundException, BufMgrException, IOException {
+		   SystemDefs.JavabaseBM.flushAllPages();
+		   System.out.println("hihihihi");
+		   SystemDefs sysdef = new SystemDefs(graphDbName,0,20,"Clock",0);
+	   }
 }

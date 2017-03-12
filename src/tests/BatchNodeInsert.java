@@ -13,8 +13,6 @@ import heap.HFDiskMgrException;
 import heap.HFException;
 import heap.InvalidSlotNumberException;
 import heap.InvalidTupleSizeException;
-import heap.Tuple;
-import nodeheap.NScan;
 import nodeheap.Node;
 
 public class BatchNodeInsert
@@ -22,7 +20,6 @@ public class BatchNodeInsert
 	private final static boolean OK = true;
 	private final static boolean FAIL = false;
 
-	private final static int reclen = 32;
 
 
 	protected  boolean batchNodeInsert (String nodefilename,String graphDbName) throws InvalidSlotNumberException, InvalidTupleSizeException, HFException, HFDiskMgrException, HFBufMgrException, IOException, Exception {
@@ -59,7 +56,7 @@ public class BatchNodeInsert
 
 					try {
 
-						NID  nid = SystemDefs.JavabaseDB.nhfile.insertNode(currentNode.getNodeByteArray());
+						NID nid = SystemDefs.JavabaseDB.nhfile.insertNode(currentNode.getNodeByteArray());
 						insertI++;
 					}
 					catch (Exception e) {
