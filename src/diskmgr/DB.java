@@ -181,7 +181,7 @@ public class DB implements GlobalConst {
     
     // Write the appropriate number of bytes.
     try{
-    	PCounter.writeIncrement();
+    	//PCounter.writeIncrement();
       fp.write(apage.getpage());
     }
     catch (IOException e) {

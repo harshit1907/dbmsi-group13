@@ -15,12 +15,11 @@ import bufmgr.HashEntryNotFoundException;
 import bufmgr.InvalidFrameNumberException;
 import bufmgr.PageUnpinnedException;
 import bufmgr.ReplacerException;
-import edgeheap.EHFPage;
+
 import edgeheap.EScan;
 import edgeheap.Edge;
 import edgeheap.EdgeHeapFile;
 import global.AttrType;
-import global.Convert;
 import global.EID;
 import global.GlobalConst;
 import global.NID;
@@ -31,7 +30,7 @@ import heap.HFDiskMgrException;
 import heap.HFException;
 import heap.InvalidSlotNumberException;
 import heap.InvalidTupleSizeException;
-import nodeheap.NHFPage;
+
 import nodeheap.NScan;
 import nodeheap.Node;
 import nodeheap.NodeHeapFile;

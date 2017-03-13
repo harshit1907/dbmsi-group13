@@ -23,18 +23,16 @@ import heap.InvalidTupleSizeException;
 // batchnodeinsert /home/anjoy92/Documents/dbmsi-group13/src/tests/NodeTestDataI.txt db1
 // batchnodedelete /home/anjoy92/Documents/dbmsi-group13/src/tests/NodeTestDataD.txt db1
 // fullnodescan db1
-// batchedgeinsert /home/anjoy92/Documents/dbmsi-group13/src/tests/EdgeTestData.txt db1
-
 // Mihir
-// batchnodeinsert /Users/mihir/dev/NodeTestData.txt db1
-// batchnodedelete /Users/mihir/dev/NodeTestData2.txt db1
-// batchedgeinsert /Users/mihir/dev/EdgeTestData.txt db1
-// batchedgedelete /Users/mihir/dev/EdgeTestData2.txt db1
+// batchnodeinsert C://NodeTestData.txt db1
+// batchnodedelete C://mihir.txt db1
+// batchedgeinsert C://EdgeTestData.txt db1
+// batchedgedelete C://EdgeTestData2.txt db1
 
 // fullnodescan db1
 // fulledgescan db1
-// nodequery /Users/mihir/dev/NodeTestData.txt db1
-// edgequery /Users/mihir/dev/EdgeTestData.txt db1
+// nodequery C://NodeTestData.txt db1
+// edgequery C://EdgeTestData.txt db1
 
 
 public class G13App {
@@ -100,14 +98,14 @@ public class G13App {
 			   		if(graphdbname==null) {
 			   			graphdbname = DBName;
 			   		}
-			   		new NodeQuery().nodeQuery(graphdbname, 40,0,1,2);
+			   		new NodeQuery().nodeQuery(graphdbname, 40,4,5,"251"); //put label
 			   	} else if (operation.equalsIgnoreCase("edgequery")) {
 				   		//int numBuf = Integer.parseInt(tokens[3]);
 				   		if(graphdbname==null) {
 				   			graphdbname = DBName;
 				   		}
 				   		//System.out.println("Whuy!!");
-				   	new EdgeQuery().edgeQuery(graphdbname, 40,0,1,2);
+				   	new EdgeQuery().edgeQuery(graphdbname, 40,5,0,"10 20");//put space sep lowerbound and upper bound
 				   //	System.out.println("Whuy!!--");
 			   	} else if (operation.equalsIgnoreCase("batchedgedelete")) {
 			   		if(graphdbname==null) {

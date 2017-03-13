@@ -16,7 +16,7 @@ import btree.IndexInsertRecException;
 import btree.IndexSearchException;
 import btree.InsertException;
 import btree.IteratorException;
-import btree.KeyClass;
+
 import btree.KeyNotMatchException;
 import btree.KeyTooLongException;
 import btree.LeafDeleteException;
@@ -31,7 +31,7 @@ import bufmgr.PageUnpinnedException;
 import bufmgr.ReplacerException;
 import diskmgr.Page;
 import global.AttrType;
-import global.Convert;
+
 import global.NID;
 import global.PageId;
 import global.SystemDefs;

@@ -1,34 +1,32 @@
 package tests;
 //originally from : joins.C
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-import btree.AddFileEntryException;
 import btree.BTFileScan;
 import btree.BTreeFile;
-import btree.ConstructPageException;
-import btree.GetFileEntryException;
 import btree.KeyDataEntry;
 import btree.LeafData;
 import btree.StringKey;
-import bufmgr.BufMgrException;
-import bufmgr.HashOperationException;
-import bufmgr.PageNotFoundException;
-import bufmgr.PagePinnedException;
-import bufmgr.PageUnpinnedException;
+import diskmgr.PCounter;
+import edgeheap.Edge;
 import global.AttrType;
+import global.EID;
 import global.NID;
 import global.RID;
 import global.SystemDefs;
-import heap.InvalidTupleSizeException;
+import heap.HFBufMgrException;
+import heap.HFDiskMgrException;
+import heap.HFException;
+import heap.InvalidSlotNumberException;
 import nodeheap.Node;
-import zbtree.*;
 
 public class NodeQuery
 {
 	  public final static boolean OK   = true; 
 	  public final static boolean FAIL = false;
-	public void nodeQuery(String graphDBName,int numBuf,int qType,int index,int queryOptions) throws InvalidTupleSizeException, IOException, HashOperationException, PageUnpinnedException, PagePinnedException, PageNotFoundException, BufMgrException, GetFileEntryException, ConstructPageException, AddFileEntryException, zbtree.GetFileEntryException, zbtree.ConstructPageException, zbtree.AddFileEntryException
+	public void nodeQuery(String graphDBName,int numBuf,int qType,int index,String queryOptions) throws InvalidSlotNumberException, HFException, HFDiskMgrException, HFBufMgrException, Exception
 	{
 		
 		switch(qType)
@@ -193,6 +191,135 @@ public class NodeQuery
 			break;
 		case 4:
 			System.out.println("query will take a label and return all relevant information (including outgoing and incoming edges) about the node with the matching labe");
+			List<EID> listEid = new ArrayList<EID>();
+			Node matchNode = null;
+			if(index==0) {
+				if(SystemDefs.JavabaseDB!=null) 
+					SystemDefs.JavabaseBM.flushAllPages();
+				SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
+				SystemDefs.JavabaseBM.flushAllPages();
+				
+				 NID nid =SystemDefs.JavabaseDB.nhfile.getNID(queryOptions);
+				if(nid!=null)	
+				  { listEid= SystemDefs.JavabaseDB.ehfile.getEIDList(nid);
+				  matchNode = SystemDefs.JavabaseDB.nhfile.getNode(nid);
+				  }
+			} 
+			else {
+				if(SystemDefs.JavabaseDB!=null) 
+					SystemDefs.JavabaseBM.flushAllPages();
+				SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
+				//SystemDefs.JavabaseBM.flushAllPages();
+				
+				boolean status = OK;
+				SystemDefs.JavabaseDB.btNodeLabel = new BTreeFile(SystemDefs.JavabaseDBName+"_BTreeNodeIndex", AttrType.attrString, 32, 1/*delete*/);
+				
+				// start index scan
+				BTFileScan iscan = null;
+				try {
+					iscan = SystemDefs.JavabaseDB.btNodeLabel.new_scan(null, null);
+				}
+				catch (Exception e) {
+					status = FAIL;
+					e.printStackTrace();
+				}
+
+				KeyDataEntry t=null;
+				try {
+					t = iscan.get_next();
+				}
+				catch (Exception e) {
+					status = FAIL;
+					e.printStackTrace();
+				}
+				boolean flag = true;
+				//System.out.println(t+""+iscan);
+				while (t != null && iscan!=null) {
+			//System.out.println("hii");
+					try {
+						t = iscan.get_next();
+					}
+					catch (Exception e) {
+						status = FAIL;
+						e.printStackTrace();
+					}
+					
+					try {
+						if(t==null) break;
+						StringKey k = (StringKey)t.key;
+						
+						LeafData l = (LeafData)t.data;
+						RID rid =  l.getData();
+						NID nid = new NID(rid.pageNo, rid.slotNo);
+						Node node = SystemDefs.JavabaseDB.nhfile.getNode(nid);
+						if(node.getLabel().equalsIgnoreCase(queryOptions))
+						{
+							listEid= SystemDefs.JavabaseDB.ehfile.getEIDList(nid);
+							matchNode = node;
+							break;							
+						}
+					
+					}
+					catch (Exception e) {
+						status = FAIL;
+						e.printStackTrace();
+					}
+				}
+
+				// clean up
+				try {
+					//iscan.close();
+					SystemDefs.JavabaseDB.btNodeLabel.close();
+				}
+				catch (Exception e) {
+					status = FAIL;
+					e.printStackTrace();
+				}
+			}
+				if(matchNode!=null&&!listEid.isEmpty())
+				{
+					System.out.println("Match Found: ");
+					System.out.println("Node Label:"+ matchNode.getLabel());
+					System.out.println("Node Descriptor: "+ matchNode.getDesc().value[0]+" "+matchNode.getDesc().value[1]+" "+ matchNode.getDesc().value[2]+" "+matchNode.getDesc().value[3]+" "+matchNode.getDesc().value[4]);
+						
+					List<Edge> listSource= new ArrayList<Edge>();
+					List<Edge> listDes= new ArrayList<Edge>();
+					for(EID i:listEid)
+					{
+						Edge curEdge = SystemDefs.JavabaseDB.ehfile.getEdge(i);
+						NID nidSource =curEdge.getSource();
+						NID nidDes = curEdge.getDestination();
+						String nodeSource =  SystemDefs.JavabaseDB.nhfile.getNode(nidSource).getLabel();
+						String nodeDes =  SystemDefs.JavabaseDB.nhfile.getNode(nidDes).getLabel();
+						if(nodeSource.equalsIgnoreCase(queryOptions))   listSource.add(curEdge);
+						if(nodeDes.equalsIgnoreCase(queryOptions))   listDes.add(curEdge);
+					}
+					if(!listDes.isEmpty())
+					{
+						System.out.println("Node Incomming Edges: "+listDes.size());
+										for(Edge e:listDes)
+					{
+						 String src= SystemDefs.JavabaseDB.nhfile.getNode(e.getSource()).getLabel();
+						System.out.println("Source Node: "+src+" Label: "+e.getLabel() + " Weight: "+e.getWeight());
+					}
+					}
+					else
+					System.out.println("Node Incomming Edges: "+listDes.size());
+					if(!listSource.isEmpty())
+					{
+						System.out.println("Node Outgoing Edges: "+listSource.size());
+					for(Edge e:listSource)
+					{
+						 String des= SystemDefs.JavabaseDB.nhfile.getNode(e.getDestination()).getLabel();
+						System.out.println("Destination Node: "+des+" Label: "+e.getLabel() + " Weight: "+e.getWeight());
+					}
+					}
+					else 	System.out.println("Node Outgoing Edges: "+listSource.size());
+					
+				}
+				else 
+					System.out.println("No mactch found!!");
+			
 			break;
 		case 5:
 			System.out.println("query will take a target descriptor and a distance and return all relevant information (including outgoing and incoming edges) about the nodes with the given distance from the target descriptor.");
@@ -203,6 +330,14 @@ public class NodeQuery
 			break;
 		}
 
+			System.out.println("");
+		System.out.println("Node Count: "+SystemDefs.JavabaseDB.getNodeCnt());
+
+		  System.out.println("Edge Count: "+SystemDefs.JavabaseDB.getEdgeCnt());
+
+		  System.out.println("Disk Read Count: "+PCounter.readCounter);
+		  
+		  System.out.println("Disk Write Count: "+PCounter.writeCounter);
 
 	}
 	/*public static void main(String[] args) throws InvalidTupleSizeException, IOException, HashOperationException, PageUnpinnedException, PagePinnedException, PageNotFoundException, BufMgrException
