@@ -1,7 +1,7 @@
 package global;
 
 public class Descriptor {
-public int value[] = new int[5];
+    public int value[] = new int[5];
 
 	public void set(int value0, int value1, int value2, int value3, int value4) {
 		value[0] = value0;
@@ -26,8 +26,7 @@ public int value[] = new int[5];
 			return 0;
 	}
 	
-	public String getString()
-	{
+	public String getString() {
 		String str="";
 		for(int val:value)
 		{

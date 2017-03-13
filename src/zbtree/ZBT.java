@@ -40,7 +40,7 @@ public class ZBT implements GlobalConst {
      */
     protected final static int getKeyLength(KeyClass key) throws DescriptorNotMatchException, IOException {
         if (key instanceof DescriptorKey) {
-            return 20; // We know out key is of size 160/8 (32 x 5)
+            return 10; // We know out key is of size 160/8 (32 x 5)
         } else {
             throw new DescriptorNotMatchException(null, "Descriptor key Types do not match");
         }

@@ -51,10 +51,10 @@ public class Convert{
         InputStream in;
         DataInputStream instr;
         Descriptor value = new Descriptor();
-        byte tmp[] = new byte[20]; // For 5 int values, 20 bytes reserved
+        byte tmp[] = new byte[10]; // For 5 int values, 20 bytes reserved
         
         // copy the value from data array out to a tmp byte array
-        System.arraycopy (data, position, tmp, 0, 20);
+        System.arraycopy (data, position, tmp, 0,  10);
         
         /* creates a new data input stream to read data from the
          * specified input stream

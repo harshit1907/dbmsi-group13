@@ -6,9 +6,7 @@ import iterator.CondExpr;
 import iterator.UnknownKeyTypeException;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 
 /**
@@ -181,8 +179,8 @@ public class ZIndexUtils {
   	  int res1[] = new int[5];
 	  int res2[] = new int[5];
 	  for (int i = 0; i < 5; i++) {
-	      int topDist = value[i] + (int) (distance / Math.sqrt(5.0));
-		  int botDist = value[i] - (int) (distance / Math.sqrt(5.0));
+	      int topDist = value[i] + (int) Math.ceil(distance / Math.sqrt(5.0));
+		  int botDist = value[i] - (int) Math.ceil(distance / Math.sqrt(5.0));
 		  res1[i] = topDist;
 		  res2[i] = (botDist < 0)? 0: botDist;
 	  }
@@ -194,76 +192,92 @@ public class ZIndexUtils {
 	  KeyClass key1 = new DescriptorKey(desc1);
 	  KeyClass key2 = new DescriptorKey(desc2);
 
-	  return new DescriptorRangePair((DescriptorKey) key1, (DescriptorKey) key2);
+	  if (((DescriptorKey)key1).getKey().compareTo(((DescriptorKey)key2).getKey()) > 0) {
+
+          return new DescriptorRangePair((DescriptorKey) key2, (DescriptorKey) key1);
+      } else {
+          return new DescriptorRangePair((DescriptorKey) key1, (DescriptorKey) key2);
+      }
   }
 
-  public static List<DescriptorRangePair> getRangesForDescRange(DescriptorRangePair pair,
-																List<DescriptorRangePair> result) {
-      String startKey = pair.getStart().getKey();
-      String endKey = pair.getEnd().getKey();
+  public static Set<DescriptorRangePair> getRangesForDescRange(DescriptorRangePair pair) {
+      Set<DescriptorRangePair> result = new HashSet<>();
+      LinkedList<DescriptorRangePair> queue = new LinkedList<>();
+      queue.add(pair);
 
-	  for (int i = 0; i < startKey.length(); i++) {
-		  if (startKey.charAt(i) != endKey.charAt(i)) {
-		      int axis = i % 5;
-		      int posOnAxis = i / 5;
-		      String[] lit = BitShufflingUtils.stringsFromKey(startKey);
-		      String[] big = BitShufflingUtils.stringsFromKey(endKey);
+      while (!queue.isEmpty()) {
+          DescriptorRangePair range = queue.remove();
+          String startKey = range.getStart().getKey();
+          String endKey = range.getEnd().getKey();
+          DescriptorRangePair lower,upper;
+          for (int i = 0; i < startKey.length(); i++) {
+              if (startKey.charAt(i) != endKey.charAt(i)) {
+                  int axis = i % 5;
+                  int posOnAxis = i / 5;
+                  String[] lit = BitShufflingUtils.stringsFromKey(startKey);
+                  String[] big = BitShufflingUtils.stringsFromKey(endKey);
 
-		      String litMax = getLitMax(posOnAxis);
-			  String bigMin = getBigMin(posOnAxis);
+                  String litMax = getLitMax(lit[axis], posOnAxis);
+                  String bigMin = getBigMin(big[axis], posOnAxis);
 
-			  String[] litStart = lit.clone();
-			  String[] litEnd = big.clone();
-			  litEnd[axis] = litMax;
-			  DescriptorRangePair lower = new DescriptorRangePair(
-			  		BitShufflingUtils.keyFromStrings(litStart),
-					BitShufflingUtils.keyFromStrings(litEnd));
+                  String[] litStart = lit.clone();
+                  String[] litEnd = big.clone();
+                  litEnd[axis] = litMax;
+                  lower = new DescriptorRangePair(
+                          BitShufflingUtils.keyFromStrings(litStart),
+                          BitShufflingUtils.keyFromStrings(litEnd));
 
-			  String[] bigStart = lit.clone();
-			  bigStart[axis] = bigMin;
-			  String[] bigEnd = big.clone();
-			  DescriptorRangePair upper = new DescriptorRangePair(
-					  BitShufflingUtils.keyFromStrings(bigStart),
-					  BitShufflingUtils.keyFromStrings(bigEnd));
+                  String[] bigStart = lit.clone();
+                  bigStart[axis] = bigMin;
+                  String[] bigEnd = big.clone();
+                  upper = new DescriptorRangePair(
+                          BitShufflingUtils.keyFromStrings(bigStart),
+                          BitShufflingUtils.keyFromStrings(bigEnd));
 
-			  if ((lower.getEnd().getKey().compareTo(lower.getStart().getKey()) > 0)) {
-				  if (result.contains(pair)) {
-					  result.remove(pair);
-				  }
-				  result.add(lower);
-				  getRangesForDescRange(lower, result);
-			  }
-			  if (upper.getEnd().getKey().compareTo(upper.getEnd().getKey()) > 0) {
-				  if (result.contains(pair)) {
-					  result.remove(pair);
-				  }
-			      result.add(upper);
-				  getRangesForDescRange(upper, result);
-			  }
-		  }
-	  }
-	  if (result.size() == 0) {
-	      List<DescriptorRangePair> res = new ArrayList<>();
-	      res.add(pair);
-	      return res;
-	  } else {
-	      return result;
-	  }
+                  if (substringMaxMatch(lower.getStart().getKey(), lower.getEnd().getKey())) {
+                      result.add(range);
+                  } else {
+                      queue.add(lower);
+                  }
+                  if (substringMaxMatch(upper.getStart().getKey(), upper.getEnd().getKey())) {
+                      result.add(range);
+                  } else {
+                      queue.add(upper);
+                  }
+
+                  break;
+              }
+          }
+
+      }
+      return result;
   }
 
-  private static String getBigMin(int pos) {
+  private static boolean substringMaxMatch(String start, String end) {
+      int i;
+      for (i = 0; i < 80; i++) {
+          if (start.charAt(i) != end.charAt(i)) {
+              break;
+          }
+      }
+      return (i > 64);
+  }
+
+  private static String getLitMax(String lit, int pos) {
       StringBuilder res = new StringBuilder();
-	  for (int i = 0; i < 32 ; i++) {
-		  if (i <= pos) res.append("0");
+	  for (int i = 0; i < 16; i++) {
+		  if (i < pos) res.append(lit.charAt(i));
+		  else if (i == pos) res.append("0");
 		  else res.append("1");
 	  }
 	  return res.toString();
   }
 
-  private static String getLitMax(int pos) {
+  private static String getBigMin(String big, int pos) {
 	  StringBuilder res = new StringBuilder();
-	  for (int i = 0; i < 32 ; i++) {
-		  if (i <= pos) res.append("1");
+	  for (int i = 0; i < 16; i++) {
+		  if (i < pos) res.append(big.charAt(i));
+		  else if (i == pos) res.append("1");
 		  else res.append("0");
 	  }
 	  return res.toString();
