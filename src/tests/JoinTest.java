@@ -153,8 +153,8 @@ class JoinsDriver implements GlobalConst {
 			      1000,500,200,"Clock");
     */
 
-    SystemDefs sysdef = new SystemDefs( dbpath, 1000, NUMBUF, "Clock" , 0);
-    
+    SystemDefs sysdef = new SystemDefs( dbpath, 1000, NUMBUF, "Clock",0 );
+
     // creating the sailors relation
     AttrType [] Stypes = new AttrType[4];
     Stypes[0] = new AttrType (AttrType.attrInteger);

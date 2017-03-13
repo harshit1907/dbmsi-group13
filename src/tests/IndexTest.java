@@ -60,7 +60,7 @@ class IndexDriver extends TestDriver
     
     System.out.println ("\n" + "Running " + testName() + " tests...." + "\n");
     
-    SystemDefs sysdef = new SystemDefs( dbpath, 300, NUMBUF, "Clock", 0 );
+    SystemDefs sysdef = new SystemDefs( dbpath, 300, NUMBUF, "Clock",0 );
 
     // Kill anything that might be hanging around
     String newdbpath;

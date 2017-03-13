@@ -10,7 +10,7 @@ import java.util.*;
  * Created by prakhar on 3/12/17.
  */
 public class TestZIndexUtils {
-//    public static void main(String[] args) {
+    public static void main(String[] args) {
 //        Descriptor desc1 = new Descriptor();
 //        desc1.set(100, 200, 300, 400, 500);
 //
@@ -27,5 +27,5 @@ public class TestZIndexUtils {
 //            System.out.println(Arrays.toString(x.getEnd().getDesc().value));
 //            System.out.println();
 //        });
-//    }
+    }
 }

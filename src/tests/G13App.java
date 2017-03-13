@@ -23,6 +23,8 @@ import heap.InvalidTupleSizeException;
 // batchnodeinsert /home/anjoy92/Documents/dbmsi-group13/src/tests/NodeTestDataI.txt db1
 // batchnodedelete /home/anjoy92/Documents/dbmsi-group13/src/tests/NodeTestDataD.txt db1
 // fullnodescan db1
+// batchedgeinsert /home/anjoy92/Documents/dbmsi-group13/src/tests/EdgeTestData.txt db1
+
 // Mihir
 // batchnodeinsert /Users/mihir/dev/NodeTestData.txt db1
 // batchnodedelete /Users/mihir/dev/NodeTestData2.txt db1

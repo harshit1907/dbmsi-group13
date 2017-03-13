@@ -43,6 +43,8 @@ import heap.InvalidSlotNumberException;
 import heap.InvalidTupleSizeException;
 import heap.InvalidUpdateException;
 import heap.SpaceNotAvailableException;
+import zbtree.*;
+
 
 /**
  * Created by prakhar on 2/18/17.
@@ -445,6 +447,26 @@ public class NodeHeapFile {
 	 * @throws HashEntryNotFoundException 
 	 * @throws InvalidFrameNumberException 
 	 * @throws PageUnpinnedException 
+	 * @throws zbtree.KeyTooLongException 
+	 * @throws zbtree.KeyNotMatchException 
+	 * @throws zbtree.LeafInsertRecException 
+	 * @throws zbtree.IndexInsertRecException 
+	 * @throws zbtree.ConstructPageException 
+	 * @throws zbtree.UnpinPageException 
+	 * @throws zbtree.PinPageException 
+	 * @throws zbtree.NodeNotMatchException 
+	 * @throws zbtree.ConvertException 
+	 * @throws zbtree.DeleteRecException 
+	 * @throws zbtree.IndexSearchException 
+	 * @throws zbtree.IteratorException 
+	 * @throws zbtree.LeafDeleteException 
+	 * @throws zbtree.InsertException 
+	 * @throws DeleteDescException 
+	 * @throws IndexInsertDescException 
+	 * @throws LeafInsertDescException 
+	 * @throws DescriptorNotMatchException 
+	 * @throws zbtree.GetFileEntryException 
+	 * @throws zbtree.AddFileEntryException 
 	 */
 	public NID insertNode(byte[] recPtr)
 			throws InvalidSlotNumberException,
@@ -453,7 +475,7 @@ public class NodeHeapFile {
 			HFException,
 			HFBufMgrException,
 			HFDiskMgrException,
-			IOException, KeyTooLongException, KeyNotMatchException, LeafInsertRecException, IndexInsertRecException, ConstructPageException, UnpinPageException, PinPageException, NodeNotMatchException, ConvertException, DeleteRecException, IndexSearchException, IteratorException, LeafDeleteException, InsertException, GetFileEntryException, AddFileEntryException, PageUnpinnedException, InvalidFrameNumberException, HashEntryNotFoundException, ReplacerException {
+			IOException, KeyTooLongException, KeyNotMatchException, LeafInsertRecException, IndexInsertRecException, ConstructPageException, UnpinPageException, PinPageException, NodeNotMatchException, ConvertException, DeleteRecException, IndexSearchException, IteratorException, LeafDeleteException, InsertException, GetFileEntryException, AddFileEntryException, PageUnpinnedException, InvalidFrameNumberException, HashEntryNotFoundException, ReplacerException, zbtree.KeyTooLongException, zbtree.KeyNotMatchException, zbtree.LeafInsertRecException, zbtree.IndexInsertRecException, zbtree.ConstructPageException, zbtree.UnpinPageException, zbtree.PinPageException, zbtree.NodeNotMatchException, zbtree.ConvertException, zbtree.DeleteRecException, zbtree.IndexSearchException, zbtree.IteratorException, zbtree.LeafDeleteException, zbtree.InsertException, DescriptorNotMatchException, LeafInsertDescException, IndexInsertDescException, DeleteDescException, zbtree.GetFileEntryException, zbtree.AddFileEntryException {
 		int dpinfoLen = 0;
 		int recLen = recPtr.length;
 		boolean found;
@@ -654,6 +676,12 @@ public class NodeHeapFile {
 			SystemDefs.JavabaseDB.btNodeLabel.insert(new StringKey(nn.getLabel()),nid);
 			SystemDefs.JavabaseDB.btNodeLabel.close();
 		}
+		if(SystemDefs.JavabaseDB.ztNodeDesc!=null) { 
+			SystemDefs.JavabaseDB.ztNodeDesc=new ZBTreeFile(SystemDefs.JavabaseDBName+"_ZTreeNodeIndex", AttrType.attrDesc, 180, 1/*delete*/);
+			SystemDefs.JavabaseDB.ztNodeDesc.insert(new DescriptorKey(nn.getDesc()),nid);
+			SystemDefs.JavabaseDB.ztNodeDesc.close();
+		}
+		
 		// TODO
 		//SystemDefs.JavabaseDB.btNodeLabel.insert(new StringKey(nn.getLabel()),nid);
 
@@ -954,6 +982,12 @@ public class NodeHeapFile {
 			SystemDefs.JavabaseDB.btNodeLabel.Delete(new StringKey(SystemDefs.JavabaseDB.nhfile.getNode(nid).getLabel()),nid);
 			SystemDefs.JavabaseDB.btNodeLabel.close();
 		}
+
+        if(SystemDefs.JavabaseDB.ztNodeDesc!=null) { 
+            SystemDefs.JavabaseDB.ztNodeDesc=new ZBTreeFile(SystemDefs.JavabaseDBName+"_ZTreeNodeIndex", AttrType.attrDesc, 180, 1/*delete*/);
+            SystemDefs.JavabaseDB.ztNodeDesc.Delete(new DescriptorKey(SystemDefs.JavabaseDB.nhfile.getNode(nid).getDesc()),nid);
+            SystemDefs.JavabaseDB.ztNodeDesc.close();
+        }
 		
 		boolean status;
 		NHFPage currentDirPage = new NHFPage();

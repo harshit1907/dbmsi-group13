@@ -35,8 +35,8 @@ public boolean runTests () {
 
     System.out.println ("\n" + "Running " + testName() + " tests...." + "\n");
 
-    SystemDefs sysdef = new SystemDefs(dbpath,100,100,"Clock", 0);
-   
+    SystemDefs sysdef = new SystemDefs(dbpath,100,100,"Clock",0);
+
     // Kill anything that might be hanging around
     String newdbpath;
     String newlogpath;

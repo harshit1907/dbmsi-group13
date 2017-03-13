@@ -38,7 +38,7 @@ class BMDriver extends TestDriver implements GlobalConst {
     System.out.print ("\n" + "Running " + testName() + " tests...." + "\n");
     
     try {
-      SystemDefs sysdef = new SystemDefs( dbpath, NUMBUF+20, NUMBUF, "Clock", 0 );
+      SystemDefs sysdef = new SystemDefs( dbpath, NUMBUF+20, NUMBUF, "Clock",0 );
     }
     
     catch (Exception e) {
