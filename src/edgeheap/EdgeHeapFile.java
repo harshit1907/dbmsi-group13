@@ -1,6 +1,8 @@
 package edgeheap;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import btree.AddFileEntryException;
 import btree.BTreeFile;
@@ -39,8 +41,6 @@ import heap.InvalidSlotNumberException;
 import heap.InvalidTupleSizeException;
 import heap.InvalidUpdateException;
 import heap.SpaceNotAvailableException;
-import nodeheap.NScan;
-import nodeheap.Node;
 
 /**  This heapfile implementation is directory-based. We maintain a
  *  directory of info about the data pages (which are of type HFPage
@@ -650,7 +650,7 @@ public class EdgeHeapFile implements Filetype,  GlobalConst {
 		
 		Edge nn= new Edge();
 		nn.edgeInit(recPtr,0);
-		System.out.println(""+SystemDefs.JavabaseDBName);
+		//System.out.println(""+SystemDefs.JavabaseDBName);
 		
 		if(SystemDefs.JavabaseDB.btEdgeLabel!=null) { 
 			SystemDefs.JavabaseDB.btEdgeLabel = new BTreeFile(SystemDefs.JavabaseDBName+"_BTreeEdgeIndex", AttrType.attrString, 32, 1/*delete*/);
@@ -684,6 +684,7 @@ public class EdgeHeapFile implements Filetype,  GlobalConst {
 	{
 		if(SystemDefs.JavabaseDB.btEdgeLabel!=null) { 
 			SystemDefs.JavabaseDB.btEdgeLabel = new BTreeFile(SystemDefs.JavabaseDBName+"_BTreeEdgeIndex", AttrType.attrString, REC_LEN1, 1/*delete*/);
+			//System.out.println();
 			SystemDefs.JavabaseDB.btEdgeLabel.Delete(new StringKey(SystemDefs.JavabaseDB.ehfile.getEdge(rid).getLabel()),rid);
 			SystemDefs.JavabaseDB.btEdgeLabel.close();
 		}
@@ -1177,6 +1178,64 @@ public class EdgeHeapFile implements Filetype,  GlobalConst {
 
 	}
 
+	public List<EID> getEIDList(NID nid) throws InvalidSlotNumberException, InvalidTupleSizeException, HFException, HFDiskMgrException, HFBufMgrException, Exception {
+		boolean OK = true;
+		boolean FAIL = false;
+		EScan scan = null;
+		boolean status = OK;
+		EID eid = new EID();
+		List<EID> listEid =new ArrayList<EID>();
+		if (status == OK) {
+			try {
+				scan = SystemDefs.JavabaseDB.ehfile.openScan();
+
+			} catch (Exception e) {
+				status = FAIL;
+				System.err.println("*** Error opening scan\n");
+				e.printStackTrace();
+				return listEid;
+			}
+		}
+		if (status == OK) {
+			Edge edge = new Edge();
+			boolean done = false;
+
+			while (!done) {
+				try {
+					edge = scan.getNext(eid);
+					if (edge == null) {
+						done = true;
+					}
+					//System.out.println(nid+"   "+SystemDefs.JavabaseDB.nhfile.getNode(nid));
+
+				} catch (Exception e) {
+					status = FAIL;
+					e.printStackTrace();
+
+				}
+
+				//System.out.println("Deleting this .."+node.getLabel()+" ^^^ "+nodelabel);
+
+				if (!done && status == OK) {
+
+					if (edge.getSource().equals(nid)||edge.getDestination().equals(nid))
+					{
+						 String sLabel = SystemDefs.JavabaseDB.nhfile.getNode(edge.getSource()).getLabel();
+						 String dLabel = SystemDefs.JavabaseDB.nhfile.getNode(edge.getDestination()).getLabel();
+						EID eidCur= SystemDefs.JavabaseDB.ehfile.getEID(edge, sLabel, dLabel);
+						 listEid.add(eidCur);
+								
+					}
+
+						//System.out.print("Deleting this .."+nodelabel);
+					}
+				
+			}
+		}
+		scan.closescan();
+		
+		return listEid;
+	}
 
 
 }// End of HeapFile 

@@ -3,8 +3,10 @@ package tests;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.List;
 
 import diskmgr.PCounter;
+import global.EID;
 import global.NID;
 import global.SystemDefs;
 import heap.HFBufMgrException;
@@ -12,7 +14,6 @@ import heap.HFDiskMgrException;
 import heap.HFException;
 import heap.InvalidSlotNumberException;
 import heap.InvalidTupleSizeException;
-import nodeheap.NScan;
 import nodeheap.Node;
 
 public class BatchNodeDelete {
@@ -30,6 +31,7 @@ public class BatchNodeDelete {
 			br= new BufferedReader(new FileReader(nodefilename));
 			String line = br.readLine();
 			int countA=0,countD=0;
+			int countEdge = 0;
 			while (line != null) {
 				String nodelabel = line;
 				NID nid = new NID();
@@ -40,16 +42,28 @@ public class BatchNodeDelete {
 				Node nd=new Node();
 				nd.setLabel(nodelabel);
 				nid=SystemDefs.JavabaseDB.nhfile.getNID(nd);
+				if(nid!=null)
+				{
+				List<EID> listEid= SystemDefs.JavabaseDB.ehfile.getEIDList(nid);
 				if(nid!=null){
 					try {
+						if(listEid!=null&&!listEid.isEmpty())
+						{
+							for(EID i:listEid)
+							{
+								SystemDefs.JavabaseDB.ehfile.deleteEdge(i);
+								countEdge++;
+							}
+						}
 						SystemDefs.JavabaseDB.nhfile.deleteNode(nid);
+						
 						countD++;
 					} catch (Exception e) {
 						System.err.println("*** Error deleting record " + nd.getLabel() + "\n");
 						e.printStackTrace();
 					}
 				}
-
+				}
 //				if (status == OK) {
 //					try {
 //						scan = SystemDefs.JavabaseDB.nhfile.openScan();
@@ -112,7 +126,7 @@ public class BatchNodeDelete {
 				line=br.readLine();
 			}
 
-			System.out.println("Deleted "+countD+" Nodes. Nodes given in file to delete "+countA);
+			System.out.println("Deleted "+countD+" Nodes. Nodes given in file to delete "+countA+" Deleted Edges: "+countEdge);
 
 		} finally {
 			br.close();

@@ -45,6 +45,7 @@ public class BatchEdgeDelete {
 				Edge nd=new Edge();
 				nd.setLabel(edgeLabel);
 				eid=SystemDefs.JavabaseDB.ehfile.getEID(nd, tokens[0], tokens[1]);
+				
 				if(eid!=null){
 					try {
 						SystemDefs.JavabaseDB.ehfile.deleteEdge(eid);
