@@ -1,9 +1,10 @@
 package tests;
 //originally from : joins.C
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import ZIndex.ZIndexUtils;
 import btree.BTFileScan;
 import btree.BTreeFile;
 import btree.KeyDataEntry;
@@ -11,16 +12,17 @@ import btree.LeafData;
 import btree.StringKey;
 import diskmgr.PCounter;
 import edgeheap.Edge;
-import global.AttrType;
-import global.EID;
-import global.NID;
-import global.RID;
-import global.SystemDefs;
+import global.*;
 import heap.HFBufMgrException;
 import heap.HFDiskMgrException;
 import heap.HFException;
 import heap.InvalidSlotNumberException;
+import nodeheap.NScan;
 import nodeheap.Node;
+import zbtree.DescriptorDataEntry;
+import zbtree.DescriptorKey;
+import zbtree.ZBTFileScan;
+import zbtree.ZBTreeFile;
 
 public class NodeQuery
 {
@@ -110,8 +112,7 @@ public class NodeQuery
 					status = FAIL;
 					e.printStackTrace();
 				}
-				
-				
+
 //				
 //				System.out.println("*******************************************************************\n\n\n");
 //				
@@ -184,10 +185,151 @@ public class NodeQuery
 			System.out.println("query will print the node data in increasing alphanumerical order of labels");
 			break;
 		case 2:
-			System.out.println(" query will print the node data in increasing order of distance from a given 5D target descriptor");
+			System.out.println(" query will print the node data in increasing order of distance from a given " +
+					"5D target descriptor");
+			Descriptor userDesc  = new Descriptor();
+			String[] tokens = queryOptions.split(" ");
+			userDesc.set(
+					Integer.parseInt(tokens[0]),
+					Integer.parseInt(tokens[1]),
+					Integer.parseInt(tokens[2]),
+					Integer.parseInt(tokens[3]),
+					Integer.parseInt(tokens[4])
+			);
+			int distance = Integer.parseInt(tokens[5]);
+			if (index == 1) {
+				boolean status = OK;
+				SystemDefs.JavabaseDB.ztNodeDesc = new ZBTreeFile(SystemDefs.JavabaseDBName + "_ZTreeNodeIndex",
+						AttrType.attrString, 180, 1/*delete*/);
+
+				// start index scan
+				ZBTFileScan izscan = null;
+
+			} else if (index == 0) {
+
+			}
 			break;
 		case 3:
 			System.out.println("then the query will take a target descriptor and a distance and return the labels of nodes with the given distance from the target descripto");
+			userDesc  = new Descriptor();
+			tokens = queryOptions.split(" ");
+			userDesc.set(
+			        Integer.parseInt(tokens[0]),
+					Integer.parseInt(tokens[1]),
+					Integer.parseInt(tokens[2]),
+					Integer.parseInt(tokens[3]),
+					Integer.parseInt(tokens[4])
+			);
+
+			distance = Integer.parseInt(tokens[5]);
+
+			if (index == 1) {
+				boolean status = OK;
+				SystemDefs.JavabaseDB.ztNodeDesc = new ZBTreeFile(SystemDefs.JavabaseDBName+"_ZTreeNodeIndex",
+						AttrType.attrString, 180, 1/*delete*/);
+
+				// start index scan
+				ZBTFileScan izscan = null;
+				Set<DescriptorRangePair> pairs = ZIndexUtils.getRangesForDescRange(
+						ZIndexUtils.getDiagonalDescFromDistance(new DescriptorKey(userDesc), distance));
+
+				boolean flag = true;
+				for (DescriptorRangePair pair: pairs) {
+					try {
+						izscan = SystemDefs.JavabaseDB.ztNodeDesc.new_scan(pair.getStart(), pair.getEnd());
+					} catch (Exception e) {
+						status = FAIL;
+						e.printStackTrace();
+					}
+
+					DescriptorDataEntry tz = null;
+					try {
+						tz = izscan.get_next();
+					} catch (Exception e) {
+						status = FAIL;
+						e.printStackTrace();
+					}
+					flag = true;
+					while (tz != null && izscan != null) {
+						try {
+							tz = izscan.get_next();
+						} catch (Exception e) {
+							status = FAIL;
+							e.printStackTrace();
+						}
+
+						try {
+							if (tz == null) break;
+							DescriptorKey k = (DescriptorKey) tz.key;
+
+							zbtree.LeafData l = (zbtree.LeafData) tz.data;
+							NID nid = l.getData();
+							Node node = SystemDefs.JavabaseDB.nhfile.getNode(nid);
+							System.out.println("Key: " + k.getKey() + " Label: " +
+									node.getLabel() + " -- Descripotr: " + Arrays.toString(node.getDesc().value));
+						} catch (Exception e) {
+							status = FAIL;
+							e.printStackTrace();
+						}
+					}
+				}
+
+				if (flag && status) {
+					System.out.println("Test3 -- OK");
+				}
+
+				// clean up
+				try {
+					//iscan.close();
+					SystemDefs.JavabaseDB.ztNodeDesc.close();
+				}
+				catch (Exception e) {
+					status = FAIL;
+					e.printStackTrace();
+				}
+
+			} else if (index == 0) {
+				NScan scan = null;
+				boolean status = OK;
+				if ( status == OK ) {
+					System.out.println ("  - Take a target Desc and dist and return labels of nodes within distance\n");
+
+					try {
+						scan = SystemDefs.JavabaseDB.nhfile.openScan();
+					} catch (Exception e) {
+						status = FAIL;
+						System.err.println ("*** Error opening scan\n");
+						e.printStackTrace();
+					}
+
+					if ( status == OK &&  SystemDefs.JavabaseBM.getNumUnpinnedBuffers()
+							== SystemDefs.JavabaseBM.getNumBuffers() ) {
+						System.err.println ("*** The heap-file scan has not pinned the first page\n");
+						status = FAIL;
+					}
+				}
+				NID nidTmp = new NID();
+
+				if ( status == OK ) {
+					Node node = null;
+
+					boolean done = false;
+					while (!done) {
+						node = scan.getNext(nidTmp);
+						if (node == null) {
+							done = true;
+							break;
+						}
+
+						if (userDesc.distance(node.getDesc())<distance) {
+							System.out.print("Label: " + node.getLabel());
+							System.out.println(" Descriptor: " + node.getDesc().getString());
+						}
+					}
+
+				}
+				scan.closescan();
+			}
 			break;
 		case 4:
 			System.out.println("query will take a label and return all relevant information (including outgoing and incoming edges) about the node with the matching labe");

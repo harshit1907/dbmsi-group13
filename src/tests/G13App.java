@@ -41,6 +41,12 @@ import heap.InvalidTupleSizeException;
 //batchnodedelete /Users/mihir/dev/NodeTestData2.txt db1
 //batchedgeinsert /Users/mihir/dev/EdgeTestData.txt db1
 //batchedgedelete /Users/mihir/dev/EdgeTestData2.txt db1
+
+//Prakhar
+//batchnodeinsert /home/prakhar/Documents/minjava/javaminibase/NodeTestData.txt db1
+//batchnodedelete /home/prakhar/Documents/minjava/javaminibase/NodeTestData2.txt db1
+//batchedgeinsert /home/prakhar/Documents/minjava/javaminibase/EdgeTestData.txt db1
+//batchedgedelete /home/prakhar/Documents/minjava/javaminibase/EdgeTestData2.txt db1
 public class G13App {
 	   public static void main(String[] agrs) throws InvalidSlotNumberException, InvalidTupleSizeException, HFException, HFDiskMgrException, HFBufMgrException, IOException, Exception {
 		   	//String graphdbname=args[0];
