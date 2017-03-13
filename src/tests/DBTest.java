@@ -85,7 +85,7 @@ class DBDriver extends TestDriver implements GlobalConst {
   
   protected boolean test1 () {
 
-    SystemDefs sysdef = new SystemDefs( dbpath, 8193,  100, "Clock" );
+    SystemDefs sysdef = new SystemDefs( dbpath, 8193,  100, "Clock",0 );
 
     System.out.print("\n  Test 1 creates a new database and does " + 
 		       "some tests of normal operations:\n");

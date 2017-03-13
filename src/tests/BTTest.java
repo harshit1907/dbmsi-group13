@@ -34,7 +34,7 @@ class BTDriver  implements GlobalConst
     logpath = "BTREE" + random.nextInt() + ".minibase-log"; 
     
     
-    SystemDefs sysdef = new SystemDefs( dbpath, 5000 ,5000,"Clock");  
+    SystemDefs sysdef = new SystemDefs( dbpath, 5000 ,5000,"Clock",0);  
     System.out.println ("\n" + "Running " + " tests...." + "\n");
     
     keyType=AttrType.attrInteger;

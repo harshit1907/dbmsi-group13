@@ -22,12 +22,13 @@ import global.RID;
 import global.SystemDefs;
 import heap.InvalidTupleSizeException;
 import nodeheap.Node;
+import zbtree.*;
 
 public class NodeQuery
 {
 	  public final static boolean OK   = true; 
 	  public final static boolean FAIL = false;
-	public void nodeQuery(String graphDBName,int numBuf,int qType,int index,int queryOptions) throws InvalidTupleSizeException, IOException, HashOperationException, PageUnpinnedException, PagePinnedException, PageNotFoundException, BufMgrException, GetFileEntryException, ConstructPageException, AddFileEntryException
+	public void nodeQuery(String graphDBName,int numBuf,int qType,int index,int queryOptions) throws InvalidTupleSizeException, IOException, HashOperationException, PageUnpinnedException, PagePinnedException, PageNotFoundException, BufMgrException, GetFileEntryException, ConstructPageException, AddFileEntryException, zbtree.GetFileEntryException, zbtree.ConstructPageException, zbtree.AddFileEntryException
 	{
 		
 		switch(qType)
@@ -96,8 +97,6 @@ public class NodeQuery
 						status = FAIL;
 						e.printStackTrace();
 					}
-
-					
 				}
 
 				if (flag && status) {
@@ -113,6 +112,74 @@ public class NodeQuery
 					status = FAIL;
 					e.printStackTrace();
 				}
+				
+				
+//				
+//				System.out.println("*******************************************************************\n\n\n");
+//				
+//				status = OK;
+//				SystemDefs.JavabaseDB.ztNodeDesc = new ZBTreeFile(SystemDefs.JavabaseDBName+"_ZTreeNodeIndex", AttrType.attrString, 180, 1/*delete*/);
+//				
+//				// start index scan
+//				ZBTFileScan izscan = null;
+//				try {
+//					izscan = SystemDefs.JavabaseDB.ztNodeDesc.new_scan(null, null);
+//				}
+//				catch (Exception e) {
+//					status = FAIL;
+//					e.printStackTrace();
+//				}
+//
+//				DescriptorDataEntry tz=null;
+//				try {
+//					tz = izscan.get_next();
+//				}
+//				catch (Exception e) {
+//					status = FAIL;
+//					e.printStackTrace();
+//				}
+//				flag = true;
+//				//System.out.println(t+""+iscan);
+//				while (tz != null && izscan!=null) {
+//			//System.out.println("hii");
+//					try {
+//						tz = izscan.get_next();
+//					}
+//					catch (Exception e) {
+//						status = FAIL;
+//						e.printStackTrace();
+//					}
+//					
+//					try {
+//						if(tz==null) break;
+//						DescriptorKey k = (DescriptorKey)tz.key;
+//						
+//						zbtree.LeafData l = (zbtree.LeafData)tz.data;
+//						NID nid =  l.getData();
+//						Node node = SystemDefs.JavabaseDB.nhfile.getNode(nid);
+//						System.out.println("Key: "+k.getKey()+" Label: "+node.getLabel()+" -- Descripotr: "+node.getDesc().value[0]+" "+node.getDesc().value[1]+" "+node.getDesc().value[2]+" "+node.getDesc().value[3]+" "+node.getDesc().value[4]);
+//					}
+//					catch (Exception e) {
+//						status = FAIL;
+//						e.printStackTrace();
+//					}
+//				}
+//
+//				if (flag && status) {
+//					System.out.println("Test1 -- Index Scan OK");
+//				}
+//
+//				// clean up
+//				try {
+//					//iscan.close();
+//					SystemDefs.JavabaseDB.ztNodeDesc.close();
+//				}
+//				catch (Exception e) {
+//					status = FAIL;
+//					e.printStackTrace();
+//				}
+				
+				
 			}
 			break;
 		case 1:

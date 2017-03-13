@@ -20,18 +20,18 @@ public class ExtendedSystemDefs extends SystemDefs {
   
   public ExtendedSystemDefs( String dbname, int dbpages,
 			     int bufpoolsize,
-			     String replacement_policy)
+			     String replacement_policy,int type)
     {
-      super(dbname, dbpages, bufpoolsize, replacement_policy);	
+      super(dbname, dbpages, bufpoolsize, replacement_policy,type);	
       init(dbpages); 
     }
   
   public ExtendedSystemDefs(String dbname, String logname,
 		     int dbpages, int maxlogsize,
 		     int bufpoolsize ,
-		     String replacement_policy )
+		     String replacement_policy,int type )
     {
-      super(dbname, dbpages, bufpoolsize, replacement_policy);
+      super(dbname, dbpages, bufpoolsize, replacement_policy,type);
       init(dbpages);
     }
    
