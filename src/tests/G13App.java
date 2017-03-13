@@ -111,7 +111,7 @@ public class G13App {
 				   			graphdbname = DBName;
 				   		}
 				   		//System.out.println("Whuy!!");
-				   	new EdgeQuery().edgeQuery(graphdbname, 40,2,1,"10 20");//put space sep lowerbound and upper bound
+				   	new EdgeQuery().edgeQuery(graphdbname, 40,6,1,"10 20");//put space sep lowerbound and upper bound
 				   //	System.out.println("Whuy!!--");
 			   	} else if (operation.equalsIgnoreCase("batchedgedelete")) {
 			   		if(graphdbname==null) {

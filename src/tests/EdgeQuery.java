@@ -27,11 +27,13 @@ import edgeheap.EScan;
 import edgeheap.Edge;
 import global.AttrType;
 import global.EID;
+import global.NID;
 import global.RID;
 import global.SystemDefs;
 import heap.HFBufMgrException;
 import heap.HFDiskMgrException;
 import heap.HFException;
+import nodeheap.NScan;
 import nodeheap.Node;
 
 public class EdgeQuery
@@ -535,6 +537,176 @@ public class EdgeQuery
 				break;
 			case 6:
 				System.out.println(" query will return pairs of incident graph edges");
+				if(index==0) {
+					if(SystemDefs.JavabaseDB!=null) 
+						SystemDefs.JavabaseBM.flushAllPages();
+					SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
+					SystemDefs.JavabaseBM.flushAllPages();
+					
+					NScan scan = null;
+					boolean status = OK;
+
+					if ( status == OK ) {	
+					
+						try {
+							scan = SystemDefs.JavabaseDB.nhfile.openScan();
+						}
+						catch (Exception e) {
+							status = FAIL;
+							System.err.println ("*** Error opening scan\n");
+							e.printStackTrace();
+						}
+
+						if ( status == OK &&  SystemDefs.JavabaseBM.getNumUnpinnedBuffers() 
+								== SystemDefs.JavabaseBM.getNumBuffers() ) {
+							System.err.println ("*** The heap-file scan has not pinned the first page\n");
+							status = FAIL;
+						}
+					}
+					NID nidTmp = new NID();
+
+					if ( status == OK ) {
+						Node node = null;
+
+						boolean done = false;
+						while (!done) { 
+							node = scan.getNext(nidTmp);
+							if (node == null) {
+								done = true;
+								break;
+							}
+							NID nid =SystemDefs.JavabaseDB.nhfile.getNID(node);
+							List<EID> eidList = SystemDefs.JavabaseDB.ehfile.getEIDList(nid);
+							List<Edge> listSource= new ArrayList<Edge>();
+							List<Edge> listDes= new ArrayList<Edge>();
+							if(eidList!=null&&eidList.size()>1)
+							{
+							for(EID i:eidList)
+							{
+								Edge curEdge = SystemDefs.JavabaseDB.ehfile.getEdge(i);
+								NID nidSource =curEdge.getSource();
+								NID nidDes = curEdge.getDestination();
+								String nodeSource =  SystemDefs.JavabaseDB.nhfile.getNode(nidSource).getLabel();
+								String nodeDes =  SystemDefs.JavabaseDB.nhfile.getNode(nidDes).getLabel();
+								if(nodeSource.equalsIgnoreCase(node.getLabel()))   listSource.add(curEdge);
+								if(nodeDes.equalsIgnoreCase(node.getLabel()))   listDes.add(curEdge);
+							}
+							System.out.println("Node Label: "+node.getLabel());
+							if(listSource.size()>1&&listDes.size()>1)
+							{
+							for(Edge e:listSource)
+							{
+								for(Edge j:listDes)
+								{
+									System.out.println("Incident Pair: ["+e.getLabel()+" , "+j.getLabel()+" ]");
+								}
+							}
+							}
+							else
+								System.out.println("No incident pairs!!");
+							}
+						}
+
+					}
+					scan.closescan();
+				} 
+				else {
+				
+				if(SystemDefs.JavabaseDB!=null) 
+					SystemDefs.JavabaseBM.flushAllPages();
+				SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
+				//SystemDefs.JavabaseBM.flushAllPages();
+				
+				boolean status = OK;
+				SystemDefs.JavabaseDB.btNodeLabel = new BTreeFile(SystemDefs.JavabaseDBName+"_BTreeNodeIndex", AttrType.attrString, 32, 1/*delete*/);
+				
+				// start index scan
+				BTFileScan iscan = null;
+				try {
+					iscan = SystemDefs.JavabaseDB.btNodeLabel.new_scan(null, null);
+				}
+				catch (Exception e) {
+					status = FAIL;
+					e.printStackTrace();
+				}
+
+				KeyDataEntry t=null;
+				try {
+					t = iscan.get_next();
+				}
+				catch (Exception e) {
+					status = FAIL;
+					e.printStackTrace();
+				}
+				boolean flag = true;
+				//System.out.println(t+""+iscan);
+				while (t != null && iscan!=null) {
+			//System.out.println("hii");
+					try {
+						t = iscan.get_next();
+					}
+					catch (Exception e) {
+						status = FAIL;
+						e.printStackTrace();
+					}
+					
+					try {
+						if(t==null) break;
+						StringKey k = (StringKey)t.key;
+						
+						LeafData l = (LeafData)t.data;
+						RID rid =  l.getData();
+						NID nid = new NID(rid.pageNo, rid.slotNo);
+						Node node = SystemDefs.JavabaseDB.nhfile.getNode(nid);
+						
+						List<EID> eidList = SystemDefs.JavabaseDB.ehfile.getEIDList(nid);
+						List<Edge> listSource= new ArrayList<Edge>();
+						List<Edge> listDes= new ArrayList<Edge>();
+						if(eidList!=null&&eidList.size()>1)
+						{
+						for(EID i:eidList)
+						{
+							Edge curEdge = SystemDefs.JavabaseDB.ehfile.getEdge(i);
+							NID nidSource =curEdge.getSource();
+							NID nidDes = curEdge.getDestination();
+							String nodeSource =  SystemDefs.JavabaseDB.nhfile.getNode(nidSource).getLabel();
+							String nodeDes =  SystemDefs.JavabaseDB.nhfile.getNode(nidDes).getLabel();
+							if(nodeSource.equalsIgnoreCase(node.getLabel()))   listSource.add(curEdge);
+							if(nodeDes.equalsIgnoreCase(node.getLabel()))   listDes.add(curEdge);
+						}
+						System.out.println("Node Label: "+node.getLabel());
+						if(listSource.size()>1&&listDes.size()>1)
+						{
+						for(Edge e:listSource)
+						{
+							for(Edge j:listDes)
+							{
+								System.out.println("Incident Pair: ["+e.getLabel()+" , "+j.getLabel()+" ]");
+							}
+						}
+						}
+						else
+							System.out.println("No incident pairs!!");
+						}
+					}
+					catch (Exception e) {
+						status = FAIL;
+						e.printStackTrace();
+					}
+				}
+
+		
+				// clean up
+				try {
+					//iscan.close();
+					SystemDefs.JavabaseDB.btNodeLabel.close();
+				}
+				catch (Exception e) {
+					status = FAIL;
+					e.printStackTrace();
+				}
+				}
+
 				break;
 			default:
 				System.out.println("invalid option");
