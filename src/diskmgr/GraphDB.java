@@ -52,11 +52,11 @@ public class GraphDB implements GlobalConst {
 
     public NodeHeapFile nhfile ;
     public EdgeHeapFile ehfile ;
+    
     public BTreeFile btNodeLabel;
     public BTreeFile btEdgeLabel;
     public BTreeFile btEdgeWeight;
     public ZBTreeFile ztNodeDesc;
-    public ZBTreeFile ztEdgeDesc;
     public int type;
     public GraphDB(int type){
         PCounter.initialize();
@@ -235,6 +235,9 @@ public class GraphDB implements GlobalConst {
             btEdgeLabel.close();
             ztNodeDesc=new ZBTreeFile(name+"_ZTreeNodeIndex", AttrType.attrDesc, 180, 1/*delete*/);
             ztNodeDesc.close();
+            btEdgeWeight = new BTreeFile(name+"_BTreeEdgeWeightIndex", AttrType.attrInteger, 8, 1/*delete*/); 
+            btEdgeWeight.close();
+            
             //System.out.println("Hiii");
             break;
         }

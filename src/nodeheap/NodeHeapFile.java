@@ -982,6 +982,12 @@ public class NodeHeapFile {
 			SystemDefs.JavabaseDB.btNodeLabel.Delete(new StringKey(SystemDefs.JavabaseDB.nhfile.getNode(nid).getLabel()),nid);
 			SystemDefs.JavabaseDB.btNodeLabel.close();
 		}
+
+        if(SystemDefs.JavabaseDB.ztNodeDesc!=null) { 
+            SystemDefs.JavabaseDB.ztNodeDesc=new ZBTreeFile(SystemDefs.JavabaseDBName+"_ZTreeNodeIndex", AttrType.attrDesc, 180, 1/*delete*/);
+            SystemDefs.JavabaseDB.ztNodeDesc.Delete(new DescriptorKey(SystemDefs.JavabaseDB.nhfile.getNode(nid).getDesc()),nid);
+            SystemDefs.JavabaseDB.ztNodeDesc.close();
+        }
 		
 		boolean status;
 		NHFPage currentDirPage = new NHFPage();

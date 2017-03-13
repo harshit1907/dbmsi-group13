@@ -2,8 +2,11 @@ package tests;
 //originally from : joins.C
 
 
+import com.sun.corba.se.impl.ior.NewObjectKeyTemplateBase;
+
 import btree.BTFileScan;
 import btree.BTreeFile;
+import btree.KeyClass;
 import btree.KeyDataEntry;
 import btree.LeafData;
 import btree.StringKey;
@@ -37,75 +40,7 @@ public class EdgeQuery
 				new FullScanEdge().fullScanEdge(graphDBName);
 			} 
 			else {
-				
-				if(SystemDefs.JavabaseDB!=null) 
-					SystemDefs.JavabaseBM.flushAllPages();
-				SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
-				//SystemDefs.JavabaseBM.flushAllPages();
-				
-				boolean status = OK;
-				// start index scan
-				BTFileScan iscan = null;
-				 SystemDefs.JavabaseDB.btEdgeLabel = new BTreeFile(SystemDefs.JavabaseDBName+"_BTreeEdgeIndex", AttrType.attrString, 32, 1/*delete*/);
-					
-				try {
-					System.out.println(SystemDefs.JavabaseDB.btEdgeLabel);
-					iscan = SystemDefs.JavabaseDB.btEdgeLabel.new_scan(null, null);
-					
-				}
-				catch (Exception e) {
-					status = FAIL;
-					e.printStackTrace();
-				}
-
-				KeyDataEntry t=null;
-				try {
-					t = iscan.get_next();
-				}
-				catch (Exception e) {
-					status = FAIL;
-					e.printStackTrace();
-				}
-				boolean flag = true;
-				while (t != null && iscan!=null) {
-					try {
-						t = iscan.get_next();
-					}
-					catch (Exception e) {
-						status = FAIL;
-						e.printStackTrace();
-					}
-					
-					try {
-						if(t==null) break;
-						StringKey k = (StringKey)t.key;
-						LeafData l = (LeafData)t.data;
-						RID rid =  l.getData();
-						EID eid = new EID(rid.pageNo, rid.slotNo);
-						Edge edge = SystemDefs.JavabaseDB.ehfile.getEdge(eid);
-						System.out.println("Label: "+edge.getLabel()+" -- Weight: "+edge.getWeight());
-					}
-					catch (Exception e) {
-						status = FAIL;
-						e.printStackTrace();
-					}
-
-				}
-
-				if (flag && status) {
-					System.out.println("Test1 -- Index Scan OK");
-				}
-
-				// clean up
-				try {
-					//iscan.close();
-					SystemDefs.JavabaseDB.btEdgeLabel.close();
-				}
-				catch (Exception e) {
-					status = FAIL;
-					e.printStackTrace();
-				}
-			}
+						}
 			break;
 				
 			case 1:
@@ -115,9 +50,170 @@ public class EdgeQuery
 				System.out.println(" query will print the edge data in increasing alphanumerical order of destination labels");
 			    break;
 			case 3:
+			    if(index==0) {
+	                if(SystemDefs.JavabaseDB!=null) 
+	                    SystemDefs.JavabaseBM.flushAllPages();
+	                SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
+	                SystemDefs.JavabaseBM.flushAllPages();
+	                
+	                new FullScanEdge().fullScanEdge(graphDBName);
+	            } 
+	            else {
+	                
+	                if(SystemDefs.JavabaseDB!=null) 
+	                    SystemDefs.JavabaseBM.flushAllPages();
+	                SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
+	                //SystemDefs.JavabaseBM.flushAllPages();
+	                
+	                boolean status = OK;
+	                // start index scan
+	                BTFileScan iscan = null;
+	                 SystemDefs.JavabaseDB.btEdgeLabel = new BTreeFile(SystemDefs.JavabaseDBName+"_BTreeEdgeIndex", AttrType.attrString, 32, 1/*delete*/);
+	                    
+	                try {
+	                    System.out.println(SystemDefs.JavabaseDB.btEdgeLabel);
+	                    
+	                    iscan = SystemDefs.JavabaseDB.btEdgeLabel.new_scan(null, null);
+	                    
+	                }
+	                catch (Exception e) {
+	                    status = FAIL;
+	                    e.printStackTrace();
+	                }
+
+	                KeyDataEntry t=null;
+	                try {
+	                    t = iscan.get_next();
+	                }
+	                catch (Exception e) {
+	                    status = FAIL;
+	                    e.printStackTrace();
+	                }
+	                boolean flag = true;
+	                while (t != null && iscan!=null) {
+	                    try {
+	                        t = iscan.get_next();
+	                    }
+	                    catch (Exception e) {
+	                        status = FAIL;
+	                        e.printStackTrace();
+	                    }
+	                    
+	                    try {
+	                        if(t==null) break;
+	                        StringKey k = (StringKey)t.key;
+	                        LeafData l = (LeafData)t.data;
+	                        RID rid =  l.getData();
+	                        EID eid = new EID(rid.pageNo, rid.slotNo);
+	                        Edge edge = SystemDefs.JavabaseDB.ehfile.getEdge(eid);
+	                        System.out.println("Label: "+edge.getLabel()+" -- Weight: "+edge.getWeight());
+	                    }
+	                    catch (Exception e) {
+	                        status = FAIL;
+	                        e.printStackTrace();
+	                    }
+
+	                }
+
+	                if (flag && status) {
+	                    System.out.println("Test1 -- Index Scan OK");
+	                }
+
+	                // clean up
+	                try {
+	                    //iscan.close();
+	                    SystemDefs.JavabaseDB.btEdgeLabel.close();
+	                }
+	                catch (Exception e) {
+	                    status = FAIL;
+	                    e.printStackTrace();
+	                }
+	            }
+
 				 System.out.println("query will print the edge data in increasing alphanumerical order of edge labels.");
 			     break;
 			case 4:
+	             if(index==0) {
+	                    if(SystemDefs.JavabaseDB!=null) 
+	                        SystemDefs.JavabaseBM.flushAllPages();
+	                    SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
+	                    SystemDefs.JavabaseBM.flushAllPages();
+	                    
+	                    new FullScanEdge().fullScanEdge(graphDBName);
+	                } 
+	                else {
+	                    
+	                    if(SystemDefs.JavabaseDB!=null) 
+	                        SystemDefs.JavabaseBM.flushAllPages();
+	                    SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
+	                    //SystemDefs.JavabaseBM.flushAllPages();
+	                    
+	                    boolean status = OK;
+	                    // start index scan
+	                    BTFileScan iscan = null;
+	                     SystemDefs.JavabaseDB.btEdgeWeight = new BTreeFile(SystemDefs.JavabaseDBName+"_BTreeEdgeIndex", AttrType.attrString, 32, 1/*delete*/);
+	                        
+	                    try {
+	                        System.out.println(SystemDefs.JavabaseDB.btEdgeWeight);
+	                        
+	                        iscan = SystemDefs.JavabaseDB.btEdgeWeight.new_scan(null, null);
+	                        
+	                    }
+	                    catch (Exception e) {
+	                        status = FAIL;
+	                        e.printStackTrace();
+	                    }
+
+	                    KeyDataEntry t=null;
+	                    try {
+	                        t = iscan.get_next();
+	                    }
+	                    catch (Exception e) {
+	                        status = FAIL;
+	                        e.printStackTrace();
+	                    }
+	                    boolean flag = true;
+	                    while (t != null && iscan!=null) {
+	                        try {
+	                            t = iscan.get_next();
+	                        }
+	                        catch (Exception e) {
+	                            status = FAIL;
+	                            e.printStackTrace();
+	                        }
+	                        
+	                        try {
+	                            if(t==null) break;
+	                            StringKey k = (StringKey)t.key;
+	                            LeafData l = (LeafData)t.data;
+	                            RID rid =  l.getData();
+	                            EID eid = new EID(rid.pageNo, rid.slotNo);
+	                            Edge edge = SystemDefs.JavabaseDB.ehfile.getEdge(eid);
+	                            System.out.println("Label: "+edge.getLabel()+" -- Weight: "+edge.getWeight());
+	                        }
+	                        catch (Exception e) {
+	                            status = FAIL;
+	                            e.printStackTrace();
+	                        }
+
+	                    }
+
+	                    if (flag && status) {
+	                        System.out.println("Test1 -- Index Scan OK");
+	                    }
+
+	                    // clean up
+	                    try {
+	                        //iscan.close();
+	                        SystemDefs.JavabaseDB.btEdgeWeight.close();
+	                    }
+	                    catch (Exception e) {
+	                        status = FAIL;
+	                        e.printStackTrace();
+	                    }
+	                }
+
+			    
 				 System.out.println("query will print the edge data in increasing order of weights");
 			     break;
 			case 5:

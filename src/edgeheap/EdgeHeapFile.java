@@ -13,6 +13,7 @@ import btree.GetFileEntryException;
 import btree.IndexInsertRecException;
 import btree.IndexSearchException;
 import btree.InsertException;
+import btree.IntegerKey;
 import btree.IteratorException;
 import btree.KeyNotMatchException;
 import btree.KeyTooLongException;
@@ -41,6 +42,8 @@ import heap.InvalidSlotNumberException;
 import heap.InvalidTupleSizeException;
 import heap.InvalidUpdateException;
 import heap.SpaceNotAvailableException;
+import zbtree.DescriptorKey;
+import zbtree.ZBTreeFile;
 
 /**  This heapfile implementation is directory-based. We maintain a
  *  directory of info about the data pages (which are of type HFPage
@@ -657,7 +660,13 @@ public class EdgeHeapFile implements Filetype,  GlobalConst {
 			SystemDefs.JavabaseDB.btEdgeLabel.insert(new StringKey(nn.getLabel()),rid);
 			SystemDefs.JavabaseDB.btEdgeLabel.close();
 		}
-
+		if(SystemDefs.JavabaseDB.btEdgeLabel!=null) { 
+            SystemDefs.JavabaseDB.btEdgeWeight = new BTreeFile(SystemDefs.JavabaseDBName+"_BTreeEdgeWeightIndex", AttrType.attrInteger, 8, 1/*delete*/); 
+            SystemDefs.JavabaseDB.btEdgeWeight.insert(new IntegerKey(nn.getWeight()),rid);
+            SystemDefs.JavabaseDB.btEdgeWeight.close();
+        }
+        
+        
 		return rid;
 
 	}
@@ -688,6 +697,12 @@ public class EdgeHeapFile implements Filetype,  GlobalConst {
 			SystemDefs.JavabaseDB.btEdgeLabel.Delete(new StringKey(SystemDefs.JavabaseDB.ehfile.getEdge(rid).getLabel()),rid);
 			SystemDefs.JavabaseDB.btEdgeLabel.close();
 		}
+		
+		if(SystemDefs.JavabaseDB.btEdgeWeight!=null) { 
+            SystemDefs.JavabaseDB.btEdgeWeight = new BTreeFile(SystemDefs.JavabaseDBName+"_BTreeEdgeWeightIndex", AttrType.attrInteger, 8, 1/*delete*/); 
+            SystemDefs.JavabaseDB.btEdgeWeight.Delete(new IntegerKey(SystemDefs.JavabaseDB.ehfile.getEdge(rid).getWeight()),rid);
+            SystemDefs.JavabaseDB.btEdgeWeight.close();
+        }
 		boolean status;
 		EHFPage currentDirPage = new EHFPage();
 		PageId currentDirPageId = new PageId();
