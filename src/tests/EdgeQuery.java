@@ -3,17 +3,25 @@ package tests;
 
 
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.w3c.dom.ls.LSException;
 
+import btree.AddFileEntryException;
 import btree.BTFileScan;
 import btree.BTreeFile;
+import btree.ConstructPageException;
+import btree.GetFileEntryException;
 import btree.IntegerKey;
 import btree.KeyDataEntry;
 import btree.LeafData;
 import btree.StringKey;
+import bufmgr.BufMgrException;
+import bufmgr.HashOperationException;
+import bufmgr.PageNotFoundException;
+import bufmgr.PagePinnedException;
+import bufmgr.PageUnpinnedException;
 import diskmgr.PCounter;
 import edgeheap.EScan;
 import edgeheap.Edge;
@@ -53,10 +61,177 @@ public class EdgeQuery
 				
 			case 1:
 				System.out.println(" query will print the edge data  in increasing alphanumerical order of source labels.");
-	            break;
+				if(index==0) {
+	                if(SystemDefs.JavabaseDB!=null) 
+	                    SystemDefs.JavabaseBM.flushAllPages();
+	                SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
+	                SystemDefs.JavabaseBM.flushAllPages();
+	                
+	                new FullScanEdge().fullScanEdge(graphDBName);
+	            } 
+	            else {
+	            	String srcFileName = "_BTreeEdgeSourceIndex";
+	                if(SystemDefs.JavabaseDB!=null) 
+	                    SystemDefs.JavabaseBM.flushAllPages();
+	                SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
+	                //SystemDefs.JavabaseBM.flushAllPages();
+	                BTreeFile sourceLabelFile = new BTreeFile(SystemDefs.JavabaseDBName+srcFileName, AttrType.attrString, 32, 1/*delete*/);
+	   	         sourceLabelFile.close();
+	   	        
+	                boolean status = OK;
+	                // start index scan
+	                BTFileScan iscan = null;
+	                 SystemDefs.JavabaseDB.btEdgeLabel = new BTreeFile(SystemDefs.JavabaseDBName+"_BTreeEdgeIndex", AttrType.attrString, 32, 1/*delete*/);
+	                    
+	                try {
+	                    iscan = SystemDefs.JavabaseDB.btEdgeLabel.new_scan(null, null);
+	                    
+	                }
+	                catch (Exception e) {
+	                    status = FAIL;
+	                    e.printStackTrace();
+	                }
+
+	                KeyDataEntry t=null;
+	                try {
+	                    t = iscan.get_next();
+	                }
+	                catch (Exception e) {
+	                    status = FAIL;
+	                    e.printStackTrace();
+	                }
+	               while (t != null && iscan!=null) {
+	                    try {
+	                        t = iscan.get_next();
+	                    }
+	                    catch (Exception e) {
+	                        status = FAIL;
+	                        e.printStackTrace();
+	                    }
+	                    
+	                    try {
+	                        if(t==null) break;
+	                        StringKey k = (StringKey)t.key;
+	                        LeafData l = (LeafData)t.data;
+	                        RID rid =  l.getData();
+	                        EID eid = new EID(rid.pageNo, rid.slotNo);
+	                        Edge edge = SystemDefs.JavabaseDB.ehfile.getEdge(eid);
+	                     		Node src = SystemDefs.JavabaseDB.nhfile.getNode(edge.getSource());
+	                     		if(sourceLabelFile!=null)
+	                     		{
+	                     		sourceLabelFile = new BTreeFile(SystemDefs.JavabaseDBName+srcFileName, AttrType.attrString, 32, 1/*delete*/);
+	    	        			sourceLabelFile.insert(new StringKey(src.getLabel()),eid);
+	    	        			sourceLabelFile.close();
+	                     		}
+	    	         }
+	                    catch (Exception e) {
+	                        status = FAIL;
+	                        e.printStackTrace();
+	                    }
+
+	                }
+
+	                // clean up
+	                try {
+	                    //iscan.close();
+	                    SystemDefs.JavabaseDB.btEdgeLabel.close();
+	                }
+	                catch (Exception e) {
+	                    status = FAIL;
+	                    e.printStackTrace();
+	                }
+	               // System.out.println("Printing all alphanumerical sorted source labels");
+	                new EdgeQuery().printLabelIndex(sourceLabelFile, srcFileName, graphDBName, numBuf);
+	                
+	                 
+	            }
+
+				break;
 			case 2:
 				System.out.println(" query will print the edge data in increasing alphanumerical order of destination labels");
-			    break;
+				if(index==0) {
+	                if(SystemDefs.JavabaseDB!=null) 
+	                    SystemDefs.JavabaseBM.flushAllPages();
+	                SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
+	                SystemDefs.JavabaseBM.flushAllPages();
+	                
+	                new FullScanEdge().fullScanEdge(graphDBName);
+	            } 
+	            else {
+	        		String desFileName = "_BTreeEdgeDestinationIndex";
+    	        	
+	          	
+	                if(SystemDefs.JavabaseDB!=null) 
+	                    SystemDefs.JavabaseBM.flushAllPages();
+	                SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
+	                //SystemDefs.JavabaseBM.flushAllPages();
+	                BTreeFile destinationLabelFile = new BTreeFile(SystemDefs.JavabaseDBName+desFileName, AttrType.attrString, 32, 1/*delete*/);
+	   	 	     destinationLabelFile.close();  	
+	   	                 
+	                boolean status = OK;
+	                // start index scan
+	                BTFileScan iscan = null;
+	                 SystemDefs.JavabaseDB.btEdgeLabel = new BTreeFile(SystemDefs.JavabaseDBName+"_BTreeEdgeIndex", AttrType.attrString, 32, 1/*delete*/);
+	                    
+	                try {
+	                    iscan = SystemDefs.JavabaseDB.btEdgeLabel.new_scan(null, null);
+	                    
+	                }
+	                catch (Exception e) {
+	                    status = FAIL;
+	                    e.printStackTrace();
+	                }
+
+	                KeyDataEntry t=null;
+	                try {
+	                    t = iscan.get_next();
+	                }
+	                catch (Exception e) {
+	                    status = FAIL;
+	                    e.printStackTrace();
+	                }
+	               while (t != null && iscan!=null) {
+	                    try {
+	                        t = iscan.get_next();
+	                    }
+	                    catch (Exception e) {
+	                        status = FAIL;
+	                        e.printStackTrace();
+	                    }
+	                    
+	                    try {
+	                        if(t==null) break;
+	                        LeafData l = (LeafData)t.data;
+	                        RID rid =  l.getData();
+	                        EID eid = new EID(rid.pageNo, rid.slotNo);
+	                        Edge edge = SystemDefs.JavabaseDB.ehfile.getEdge(eid);
+	                     		Node des = SystemDefs.JavabaseDB.nhfile.getNode(edge.getDestination());
+	                     		destinationLabelFile = new BTreeFile(SystemDefs.JavabaseDBName+desFileName, AttrType.attrString, 32, 1/*delete*/);
+	    	        			destinationLabelFile.insert(new StringKey(des.getLabel()),eid);
+	    	        			destinationLabelFile.close();
+	    	         }
+	                    catch (Exception e) {
+	                        status = FAIL;
+	                        e.printStackTrace();
+	                    }
+
+	                }
+
+	                // clean up
+	                try {
+	                    //iscan.close();
+	                    SystemDefs.JavabaseDB.btEdgeLabel.close();
+	                }
+	                catch (Exception e) {
+	                    status = FAIL;
+	                    e.printStackTrace();
+	                }
+	               // System.out.println("Printing all alphanumerical sorted destination labels");
+	                new EdgeQuery().printLabelIndex(destinationLabelFile, desFileName, graphDBName, numBuf);
+	                
+	                 
+	            }
+				break;
 			case 3:
 				 System.out.println("query will print the edge data in increasing alphanumerical order of edge labels.");
 					
@@ -81,8 +256,7 @@ public class EdgeQuery
 	                 SystemDefs.JavabaseDB.btEdgeLabel = new BTreeFile(SystemDefs.JavabaseDBName+"_BTreeEdgeIndex", AttrType.attrString, 32, 1/*delete*/);
 	                    
 	                try {
-	                    System.out.println(SystemDefs.JavabaseDB.btEdgeLabel);
-	                    
+	                   
 	                    iscan = SystemDefs.JavabaseDB.btEdgeLabel.new_scan(null, null);
 	                    
 	                }
@@ -307,7 +481,6 @@ public class EdgeQuery
 	                        status = FAIL;
 	                        e.printStackTrace();
 	                    }
-	                    boolean flag = true;
 	                    while (t != null && iscan!=null) {
 	                        try {
 	                            t = iscan.get_next();
@@ -379,6 +552,74 @@ public class EdgeQuery
 
 
 	}
+	public void printLabelIndex(BTreeFile labelIndexFile, String nameOfFile,String graphDBName,int numBuf) throws GetFileEntryException, ConstructPageException, AddFileEntryException, IOException, HashOperationException, PageUnpinnedException, PagePinnedException, PageNotFoundException, BufMgrException
+	{
+		if(SystemDefs.JavabaseDB!=null) 
+            SystemDefs.JavabaseBM.flushAllPages();
+        SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
+        //SystemDefs.JavabaseBM.flushAllPages();
+        
+        boolean status = OK;
+        // start index scan
+        BTFileScan iscan = null;
+       // System.out.println(SystemDefs.JavabaseDBName+nameOfFile);
+        labelIndexFile = new BTreeFile(SystemDefs.JavabaseDBName+nameOfFile, AttrType.attrString, 32, 1/*delete*/);
+            
+        try {
+             
+            iscan = labelIndexFile.new_scan(null, null);
+            
+        }
+        catch (Exception e) {
+            status = FAIL;
+            e.printStackTrace();
+        }
+
+        KeyDataEntry t=null;
+        try {
+            t = iscan.get_next();
+        }
+        catch (Exception e) {
+            status = FAIL;
+            e.printStackTrace();
+        }
+        while (t != null && iscan!=null) {
+            try {
+                t = iscan.get_next();
+            }
+            catch (Exception e) {
+                status = FAIL;
+                e.printStackTrace();
+            }
+            
+            try {
+                if(t==null) break;
+                StringKey k = (StringKey)t.key;
+                LeafData l = (LeafData)t.data;
+                RID rid =  l.getData();
+                EID eid = new EID(rid.pageNo, rid.slotNo);
+                Edge edge = SystemDefs.JavabaseDB.ehfile.getEdge(eid);
+                System.out.println("Node Label: "+k.getKey()+" Edge Label: "+edge.getLabel()+" -- Weight: "+edge.getWeight());
+            }
+            catch (Exception e) {
+                status = FAIL;
+                e.printStackTrace();
+            }
+
+        }
+
+        // clean up
+        try {
+            //iscan.close();
+           labelIndexFile.close();
+        }
+        catch (Exception e) {
+            status = FAIL;
+            e.printStackTrace();
+        }
+    }
+
+	
 	/*public static void main(String[] args) throws InvalidTupleSizeException, IOException, HashOperationException, PageUnpinnedException, PagePinnedException, PageNotFoundException, BufMgrException
 	{
 		String graphDBName=args[0];

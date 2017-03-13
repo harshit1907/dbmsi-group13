@@ -104,14 +104,14 @@ public class G13App {
 			   		if(graphdbname==null) {
 			   			graphdbname = DBName;
 			   		}
-			   		new NodeQuery().nodeQuery(graphdbname, 40,4,5,"251"); //put label
-			   	} else if (operation.equalsIgnoreCase("edgequery")) {
+			   		new NodeQuery().nodeQuery(graphdbname, 40,4,1,"251"); //put label
+			  	} else if (operation.equalsIgnoreCase("edgequery")) {
 				   		//int numBuf = Integer.parseInt(tokens[3]);
 				   		if(graphdbname==null) {
 				   			graphdbname = DBName;
 				   		}
 				   		//System.out.println("Whuy!!");
-				   	new EdgeQuery().edgeQuery(graphdbname, 40,5,0,"10 20");//put space sep lowerbound and upper bound
+				   	new EdgeQuery().edgeQuery(graphdbname, 40,2,1,"10 20");//put space sep lowerbound and upper bound
 				   //	System.out.println("Whuy!!--");
 			   	} else if (operation.equalsIgnoreCase("batchedgedelete")) {
 			   		if(graphdbname==null) {

@@ -255,17 +255,17 @@ public class ZIndexUtils {
 
   private static boolean substringMaxMatch(String start, String end) {
       int i;
-      for (i = 0; i < 80; i++) {
+      for (i = 0; i < 160; i++) {
           if (start.charAt(i) != end.charAt(i)) {
               break;
           }
       }
-      return (i > 64);
+      return (i > 128);
   }
 
   private static String getLitMax(String lit, int pos) {
       StringBuilder res = new StringBuilder();
-	  for (int i = 0; i < 16; i++) {
+	  for (int i = 0; i < 32; i++) {
 		  if (i < pos) res.append(lit.charAt(i));
 		  else if (i == pos) res.append("0");
 		  else res.append("1");
@@ -275,7 +275,7 @@ public class ZIndexUtils {
 
   private static String getBigMin(String big, int pos) {
 	  StringBuilder res = new StringBuilder();
-	  for (int i = 0; i < 16; i++) {
+	  for (int i = 0; i < 32; i++) {
 		  if (i < pos) res.append(big.charAt(i));
 		  else if (i == pos) res.append("1");
 		  else res.append("0");

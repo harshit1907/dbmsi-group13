@@ -202,7 +202,7 @@ public class NodeQuery
 			System.out.println("then the query will take a target descriptor and a distance and return the labels of nodes with the given distance from the target descripto");
 			break;
 		case 4:
-			System.out.println("query will take a label and return all relevant information (including outgoing and incoming edges) about the node with the matching labe");
+			System.out.println("query will take a label and return all relevant information (including outgoing and incoming edges) about the node with the matching label");
 			List<EID> listEid = new ArrayList<EID>();
 			Node matchNode = null;
 			if(index==0) {
@@ -221,10 +221,10 @@ public class NodeQuery
 				if(SystemDefs.JavabaseDB!=null) 
 					SystemDefs.JavabaseBM.flushAllPages();
 				SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
-				//SystemDefs.JavabaseBM.flushAllPages();
+				SystemDefs.JavabaseBM.flushAllPages();
 				
 				boolean status = OK;
-				SystemDefs.JavabaseDB.btNodeLabel = new BTreeFile(SystemDefs.JavabaseDBName+"_BTreeNodeIndex", AttrType.attrString, 32, 1/*delete*/);
+			SystemDefs.JavabaseDB.btNodeLabel = new BTreeFile(SystemDefs.JavabaseDBName+"_BTreeNodeIndex", AttrType.attrString, 32, 1/*delete*/);
 				
 				// start index scan
 				BTFileScan iscan = null;
@@ -244,10 +244,7 @@ public class NodeQuery
 					status = FAIL;
 					e.printStackTrace();
 				}
-				boolean flag = true;
-				//System.out.println(t+""+iscan);
 				while (t != null && iscan!=null) {
-			//System.out.println("hii");
 					try {
 						t = iscan.get_next();
 					}
@@ -268,7 +265,6 @@ public class NodeQuery
 						{
 							listEid= SystemDefs.JavabaseDB.ehfile.getEIDList(nid);
 							matchNode = node;
-							break;							
 						}
 					
 					}
@@ -277,18 +273,21 @@ public class NodeQuery
 						e.printStackTrace();
 					}
 				}
-
-				// clean up
 				try {
 					//iscan.close();
 					SystemDefs.JavabaseDB.btNodeLabel.close();
 				}
 				catch (Exception e) {
-					status = FAIL;
 					e.printStackTrace();
 				}
+			
+				
 			}
-				if(matchNode!=null&&!listEid.isEmpty())
+
+			// clean up
+			
+
+			if(matchNode!=null&&!listEid.isEmpty())
 				{
 					System.out.println("Match Found: ");
 					System.out.println("Node Label:"+ matchNode.getLabel());
@@ -331,7 +330,6 @@ public class NodeQuery
 				}
 				else 
 					System.out.println("No mactch found!!");
-			
 			break;
 		case 5:
 			System.out.println("query will take a target descriptor and a distance and return all relevant information (including outgoing and incoming edges) about the nodes with the given distance from the target descriptor.");

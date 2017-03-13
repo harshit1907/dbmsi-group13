@@ -677,7 +677,7 @@ public class NodeHeapFile {
 			SystemDefs.JavabaseDB.btNodeLabel.close();
 		}
 		if(SystemDefs.JavabaseDB.ztNodeDesc!=null) { 
-			SystemDefs.JavabaseDB.ztNodeDesc=new ZBTreeFile(SystemDefs.JavabaseDBName+"_ZTreeNodeIndex", AttrType.attrDesc, 180, 1/*delete*/);
+			SystemDefs.JavabaseDB.ztNodeDesc=new ZBTreeFile(SystemDefs.JavabaseDBName+"_ZTreeNodeIndex", AttrType.attrDesc, 180, 1);
 			SystemDefs.JavabaseDB.ztNodeDesc.insert(new DescriptorKey(nn.getDesc()),nid);
 			SystemDefs.JavabaseDB.ztNodeDesc.close();
 		}
@@ -983,12 +983,12 @@ public class NodeHeapFile {
 			SystemDefs.JavabaseDB.btNodeLabel.close();
 		}
 
-        if(SystemDefs.JavabaseDB.ztNodeDesc!=null) { 
-            SystemDefs.JavabaseDB.ztNodeDesc=new ZBTreeFile(SystemDefs.JavabaseDBName+"_ZTreeNodeIndex", AttrType.attrDesc, 180, 1/*delete*/);
+   /*     if(SystemDefs.JavabaseDB.ztNodeDesc!=null) { 
+            SystemDefs.JavabaseDB.ztNodeDesc=new ZBTreeFile(SystemDefs.JavabaseDBName+"_ZTreeNodeIndex", AttrType.attrDesc, 180, 1delete);
             SystemDefs.JavabaseDB.ztNodeDesc.Delete(new DescriptorKey(SystemDefs.JavabaseDB.nhfile.getNode(nid).getDesc()),nid);
             SystemDefs.JavabaseDB.ztNodeDesc.close();
         }
-		
+	*/	
 		boolean status;
 		NHFPage currentDirPage = new NHFPage();
 		PageId currentDirPageId = new PageId();
