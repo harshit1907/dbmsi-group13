@@ -117,7 +117,7 @@ public class Edge extends Tuple{
         return Convert.getIntValue(16, data);
     }
     public NID getSource() throws IOException {
-        return Convert.getNIDValue(24, data);
+        return Convert.getNIDValue(20, data);
     }
     public NID getDestination() throws IOException {
         return Convert.getNIDValue(28, data);
@@ -128,8 +128,7 @@ public class Edge extends Tuple{
     }
 
     public void setSource(NID source) throws IOException {
-
-        Convert.setNIDValue(source,18, data);
+        Convert.setNIDValue(source,20, data);
     }
     public void setLabel(String label) throws IOException {
         Convert.setStrValue(label, 36, data);

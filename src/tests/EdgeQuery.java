@@ -112,7 +112,7 @@ public class EdgeQuery
                 // Sort 
                 Sort sort = null;
                 try {
-                    //sort = new Sort(attrType, (short) 2, attrSize, fscan, 2, order[0], 8, 30);
+                    sort = new Sort(attrType, (short) 6, attrSize, fscan, 2, order[0], 8, 30);
                 }
                 catch (Exception e) {
                     status = FAIL;
@@ -123,7 +123,7 @@ public class EdgeQuery
                 String outval = null;
 
                 try {
-                    t = fscan.get_next();
+                    t = sort.get_next();
                 }
                 catch (Exception e) {
                     status = FAIL;
@@ -135,9 +135,10 @@ public class EdgeQuery
                     try {
                         Edge edge =new Edge();
                         edge.edgeInit(t.getTupleByteArray(), 0);
-                        System.out.print("Edge Label:\t"+edge.getLabel());
-                        //System.out.println("\tSource: "+SystemDefs.JavabaseDB.nhfile.getNode(edge.getSource()).getLabel());
-                        t = fscan.get_next();
+                        System.out.println("Edge Label:\t"+edge.getLabel());
+                        //System.out.println(edge.getSource().slotNo);
+                        System.out.println("\tSource: "+SystemDefs.JavabaseDB.nhfile.getNode(edge.getSource()).getLabel());
+                        t = sort.get_next();
                     }
                     catch (Exception e) {
                         status = FAIL;
