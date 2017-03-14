@@ -329,7 +329,7 @@ public class NodeQuery
             }
             break;
         case 3:
-            System.out.println("then the query will take a target descriptor and a distance and return the labels of nodes with the given distance from the target descripto");
+            System.out.println("The query will take a target descriptor and a distance and return the labels of nodes with the given distance from the target descripto");
             userDesc  = new Descriptor();
             tokens = queryOptions.split(" ");
             userDesc.set(
@@ -344,19 +344,18 @@ public class NodeQuery
 
             if (index == 1) {
                 boolean status = OK;
-                SystemDefs.JavabaseDB.ztNodeDesc = new ZBTreeFile(SystemDefs.JavabaseDBName+"_ZTreeNodeIndex",
-                        AttrType.attrString, 180, 1/*delete*/);
-
+                
                 // start index scan
                 ZBTFileScan izscan = null;
                 Set<DescriptorRangePair> pairs = ZIndexUtils.getRangesForDescRange(
-                        ZIndexUtils.getDiagonalDescFromDistance(new DescriptorKey(userDesc), distance));
-
+                        ZIndexUtils.getDiagonalDescFromDistance(new DescriptorKey(userDesc), distance), userDesc, distance);
+                
+                SystemDefs.JavabaseDB.ztNodeDesc = new ZBTreeFile(SystemDefs.JavabaseDBName+"_ZTreeNodeIndex",
+                        AttrType.attrString, 180, 1/*delete*/);
                 boolean flag = true;
-                System.out.println(pairs.size());
+               // System.out.println(pairs.size());
                 for (DescriptorRangePair pair: pairs) {
                     try {
-                        System.out.println(pair.getStart().getKey());
                         izscan = SystemDefs.JavabaseDB.ztNodeDesc.new_scan(pair.getStart(), pair.getEnd());
                     } catch (Exception e) {
                         status = FAIL;
@@ -375,12 +374,11 @@ public class NodeQuery
                         try {
                             if (tz == null) break;
                             DescriptorKey k = (DescriptorKey) tz.key;
-
                             zbtree.LeafData l = (zbtree.LeafData) tz.data;
                             NID nid = l.getData();
                             Node node = SystemDefs.JavabaseDB.nhfile.getNode(nid);
-                            System.out.println("Key: " + k.getKey() + " Label: " +
-                                    node.getLabel() + " -- Descripotr: " + Arrays.toString(node.getDesc().value));
+                           // System.out.println("Key: " + k.getKey() + "\nLabel: " +
+                           System.out.println(node.getLabel() + " -- Descriptor: " + Arrays.toString(node.getDesc().value)+"DISTANCE: "+userDesc.distance(node.getDesc()));
                         } catch (Exception e) {
                             status = FAIL;
                             e.printStackTrace();
@@ -396,11 +394,6 @@ public class NodeQuery
 
                     }
                 }
-
-                if (flag && status) {
-                    System.out.println("Test3 -- OK");
-                }
-
                 // clean up
                 try {
                     //iscan.close();

@@ -4,9 +4,16 @@ import global.*;
 import zbtree.*;
 import iterator.CondExpr;
 import iterator.UnknownKeyTypeException;
+import nodeheap.Node;
 
 import java.io.IOException;
 import java.util.*;
+
+import btree.StringKey;
+import bufmgr.HashEntryNotFoundException;
+import bufmgr.InvalidFrameNumberException;
+import bufmgr.PageUnpinnedException;
+import bufmgr.ReplacerException;
 
 
 /**
@@ -200,16 +207,23 @@ public class ZIndexUtils {
       }
   }
 
-  public static Set<DescriptorRangePair> getRangesForDescRange(DescriptorRangePair pair) {
+  public static Set<DescriptorRangePair> getRangesForDescRange(DescriptorRangePair pair,Descriptor target,int distance) throws GetFileEntryException, ConstructPageException, AddFileEntryException, IOException, InvalidFrameNumberException, ReplacerException, PageUnpinnedException, HashEntryNotFoundException {
       Set<DescriptorRangePair> result = new HashSet<>();
       LinkedList<DescriptorRangePair> queue = new LinkedList<>();
-      queue.add(pair);
+      if (substringMaxMatch(pair.getStart().getKey(), pair.getEnd().getKey(), target, distance)) {
+          result.add(pair);
+          return result;
+      } else {
+          queue.add(pair);
+      }
+      //System.out.println(pair.getStart().getDesc().getString()+" Dist: "+target.distance(pair.getStart().getDesc()));
+      //System.out.println(pair.getEnd().getDesc().getString()+" Dist: "+target.distance(pair.getEnd().getDesc()));
 
       while (!queue.isEmpty()) {
           DescriptorRangePair range = queue.remove();
           String startKey = range.getStart().getKey();
           String endKey = range.getEnd().getKey();
-          DescriptorRangePair lower,upper;
+          DescriptorRangePair lower = null,upper = null;
           for (int i = 0; i < startKey.length(); i++) {
               if (startKey.charAt(i) != endKey.charAt(i)) {
                   int axis = i % 5;
@@ -226,48 +240,149 @@ public class ZIndexUtils {
                   lower = new DescriptorRangePair(
                           BitShufflingUtils.keyFromStrings(litStart),
                           BitShufflingUtils.keyFromStrings(litEnd));
-
+                  
+//                  System.out.println("///////");
+//                  System.out.println("Axis is : "+axis+" Position: "+);
+//                  System.out.println(startKey);
+//                  System.out.println( endKey);
+//                  System.out.println("=======");
+                  
+//                  System.out.println(BitShufflingUtils.keyFromStrings(litStart));
+//                  System.out.println( BitShufflingUtils.keyFromStrings(litEnd));
+//                  System.out.println(Arrays.toString(litStart));
+//                  System.out.println(Arrays.toString(litEnd));
+//                  System.out.println("-------");
+//                  
+                  
                   String[] bigStart = lit.clone();
                   bigStart[axis] = bigMin;
                   String[] bigEnd = big.clone();
                   upper = new DescriptorRangePair(
                           BitShufflingUtils.keyFromStrings(bigStart),
                           BitShufflingUtils.keyFromStrings(bigEnd));
-
-                  if (substringMaxMatch(lower.getStart().getKey(), lower.getEnd().getKey())) {
-                      result.add(range);
+                  
+//                  System.out.println(BitShufflingUtils.keyFromStrings(bigStart));
+//                  System.out.println(BitShufflingUtils.keyFromStrings(bigEnd));
+//                  System.out.println(Arrays.toString(bigStart));
+//                  System.out.println(Arrays.toString(bigEnd));
+//                  System.out.println("///////");
+                  //System.out.println("From:"+lower.getStart().getDesc().getString()+" To: "+lower.getEnd().getDesc().getString());
+                  if (substringMaxMatch(lower.getStart().getKey(), lower.getEnd().getKey(),target,distance)) {
+                      //System.out.println("TRUE LOWER");
+                      DescriptorRangePair ansLow= new DescriptorRangePair(lower.getStart(), lower.getEnd());
+                      result.add(ansLow);
                   } else {
+                      //System.out.println("FALSE LOWER");
                       queue.add(lower);
                   }
-                  if (substringMaxMatch(upper.getStart().getKey(), upper.getEnd().getKey())) {
-                      result.add(range);
+                  //System.out.println("From:"+upper.getStart().getDesc().getString()+" To: "+upper.getEnd().getDesc().getString());
+                  if (substringMaxMatch(upper.getStart().getKey(), upper.getEnd().getKey(),target,distance)) {
+                      //System.out.println("TRUE UPPER");
+                      DescriptorRangePair ansHigh= new DescriptorRangePair(upper.getStart(), upper.getEnd());
+                      result.add(ansHigh);
                   } else {
+                      //System.out.println("FALSE UPPER");
                       queue.add(upper);
                   }
-
                   break;
               }
           }
+
+         
 
       }
       return result;
   }
 
-  private static boolean substringMaxMatch(String start, String end) {
-      int i;
-      for (i = 0; i < 160; i++) {
-          if (start.charAt(i) != end.charAt(i)) {
-              break;
-          }
-      }
-      return (i > 128);
+  private static boolean substringMaxMatch(String start, String end,Descriptor target,int distance) throws GetFileEntryException, ConstructPageException, AddFileEntryException, IOException, InvalidFrameNumberException, ReplacerException, PageUnpinnedException, HashEntryNotFoundException {
+      
+    boolean OK   = true; 
+    boolean FAIL = false;
+    int falsePts=0;
+    boolean status = OK;
+    SystemDefs.JavabaseDB.ztNodeDesc = new ZBTreeFile(SystemDefs.JavabaseDBName+"_ZTreeNodeIndex", AttrType.attrString, 180, 1/*delete*/);
+    // start index scan
+    ZBTFileScan izscan = null;
+    try {
+        KeyClass low_key = new DescriptorKey(start);
+        KeyClass high_key = new DescriptorKey(end);
+        izscan = SystemDefs.JavabaseDB.ztNodeDesc.new_scan(low_key,high_key);
+    }
+    catch (Exception e) {
+        status = FAIL;
+        e.printStackTrace();
+    }
+
+    DescriptorDataEntry tz=null;
+    try {
+        tz = izscan.get_next();
+    }
+    catch (Exception e) {
+        status = FAIL;
+        e.printStackTrace();
+    }
+    boolean flag = true;
+    //System.out.println(t+""+iscan);
+    while (tz != null && izscan!=null) {
+//System.out.println("hii");
+        
+        try {
+            DescriptorKey k = (DescriptorKey)tz.key;
+            
+            zbtree.LeafData l = (zbtree.LeafData)tz.data;
+            NID nid =  l.getData();
+
+            Node node = SystemDefs.JavabaseDB.nhfile.getNode(nid);
+
+            //System.out.println("Inside: "+node.getDesc().getString()+" Dist: "+((int)target.distance(node.getDesc())));
+            if(((int)target.distance(node.getDesc()))>distance)
+            {
+                //System.out.println("Reason: "+node.getDesc().getString()+" Dist: "+((int)target.distance(node.getDesc())));
+                falsePts++;
+            }
+       //     System.out.println("Key: "+k.getKey()+" Label: "+node.getLabel()+" -- Descripotr: "+node.getDesc().value[0]+" "+node.getDesc().value[1]+" "+node.getDesc().value[2]+" "+node.getDesc().value[3]+" "+node.getDesc().value[4]);
+            
+        }
+        catch (Exception e) {
+            status = FAIL;
+            e.printStackTrace();
+        }
+        
+        try {
+            tz = izscan.get_next();
+        }
+        catch (Exception e) {
+            status = FAIL;
+            e.printStackTrace();
+        }
+        if(falsePts>0)
+        {
+           //izscan.DestroyZBTreeFileScan();
+            break;
+        }
+    }
+    
+    // clean up
+    try {
+        //iscan.close();
+        SystemDefs.JavabaseDB.ztNodeDesc.close();
+    }
+    catch (Exception e) {
+        status = FAIL;
+        e.printStackTrace();
+    }
+    if(falsePts>0)
+    {
+        return false; 
+    }
+    return true;
   }
 
   private static String getLitMax(String lit, int pos) {
       StringBuilder res = new StringBuilder();
 	  for (int i = 0; i < 32; i++) {
 		  if (i < pos) res.append(lit.charAt(i));
-		  else if (i == pos) res.append("0");
+		  else if (i == pos) res.append(0);
 		  else res.append("1");
 	  }
 	  return res.toString();
@@ -277,7 +392,7 @@ public class ZIndexUtils {
 	  StringBuilder res = new StringBuilder();
 	  for (int i = 0; i < 32; i++) {
 		  if (i < pos) res.append(big.charAt(i));
-		  else if (i == pos) res.append("1");
+		  else if (i == pos) res.append(1);
 		  else res.append("0");
 	  }
 	  return res.toString();
