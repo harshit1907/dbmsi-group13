@@ -5,6 +5,8 @@ import java.io.IOException;
 import global.AttrType;
 import global.Convert;
 import global.Descriptor;
+import heap.InvalidTupleSizeException;
+import heap.InvalidTypeException;
 import heap.Tuple;
 
 
@@ -49,13 +51,26 @@ public class Node extends Tuple{
    /**
     * Class constructor
     * Create a new node with length = max_size,node offset = 0.
+ * @throws IOException 
+ * @throws InvalidTupleSizeException 
+ * @throws InvalidTypeException 
     */
-    public Node()
+    public Node() throws InvalidTypeException, IOException
     {
          // Create a new tuple
          data = new byte[max_size];
          node_offset = 0;
          node_length = max_size;
+         AttrType[] attrType = new AttrType[2];
+         attrType[0] = new AttrType(AttrType.attrDesc);
+         attrType[1] = new AttrType(AttrType.attrString);
+         short[] attrSize = new short[1];
+         try {
+            setHdr((short) 2,attrType,attrSize);
+        } catch (InvalidTupleSizeException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
      
      /** Constructor
@@ -82,25 +97,27 @@ public class Node extends Tuple{
          data = fromNode.getNodeByteArray();
          node_length = fromNode.getLength();
          node_offset = 0;
-         fldCnt = 2; // fixed two fields in node
+         fldCnt = 2; 
+         
+         // fixed two fields in node
          // fldOffset = 0; 
          // what's this? I think we do not require this, as there are no variable fields in here 
      }
      
      public String getLabel() throws IOException {
-         return Convert.getStrValue(20, data, data.length-20);
+         return Convert.getStrValue(28, data, data.length-28);
      }
      
      public Descriptor getDesc() throws IOException {
-         return Convert.getDescValue(0, data);
+         return Convert.getDescValue(8, data);
      }
      
      public void setLabel(String label) throws IOException {
-         Convert.setStrValue(label, 20, data);
+         Convert.setStrValue(label, 28, data);
      }
 
      public void setDesc(Descriptor desc) throws IOException {
-         Convert.setDescValue(desc, 0, data);
+         Convert.setDescValue(desc, 8, data);
      }
      
      /** Copy the node byte array out

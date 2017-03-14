@@ -47,8 +47,8 @@ public class FullScanNode {
 					done = true;
 					break;
 				}
-				System.out.print("Label: "+node.getLabel());
-				System.out.println(" Descriptor: "+node.getDesc().getString());
+				System.out.print("Label:\t"+node.getLabel());
+				System.out.println("\tDescriptor: "+node.getDesc().getString());
 			}
 
 		}

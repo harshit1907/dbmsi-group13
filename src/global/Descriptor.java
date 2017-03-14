@@ -30,7 +30,7 @@ public class Descriptor {
 		String str="";
 		for(int val:value)
 		{
-			str=str+val+"\t";
+			str=str+"\t"+val;
 		}
 		return str;
 	}

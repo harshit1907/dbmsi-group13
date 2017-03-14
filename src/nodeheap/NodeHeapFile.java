@@ -41,6 +41,7 @@ import heap.HFDiskMgrException;
 import heap.HFException;
 import heap.InvalidSlotNumberException;
 import heap.InvalidTupleSizeException;
+import heap.InvalidTypeException;
 import heap.InvalidUpdateException;
 import heap.SpaceNotAvailableException;
 import zbtree.*;
@@ -155,7 +156,7 @@ public class NodeHeapFile {
 		}
 	}
 
-	public NID getNID(String Nd) throws IOException
+	public NID getNID(String Nd) throws IOException, InvalidTypeException, InvalidTupleSizeException
 	{
 		boolean OK = true;
 		boolean FAIL = false;
@@ -211,7 +212,7 @@ public class NodeHeapFile {
 			return null;
 	}
 
-	public NID getNID(Node Nd) throws IOException
+	public NID getNID(Node Nd) throws IOException, InvalidTypeException, InvalidTupleSizeException
 	{
 		boolean OK = true;
 		boolean FAIL = false;
@@ -467,6 +468,7 @@ public class NodeHeapFile {
 	 * @throws DescriptorNotMatchException 
 	 * @throws zbtree.GetFileEntryException 
 	 * @throws zbtree.AddFileEntryException 
+	 * @throws InvalidTypeException 
 	 */
 	public NID insertNode(byte[] recPtr)
 			throws InvalidSlotNumberException,
@@ -475,7 +477,7 @@ public class NodeHeapFile {
 			HFException,
 			HFBufMgrException,
 			HFDiskMgrException,
-			IOException, KeyTooLongException, KeyNotMatchException, LeafInsertRecException, IndexInsertRecException, ConstructPageException, UnpinPageException, PinPageException, NodeNotMatchException, ConvertException, DeleteRecException, IndexSearchException, IteratorException, LeafDeleteException, InsertException, GetFileEntryException, AddFileEntryException, PageUnpinnedException, InvalidFrameNumberException, HashEntryNotFoundException, ReplacerException, zbtree.KeyTooLongException, zbtree.KeyNotMatchException, zbtree.LeafInsertRecException, zbtree.IndexInsertRecException, zbtree.ConstructPageException, zbtree.UnpinPageException, zbtree.PinPageException, zbtree.NodeNotMatchException, zbtree.ConvertException, zbtree.DeleteRecException, zbtree.IndexSearchException, zbtree.IteratorException, zbtree.LeafDeleteException, zbtree.InsertException, DescriptorNotMatchException, LeafInsertDescException, IndexInsertDescException, DeleteDescException, zbtree.GetFileEntryException, zbtree.AddFileEntryException {
+			IOException, KeyTooLongException, KeyNotMatchException, LeafInsertRecException, IndexInsertRecException, ConstructPageException, UnpinPageException, PinPageException, NodeNotMatchException, ConvertException, DeleteRecException, IndexSearchException, IteratorException, LeafDeleteException, InsertException, GetFileEntryException, AddFileEntryException, PageUnpinnedException, InvalidFrameNumberException, HashEntryNotFoundException, ReplacerException, zbtree.KeyTooLongException, zbtree.KeyNotMatchException, zbtree.LeafInsertRecException, zbtree.IndexInsertRecException, zbtree.ConstructPageException, zbtree.UnpinPageException, zbtree.PinPageException, zbtree.NodeNotMatchException, zbtree.ConvertException, zbtree.DeleteRecException, zbtree.IndexSearchException, zbtree.IteratorException, zbtree.LeafDeleteException, zbtree.InsertException, DescriptorNotMatchException, LeafInsertDescException, IndexInsertDescException, DeleteDescException, zbtree.GetFileEntryException, zbtree.AddFileEntryException, InvalidTypeException {
 		int dpinfoLen = 0;
 		int recLen = recPtr.length;
 		boolean found;
