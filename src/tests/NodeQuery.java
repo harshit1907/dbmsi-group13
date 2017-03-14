@@ -161,7 +161,7 @@ public class NodeQuery
                 FileScan fscan = null;
 
                 try {
-                    fscan = new FileScan(SystemDefs.JavabaseDBName+"_Node", attrType, attrSize, (short) 2, 2, projlist, null);
+                    fscan = new FileScan(SystemDefs.JavabaseDBName+"_Node", attrType, attrSize, (short) 6, 2, projlist, null);
                 }
                 catch (Exception e) {
                     status = FAIL;
@@ -605,13 +605,4 @@ public class NodeQuery
         System.out.println("Disk Write Count: "+PCounter.writeCounter);
 
     }
-    /*public static void main(String[] args) throws InvalidTupleSizeException, IOException, HashOperationException, PageUnpinnedException, PagePinnedException, PageNotFoundException, BufMgrException
-    {
-        String graphDBName=args[0];
-        int numBuf=Integer.parseInt(args[1]);
-        int qType=Integer.parseInt(args[2]);
-        int index=Integer.parseInt(args[3]);
-        int queryOptions=Integer.parseInt(args[4]);
-        //NodeQuery nodequery=new NodeQuery(graphDBName, numBuf,qType,index,queryOptions);
-    }*/
 }   

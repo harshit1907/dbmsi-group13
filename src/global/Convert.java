@@ -310,6 +310,7 @@ public class Convert{
       // valid contents of the buffer have been copied into it
       byte []B = ((ByteArrayOutputStream) out).toByteArray();
       
+      //System.out.println("length = "+data.length);
       // copies the first 8 bytes of this byte array into data[] 
       System.arraycopy (B, 0, data, position, 8);
       
