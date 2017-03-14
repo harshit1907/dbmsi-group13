@@ -14,12 +14,13 @@ import heap.HFDiskMgrException;
 import heap.HFException;
 import heap.InvalidSlotNumberException;
 import heap.InvalidTupleSizeException;
+import heap.InvalidTypeException;
 
 public class BatchEdgeInsert {
 	private final static boolean OK = true;
 	private final static boolean FAIL = false;
 
-	protected boolean batchEdgeInsert(String nodefilename) throws IOException, InvalidTupleSizeException, InvalidSlotNumberException, HFException, HFBufMgrException, HFDiskMgrException {
+	protected boolean batchEdgeInsert(String nodefilename) throws IOException, InvalidTupleSizeException, InvalidSlotNumberException, HFException, HFBufMgrException, HFDiskMgrException, InvalidTypeException {
 		System.out.println("\n  Task 11: Batch Insert Edges\n");
 		boolean status = OK;
 		BufferedReader br = null;

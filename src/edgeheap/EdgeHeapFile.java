@@ -40,6 +40,7 @@ import heap.HFDiskMgrException;
 import heap.HFException;
 import heap.InvalidSlotNumberException;
 import heap.InvalidTupleSizeException;
+import heap.InvalidTypeException;
 import heap.InvalidUpdateException;
 import heap.SpaceNotAvailableException;
 import zbtree.DescriptorKey;
@@ -420,6 +421,7 @@ public class EdgeHeapFile implements Filetype,  GlobalConst {
 	 * @throws HashEntryNotFoundException 
 	 * @throws InvalidFrameNumberException 
 	 * @throws PageUnpinnedException 
+	 * @throws InvalidTypeException 
 	 */
 	public EID insertEdge(byte[] recPtr) 
 			throws InvalidSlotNumberException,  
@@ -428,7 +430,7 @@ public class EdgeHeapFile implements Filetype,  GlobalConst {
 			HFException,
 			HFBufMgrException,
 			HFDiskMgrException,
-			IOException, KeyTooLongException, KeyNotMatchException, LeafInsertRecException, IndexInsertRecException, ConstructPageException, UnpinPageException, PinPageException, NodeNotMatchException, ConvertException, DeleteRecException, IndexSearchException, IteratorException, LeafDeleteException, InsertException, GetFileEntryException, AddFileEntryException, PageUnpinnedException, InvalidFrameNumberException, HashEntryNotFoundException, ReplacerException
+			IOException, KeyTooLongException, KeyNotMatchException, LeafInsertRecException, IndexInsertRecException, ConstructPageException, UnpinPageException, PinPageException, NodeNotMatchException, ConvertException, DeleteRecException, IndexSearchException, IteratorException, LeafDeleteException, InsertException, GetFileEntryException, AddFileEntryException, PageUnpinnedException, InvalidFrameNumberException, HashEntryNotFoundException, ReplacerException, InvalidTypeException
 	{
 		int recLen = recPtr.length;
 		boolean found;

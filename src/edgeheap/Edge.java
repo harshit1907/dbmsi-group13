@@ -6,6 +6,8 @@ import global.AttrType;
 import global.Convert;
 import global.Descriptor;
 import global.NID;
+import heap.InvalidTupleSizeException;
+import heap.InvalidTypeException;
 import heap.Tuple;
 
 
@@ -48,12 +50,12 @@ public class Edge extends Tuple{
 	  
 	  
 	public NID getSource() throws IOException {
-		return Convert.getNIDValue(4, data);
+		return Convert.getNIDValue(12, data);
 	}
 
 
 	public NID getDestination() throws IOException {
-		return Convert.getNIDValue(12, data);
+		return Convert.getNIDValue(20, data);
 	}
 
 
@@ -63,13 +65,29 @@ public class Edge extends Tuple{
    /**
     * Class constructor
     * Create a new node with length = max_size,node offset = 0.
+ * @throws IOException 
+ * @throws InvalidTypeException 
     */
-    public Edge()
+    public Edge() throws InvalidTypeException, IOException
     {
          // Create a new tuple
          data = new byte[max_size];
          edge_offset = 0;
          edge_length = max_size;
+         AttrType[] attrType = new AttrType[6];
+         attrType[0] = new AttrType(AttrType.attrInteger);
+         attrType[1] = new AttrType(AttrType.attrInteger);
+         attrType[2] = new AttrType(AttrType.attrInteger);
+         attrType[3] = new AttrType(AttrType.attrInteger);
+         attrType[4] = new AttrType(AttrType.attrInteger);
+         attrType[5] = new AttrType(AttrType.attrString);
+         short[] attrSize = new short[1];
+         try {
+            setHdr((short) 2,attrType,attrSize);
+        } catch (InvalidTupleSizeException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
      
      /** Constructor
@@ -96,33 +114,34 @@ public class Edge extends Tuple{
          data = fromNode.getEdgeByteArray();
          edge_length = fromNode.getLength();
          edge_offset = 0;
-         fldCnt = 4; // fixed two fields in node
+         fldCnt = 6; // fixed two fields in node
          // fldOffset = 0; 
          // what's this? I think we do not require this, as there are no variable fields in here 
      }
      
      public String getLabel() throws IOException {
-         return Convert.getStrValue(20, data, data.length-20);
+         return Convert.getStrValue(28, data, data.length-28);
      }
      
      public int getWeight() throws IOException {
-         return Convert.getIntValue(0, data);
+         return Convert.getIntValue(8, data);
      }
      
      public void setSource(NID source) throws IOException {
-    	 Convert.setNIDValue(source,4, data);
+         
+    	 Convert.setNIDValue(source,12, data);
  	}
      
      public void setLabel(String label) throws IOException {
-         Convert.setStrValue(label, 20, data);
+         Convert.setStrValue(label, 28, data);
      }
 
      public void setWeight(int weight) throws IOException {
-         Convert.setIntValue(weight, 0, data);
+         Convert.setIntValue(weight, 8, data);
      }
      
  	public void setDestination(NID destination) throws IOException {
- 		Convert.setNIDValue(destination, 12, data);
+ 		Convert.setNIDValue(destination, 20, data);
 	}
      
      /** Copy the node byte array out
