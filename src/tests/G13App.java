@@ -33,6 +33,7 @@ import heap.InvalidTupleSizeException;
 // nodequery GRAPHDBNAME NUMBUF QTYPE INDEX [QUERYOPTIONS]
 // nodequery db1 40 1 0 0
 // nodequery db1 40 5 1 10 20 30 40 50 5
+// nodequery db1 40 5 1 10 20 30 40 50 5
 // edgequery GRAPHDBNAME NUMBUF QTYPE INDEX [QUERYOPTIONS]
 // edgequery db1 40 1 0 
 // fullnodescan db1 

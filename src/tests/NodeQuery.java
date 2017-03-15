@@ -57,8 +57,8 @@ public class NodeQuery
             }
             else
             {
-            	System.out.println("No index found!!");                
-                
+                System.out.println("No index found!!");                
+
             }
             break;
         case 1:
@@ -79,7 +79,7 @@ public class NodeQuery
                 TupleOrder[] order = new TupleOrder[1];
                 order[0] = new TupleOrder(TupleOrder.Ascending);
                 //order[1] = new TupleOrder(TupleOrder.Descending);
-                
+
                 // create an iterator by open a file scan
                 FldSpec[] projlist = new FldSpec[2];
                 RelSpec rel = new RelSpec(RelSpec.outer); 
@@ -122,7 +122,7 @@ public class NodeQuery
                 boolean flag = true;
 
                 while (t != null) {
-                    
+
                     try 
                     {
                         //System.out.println("HI: "+t.getStrFld(1));
@@ -134,7 +134,7 @@ public class NodeQuery
                     }
 
                     try {
-                        
+
                         Node node =new Node ();
                         node.nodeInit(t.getTupleByteArray(), 0);
                         System.out.print("Label:\t"+node.getLabel());
@@ -146,11 +146,11 @@ public class NodeQuery
                         e.printStackTrace();
                     }
                 }
-                
+
 
                 // clean up
                 try {
-                   //sort.close();
+                    //sort.close();
                 }
                 catch (Exception e) {
                     status = FAIL;
@@ -242,7 +242,7 @@ public class NodeQuery
                     Integer.parseInt(tokens[2]),
                     Integer.parseInt(tokens[3]),
                     Integer.parseInt(tokens[4])
-            );
+                    );
             if (index == 1) {
                 boolean status = OK;
                 SystemDefs.JavabaseDB.ztNodeDesc = new ZBTreeFile(SystemDefs.JavabaseDBName + "_ZTreeNodeIndex",
@@ -301,7 +301,7 @@ public class NodeQuery
                     }
                 }
 
-                 for (Map.Entry<Double, LinkedHashSet> entry: map.entrySet()) {
+                for (Map.Entry<Double, LinkedHashSet> entry: map.entrySet()) {
                     if (0.0 != entry.getKey()) {
                         for (Object obj : entry.getValue()) {
                             Node node = (Node) obj;
@@ -311,9 +311,77 @@ public class NodeQuery
                                     entry.getKey());
                         }
                     }
-                 }
+                }
             } else if (index == 0) {
+                if(SystemDefs.JavabaseDB!=null) 
+                    SystemDefs.JavabaseBM.flushAllPages();
+                SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
+                SystemDefs.JavabaseBM.flushAllPages();
+                
+                TreeMap<Double, List<Node>> map = new TreeMap<Double, List<Node>>();
+                NScan scan = null;
+                boolean status = OK;
+                if ( status == OK ) {
+                    System.out.println ("  - Take a target Desc and dist and return labels of nodes within distance\n");
 
+                    try {
+                        scan = SystemDefs.JavabaseDB.nhfile.openScan();
+                    } catch (Exception e) {
+                        status = FAIL;
+                        System.err.println ("*** Error opening scan\n");
+                        e.printStackTrace();
+                    }
+
+                    if ( status == OK &&  SystemDefs.JavabaseBM.getNumUnpinnedBuffers()
+                            == SystemDefs.JavabaseBM.getNumBuffers() ) {
+                        System.err.println ("*** The heap-file scan has not pinned the first page\n");
+                        status = FAIL;
+                    }
+                }
+                NID nidTmp = new NID();
+
+                if ( status == OK ) {
+                    Node node = null;
+
+                    boolean done = false;
+                    while (!done) {
+                        node = scan.getNext(nidTmp);
+                        if (node == null) {
+                            done = true;
+                        }
+                    //    System.out.println(node.getDesc().value[0]+" "+userDesc.value[0]);
+                        //System.out.println(userDesc.distance(node.getDesc()));
+                        if(node!=null)
+                        {
+                        double dist = userDesc.distance(node.getDesc());
+                     List<Node> listNode;
+                        if(map.containsKey(dist))
+                     {
+                            listNode =map.get(dist);
+                            listNode.add(node);
+                            map.put(dist, listNode);
+                     }
+                     else
+                     {
+                         listNode = new ArrayList<Node>();
+                         listNode.add(node);
+                         map.put(dist, listNode);
+                     }
+                        }
+
+                }
+                scan.closescan();
+                }
+                List<Double> list =new ArrayList<Double>(map.keySet());
+                for(double d:list)
+                {
+                    System.out.println("Distance:"+d);
+                    List<Node> listNode = map.get(d);
+                    for(Node nd:listNode)
+                    {
+                        System.out.println("Node Label:"+nd.getLabel()+"Node descriptor:"+nd.getDesc().value[0]+" "+nd.getDesc().value[1]+" "+nd.getDesc().value[2]+" "+nd.getDesc().value[3]+" "+nd.getDesc().value[4]);
+                    }
+                }
             }
             break;
         case 3:
@@ -326,23 +394,23 @@ public class NodeQuery
                     Integer.parseInt(tokens[2]),
                     Integer.parseInt(tokens[3]),
                     Integer.parseInt(tokens[4])
-            );
+                    );
 
             int distance = Integer.parseInt(tokens[5]);
 
             if (index == 1) {
                 boolean status = OK;
-                
+
                 // start index scan
                 ZBTFileScan izscan = null;
                 Set<DescriptorRangePair> pairs = ZIndexUtils.getRangesForDescRange(
                         ZIndexUtils.getDiagonalDescFromDistance(new DescriptorKey(userDesc), distance),
                         userDesc, distance);
-                
+
                 SystemDefs.JavabaseDB.ztNodeDesc = new ZBTreeFile(SystemDefs.JavabaseDBName+"_ZTreeNodeIndex",
                         AttrType.attrString, 180, 1/*delete*/);
                 boolean flag = true;
-               // System.out.println(pairs.size());
+                // System.out.println(pairs.size());
                 for (DescriptorRangePair pair: pairs) {
                     try {
                         izscan = SystemDefs.JavabaseDB.ztNodeDesc.new_scan(pair.getStart(), pair.getEnd());
@@ -366,13 +434,13 @@ public class NodeQuery
                             zbtree.LeafData l = (zbtree.LeafData) tz.data;
                             NID nid = l.getData();
                             Node node = SystemDefs.JavabaseDB.nhfile.getNode(nid);
-                           // System.out.println("Key: " + k.getKey() + "\nLabel: " +
-                           System.out.println(node.getLabel() + " -- Descriptor: " + Arrays.toString(node.getDesc().value)+" DISTANCE: "+userDesc.distance(node.getDesc()));
+                            // System.out.println("Key: " + k.getKey() + "\nLabel: " +
+                            System.out.println(node.getLabel() + " -- Descriptor: " + Arrays.toString(node.getDesc().value)+" DISTANCE: "+userDesc.distance(node.getDesc()));
                         } catch (Exception e) {
                             status = FAIL;
                             e.printStackTrace();
                         }
-                        
+
                         try {
                             tz = izscan.get_next();
                         } catch (Exception e) {
@@ -443,26 +511,26 @@ public class NodeQuery
                     SystemDefs.JavabaseBM.flushAllPages();
                 SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
                 SystemDefs.JavabaseBM.flushAllPages();
-                
-                 NID nid =SystemDefs.JavabaseDB.nhfile.getNID(queryOptions);
+
+                NID nid =SystemDefs.JavabaseDB.nhfile.getNID(queryOptions);
                 if(nid!=null)   
-                  { listEid= SystemDefs.JavabaseDB.ehfile.getEIDListHeap(nid);
-                  matchNode = SystemDefs.JavabaseDB.nhfile.getNode(nid);
-                  }
+                { listEid= SystemDefs.JavabaseDB.ehfile.getEIDListHeap(nid);
+                matchNode = SystemDefs.JavabaseDB.nhfile.getNode(nid);
+                }
             } 
             else {
                 if(SystemDefs.JavabaseDB!=null) 
                     SystemDefs.JavabaseBM.flushAllPages();
                 SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
                 //SystemDefs.JavabaseBM.flushAllPages();
-                
+
                 boolean status = OK;
                 SystemDefs.JavabaseDB.btNodeLabel = new BTreeFile(SystemDefs.JavabaseDBName+"_BTreeNodeIndex", AttrType.attrString, 32, 1/*delete*/);
-                
+
                 // start index scan
                 BTFileScan iscan = null;
                 try {
-                	
+
                     iscan = SystemDefs.JavabaseDB.btNodeLabel.new_scan(null, null);
                 }
                 catch (Exception e) {
@@ -481,7 +549,7 @@ public class NodeQuery
                 boolean flag = true;
                 //System.out.println(t+""+iscan);
                 while (t != null && iscan!=null) {
-            //System.out.println("hii");
+                    //System.out.println("hii");
                     try {
                         t = iscan.get_next();
                     }
@@ -489,11 +557,11 @@ public class NodeQuery
                         status = FAIL;
                         e.printStackTrace();
                     }
-                    
+
                     try {
                         if(t==null) break;
                         StringKey k = (StringKey)t.key;
-                        
+
                         LeafData l = (LeafData)t.data;
                         RID rid =  l.getData();
                         NID nid = new NID(rid.pageNo, rid.slotNo);
@@ -503,7 +571,7 @@ public class NodeQuery
                             listEid= SystemDefs.JavabaseDB.ehfile.getEIDListIndex(nid, graphDBName, numBuf);
                             matchNode = node;
                         }
-                    
+
                     }
                     catch (Exception e) {
                         status = FAIL;
@@ -521,50 +589,50 @@ public class NodeQuery
                     e.printStackTrace();
                 }
             }
-                if(matchNode!=null&&!listEid.isEmpty())
+            if(matchNode!=null&&!listEid.isEmpty())
+            {
+                System.out.println("Match Found: ");
+                System.out.println("Node Label:"+ matchNode.getLabel());
+                System.out.println("Node Descriptor: "+ matchNode.getDesc().value[0]+" "+matchNode.getDesc().value[1]+" "+ matchNode.getDesc().value[2]+" "+matchNode.getDesc().value[3]+" "+matchNode.getDesc().value[4]);
+
+                List<Edge> listSource= new ArrayList<Edge>();
+                List<Edge> listDes= new ArrayList<Edge>();
+                for(EID i:listEid)
                 {
-                    System.out.println("Match Found: ");
-                    System.out.println("Node Label:"+ matchNode.getLabel());
-                    System.out.println("Node Descriptor: "+ matchNode.getDesc().value[0]+" "+matchNode.getDesc().value[1]+" "+ matchNode.getDesc().value[2]+" "+matchNode.getDesc().value[3]+" "+matchNode.getDesc().value[4]);
-                        
-                    List<Edge> listSource= new ArrayList<Edge>();
-                    List<Edge> listDes= new ArrayList<Edge>();
-                    for(EID i:listEid)
+                    Edge curEdge = SystemDefs.JavabaseDB.ehfile.getEdge(i);
+                    NID nidSource =curEdge.getSource();
+                    NID nidDes = curEdge.getDestination();
+                    String nodeSource =  SystemDefs.JavabaseDB.nhfile.getNode(nidSource).getLabel();
+                    String nodeDes =  SystemDefs.JavabaseDB.nhfile.getNode(nidDes).getLabel();
+                    if(nodeSource.equalsIgnoreCase(queryOptions))   listSource.add(curEdge);
+                    if(nodeDes.equalsIgnoreCase(queryOptions))   listDes.add(curEdge);
+                }
+                if(!listDes.isEmpty())
+                {
+                    System.out.println("Node Incomming Edges: "+listDes.size());
+                    for(Edge e:listDes)
                     {
-                        Edge curEdge = SystemDefs.JavabaseDB.ehfile.getEdge(i);
-                        NID nidSource =curEdge.getSource();
-                        NID nidDes = curEdge.getDestination();
-                        String nodeSource =  SystemDefs.JavabaseDB.nhfile.getNode(nidSource).getLabel();
-                        String nodeDes =  SystemDefs.JavabaseDB.nhfile.getNode(nidDes).getLabel();
-                        if(nodeSource.equalsIgnoreCase(queryOptions))   listSource.add(curEdge);
-                        if(nodeDes.equalsIgnoreCase(queryOptions))   listDes.add(curEdge);
-                    }
-                    if(!listDes.isEmpty())
-                    {
-                        System.out.println("Node Incomming Edges: "+listDes.size());
-                                        for(Edge e:listDes)
-                    {
-                         String src= SystemDefs.JavabaseDB.nhfile.getNode(e.getSource()).getLabel();
+                        String src= SystemDefs.JavabaseDB.nhfile.getNode(e.getSource()).getLabel();
                         System.out.println("Source Node: "+src+" Label: "+e.getLabel() + " Weight: "+e.getWeight());
                     }
-                    }
-                    else
+                }
+                else
                     System.out.println("Node Incomming Edges: "+listDes.size());
-                    if(!listSource.isEmpty())
-                    {
-                        System.out.println("Node Outgoing Edges: "+listSource.size());
+                if(!listSource.isEmpty())
+                {
+                    System.out.println("Node Outgoing Edges: "+listSource.size());
                     for(Edge e:listSource)
                     {
-                         String des= SystemDefs.JavabaseDB.nhfile.getNode(e.getDestination()).getLabel();
+                        String des= SystemDefs.JavabaseDB.nhfile.getNode(e.getDestination()).getLabel();
                         System.out.println("Destination Node: "+des+" Label: "+e.getLabel() + " Weight: "+e.getWeight());
                     }
-                    }
-                    else    System.out.println("Node Outgoing Edges: "+listSource.size());
-                    
                 }
-                else 
-                    System.out.println("No mactch found!!");
-            
+                else    System.out.println("Node Outgoing Edges: "+listSource.size());
+
+            }
+            else 
+                System.out.println("No mactch found!!");
+
             break;
         case 5:
             System.out.println("query will take a target descriptor and a distance and return all relevant information (including outgoing and incoming edges) about the nodes with the given distance from the target descriptor.");
@@ -576,21 +644,21 @@ public class NodeQuery
                     Integer.parseInt(tokens[2]),
                     Integer.parseInt(tokens[3]),
                     Integer.parseInt(tokens[4])
-            );
+                    );
 
             distance = Integer.parseInt(tokens[5]);
             if (index == 1) {
                 boolean status = OK;
-                
+
                 // start index scan
                 ZBTFileScan izscan = null;
                 Set<DescriptorRangePair> pairs = ZIndexUtils.getRangesForDescRange(
                         ZIndexUtils.getDiagonalDescFromDistance(new DescriptorKey(userDesc), distance), userDesc, distance);
-                
+
                 SystemDefs.JavabaseDB.ztNodeDesc = new ZBTreeFile(SystemDefs.JavabaseDBName+"_ZTreeNodeIndex",
                         AttrType.attrString, 180, 1/*delete*/);
                 boolean flag = true;
-               // System.out.println(pairs.size());
+                // System.out.println(pairs.size());
                 for (DescriptorRangePair pair: pairs) {
                     try {
                         izscan = SystemDefs.JavabaseDB.ztNodeDesc.new_scan(pair.getStart(), pair.getEnd());
@@ -616,57 +684,57 @@ public class NodeQuery
                             Node node = SystemDefs.JavabaseDB.nhfile.getNode(nid);
                             System.out.println(node.getLabel() + " -- Descriptor: " + Arrays.toString(node.getDesc().value)+" DISTANCE: "+userDesc.distance(node.getDesc()));
                             List<EID> eidList=    SystemDefs.JavabaseDB.ehfile.getEIDListIndex(nid, graphDBName, numBuf);
-                            
+
                             if(eidList!=null&&!eidList.isEmpty())
-                        {
-                         
-                        	// System.out.println("Key: " + k.getKey() + "\nLabel: " +
-                           
-                           List<Edge> listSource= new ArrayList<Edge>();
-                           List<Edge> listDes= new ArrayList<Edge>();
-                           for(EID i:eidList)
-                           {
-                        	   Edge curEdge = SystemDefs.JavabaseDB.ehfile.getEdge(i);
-                               NID nidSource =curEdge.getSource();
-                               NID nidDes = curEdge.getDestination();
-                               String nodeSource =  SystemDefs.JavabaseDB.nhfile.getNode(nidSource).getLabel();
-                               String nodeDes =  SystemDefs.JavabaseDB.nhfile.getNode(nidDes).getLabel();
-                               if(nodeSource.equalsIgnoreCase(node.getLabel()))   listSource.add(curEdge);
-                               if(nodeDes.equalsIgnoreCase(node.getLabel()))   listDes.add(curEdge);
-                           }
-                         //  System.out.println(listDes.size()+" "+listSource.size());
-                           if(!listDes.isEmpty())
-                           {
-                               System.out.println("Node Incomming Edges: "+listDes.size());
-                                               for(Edge e:listDes)
-                           {
-                                String src= SystemDefs.JavabaseDB.nhfile.getNode(e.getSource()).getLabel();
-                               System.out.println("Source Node: "+src+" Label: "+e.getLabel() + " Weight: "+e.getWeight());
-                           }
-                           }
-                           else
-                           System.out.println("Node Incomming Edges: "+listDes.size());
-                           if(!listSource.isEmpty())
-                           {
-                               System.out.println("Node Outgoing Edges: "+listSource.size());
-                           for(Edge e:listSource)
-                           {
-                                String des= SystemDefs.JavabaseDB.nhfile.getNode(e.getDestination()).getLabel();
-                               System.out.println("Destination Node: "+des+" Label: "+e.getLabel() + " Weight: "+e.getWeight());
-                           }
-                           }
-                           else    System.out.println("Node Outgoing Edges: "+listSource.size());
-                           
-                       }
-                       else 
-                           System.out.println("No mactch found!!");
-                    
-                        
+                            {
+
+                                // System.out.println("Key: " + k.getKey() + "\nLabel: " +
+
+                                List<Edge> listSource= new ArrayList<Edge>();
+                                List<Edge> listDes= new ArrayList<Edge>();
+                                for(EID i:eidList)
+                                {
+                                    Edge curEdge = SystemDefs.JavabaseDB.ehfile.getEdge(i);
+                                    NID nidSource =curEdge.getSource();
+                                    NID nidDes = curEdge.getDestination();
+                                    String nodeSource =  SystemDefs.JavabaseDB.nhfile.getNode(nidSource).getLabel();
+                                    String nodeDes =  SystemDefs.JavabaseDB.nhfile.getNode(nidDes).getLabel();
+                                    if(nodeSource.equalsIgnoreCase(node.getLabel()))   listSource.add(curEdge);
+                                    if(nodeDes.equalsIgnoreCase(node.getLabel()))   listDes.add(curEdge);
+                                }
+                                //  System.out.println(listDes.size()+" "+listSource.size());
+                                if(!listDes.isEmpty())
+                                {
+                                    System.out.println("Node Incomming Edges: "+listDes.size());
+                                    for(Edge e:listDes)
+                                    {
+                                        String src= SystemDefs.JavabaseDB.nhfile.getNode(e.getSource()).getLabel();
+                                        System.out.println("Source Node: "+src+" Label: "+e.getLabel() + " Weight: "+e.getWeight());
+                                    }
+                                }
+                                else
+                                    System.out.println("Node Incomming Edges: "+listDes.size());
+                                if(!listSource.isEmpty())
+                                {
+                                    System.out.println("Node Outgoing Edges: "+listSource.size());
+                                    for(Edge e:listSource)
+                                    {
+                                        String des= SystemDefs.JavabaseDB.nhfile.getNode(e.getDestination()).getLabel();
+                                        System.out.println("Destination Node: "+des+" Label: "+e.getLabel() + " Weight: "+e.getWeight());
+                                    }
+                                }
+                                else    System.out.println("Node Outgoing Edges: "+listSource.size());
+
+                            }
+                            else 
+                                System.out.println("No mactch found!!");
+
+
                         } catch (Exception e) {
                             status = FAIL;
                             e.printStackTrace();
                         }
-                        
+
                         try {
                             tz = izscan.get_next();
                         } catch (Exception e) {
@@ -725,53 +793,53 @@ public class NodeQuery
                             System.out.println("Label: " + node.getLabel() + " Descriptor: " + node.getDesc().getString()+ " Distance: "+userDesc.distance(node.getDesc()));
                             NID nid =  SystemDefs.JavabaseDB.nhfile.getNID(node);
                             List<EID> eidList=    SystemDefs.JavabaseDB.ehfile.getEIDListHeap(nid);
-                            
-                            if(eidList!=null&&!eidList.isEmpty())
-                        {
-                         
-                        	// System.out.println("Key: " + k.getKey() + "\nLabel: " +
-                           
-                           List<Edge> listSource= new ArrayList<Edge>();
-                           List<Edge> listDes= new ArrayList<Edge>();
-                           for(EID i:eidList)
-                           {
-                        	   Edge curEdge = SystemDefs.JavabaseDB.ehfile.getEdge(i);
-                               NID nidSource =curEdge.getSource();
-                               NID nidDes = curEdge.getDestination();
-                               String nodeSource =  SystemDefs.JavabaseDB.nhfile.getNode(nidSource).getLabel();
-                               String nodeDes =  SystemDefs.JavabaseDB.nhfile.getNode(nidDes).getLabel();
-                               if(nodeSource.equalsIgnoreCase(node.getLabel()))   listSource.add(curEdge);
-                               if(nodeDes.equalsIgnoreCase(node.getLabel()))   listDes.add(curEdge);
-                           }
-                         //  System.out.println(listDes.size()+" "+listSource.size());
-                           if(!listDes.isEmpty())
-                           {
-                               System.out.println("Node Incomming Edges: "+listDes.size());
-                                               for(Edge e:listDes)
-                           {
-                                String src= SystemDefs.JavabaseDB.nhfile.getNode(e.getSource()).getLabel();
-                               System.out.println("Source Node: "+src+" Label: "+e.getLabel() + " Weight: "+e.getWeight());
-                           }
-                           }
-                           else
-                           System.out.println("Node Incomming Edges: "+listDes.size());
-                           if(!listSource.isEmpty())
-                           {
-                               System.out.println("Node Outgoing Edges: "+listSource.size());
-                           for(Edge e:listSource)
-                           {
-                                String des= SystemDefs.JavabaseDB.nhfile.getNode(e.getDestination()).getLabel();
-                               System.out.println("Destination Node: "+des+" Label: "+e.getLabel() + " Weight: "+e.getWeight());
-                           }
-                           }
-                           else    System.out.println("Node Outgoing Edges: "+listSource.size());
-                           
-                       }
-                       else 
-                           System.out.println("No mactch found!!");
-                    
 
-                        
+                            if(eidList!=null&&!eidList.isEmpty())
+                            {
+
+                                // System.out.println("Key: " + k.getKey() + "\nLabel: " +
+
+                                List<Edge> listSource= new ArrayList<Edge>();
+                                List<Edge> listDes= new ArrayList<Edge>();
+                                for(EID i:eidList)
+                                {
+                                    Edge curEdge = SystemDefs.JavabaseDB.ehfile.getEdge(i);
+                                    NID nidSource =curEdge.getSource();
+                                    NID nidDes = curEdge.getDestination();
+                                    String nodeSource =  SystemDefs.JavabaseDB.nhfile.getNode(nidSource).getLabel();
+                                    String nodeDes =  SystemDefs.JavabaseDB.nhfile.getNode(nidDes).getLabel();
+                                    if(nodeSource.equalsIgnoreCase(node.getLabel()))   listSource.add(curEdge);
+                                    if(nodeDes.equalsIgnoreCase(node.getLabel()))   listDes.add(curEdge);
+                                }
+                                //  System.out.println(listDes.size()+" "+listSource.size());
+                                if(!listDes.isEmpty())
+                                {
+                                    System.out.println("Node Incomming Edges: "+listDes.size());
+                                    for(Edge e:listDes)
+                                    {
+                                        String src= SystemDefs.JavabaseDB.nhfile.getNode(e.getSource()).getLabel();
+                                        System.out.println("Source Node: "+src+" Label: "+e.getLabel() + " Weight: "+e.getWeight());
+                                    }
+                                }
+                                else
+                                    System.out.println("Node Incomming Edges: "+listDes.size());
+                                if(!listSource.isEmpty())
+                                {
+                                    System.out.println("Node Outgoing Edges: "+listSource.size());
+                                    for(Edge e:listSource)
+                                    {
+                                        String des= SystemDefs.JavabaseDB.nhfile.getNode(e.getDestination()).getLabel();
+                                        System.out.println("Destination Node: "+des+" Label: "+e.getLabel() + " Weight: "+e.getWeight());
+                                    }
+                                }
+                                else    System.out.println("Node Outgoing Edges: "+listSource.size());
+
+                            }
+                            else 
+                                System.out.println("No mactch found!!");
+
+
+
                         }
                     }
 
