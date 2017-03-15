@@ -406,7 +406,88 @@ public class EdgeQuery
                 SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
                 SystemDefs.JavabaseBM.flushAllPages();
 
-                new FullScanEdge().fullScanEdge(graphDBName);
+                boolean status = OK;
+
+                AttrType[] attrType = new AttrType[6];
+                attrType[0] = new AttrType(AttrType.attrInteger);
+                attrType[1] = new AttrType(AttrType.attrInteger);
+                attrType[2] = new AttrType(AttrType.attrInteger);
+                attrType[3] = new AttrType(AttrType.attrInteger);
+                attrType[4] = new AttrType(AttrType.attrInteger);
+                attrType[5] = new AttrType(AttrType.attrString);
+                short[] attrSize = new short[1];
+                attrSize[0] = 20; //REC_LEN1;
+                TupleOrder[] order = new TupleOrder[1];
+                order[0] = new TupleOrder(TupleOrder.Ascending);
+                //order[1] = new TupleOrder(TupleOrder.Descending);
+
+                // create an iterator by open a file scan
+                FldSpec[] projlist = new FldSpec[6];
+                RelSpec rel = new RelSpec(RelSpec.outer); 
+                projlist[0] = new FldSpec(rel, 1);
+                projlist[1] = new FldSpec(rel, 2);
+                projlist[2] = new FldSpec(rel, 3);
+                projlist[3] = new FldSpec(rel, 4); 
+                projlist[4] = new FldSpec(rel, 5); 
+                projlist[5] = new FldSpec(rel, 6); 
+
+                FileScan fscan = null;
+                try {
+                    fscan = new FileScan(SystemDefs.JavabaseDBName+"_Edge", attrType, attrSize, (short) 6, 6, projlist, null);
+                }
+                catch (Exception e) {
+                    status = FAIL;
+                    e.printStackTrace();
+                }
+
+                // Sort 
+                Sort sort = null;
+                try {
+                    sort = new Sort(attrType, (short) 6, attrSize, fscan, 1, order[0], 8, 30);
+                }
+                catch (Exception e) {
+                    status = FAIL;
+                    e.printStackTrace();
+                }
+                int count = 0;
+                Tuple t = null;
+                String outval = null;
+
+                try {
+                    t = sort.get_next();
+                }
+                catch (Exception e) {
+                    status = FAIL;
+                    e.printStackTrace(); 
+                }
+
+                boolean flag = true;
+                while (t != null) {                   
+                    try {
+                        Edge edge =new Edge();
+                        edge.edgeInit(t.getTupleByteArray(), 0);
+                        System.out.print("\tSource: "+SystemDefs.JavabaseDB.nhfile.getNode(edge.getSource()).getLabel()+ "\tEdge Label:"+edge.getLabel());
+                        System.out.println("\tEdge Weight: "+edge.getWeight());
+                        t = sort.get_next();
+                    }
+                    catch (Exception e) {
+                        status = FAIL;
+                        e.printStackTrace();
+                    }
+                    
+                }
+
+
+                // clean up
+                try {
+                    sort.close();
+                }
+                catch (Exception e) {
+                    status = FAIL;
+                    e.printStackTrace();
+                }
+
+
             } 
             else {
 
