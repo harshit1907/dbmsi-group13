@@ -1,10 +1,7 @@
 package tests;
 //originally from : joins.C
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import ZIndex.ZIndexUtils;
 import btree.BTFileScan;
@@ -246,7 +243,6 @@ public class NodeQuery
                     Integer.parseInt(tokens[3]),
                     Integer.parseInt(tokens[4])
             );
-            int distance = Integer.parseInt(tokens[5]);
             if (index == 1) {
                 boolean status = OK;
                 SystemDefs.JavabaseDB.ztNodeDesc = new ZBTreeFile(SystemDefs.JavabaseDBName + "_ZTreeNodeIndex",
@@ -254,7 +250,68 @@ public class NodeQuery
 
                 // start index scan
                 ZBTFileScan izscan = null;
+                boolean flag = true;
+                try {
+                    izscan = SystemDefs.JavabaseDB.ztNodeDesc.new_scan(null, null);
+                } catch (Exception e) {
+                    status = FAIL;
+                    e.printStackTrace();
+                }
 
+                DescriptorDataEntry tz = null;
+                try {
+                    tz = izscan.get_next();
+                } catch (Exception e) {
+                    status = FAIL;
+                    e.printStackTrace();
+                }
+                flag = true;
+
+                Map<Double, LinkedHashSet> map = new TreeMap<>();
+
+                while (tz != null && izscan != null) {
+                    try {
+                        if (tz == null) break;
+                        DescriptorKey k = (DescriptorKey) tz.key;
+                        zbtree.LeafData l = (zbtree.LeafData) tz.data;
+                        NID nid = l.getData();
+                        Node node = SystemDefs.JavabaseDB.nhfile.getNode(nid);
+                        // System.out.println("Key: " + k.getKey() + "\nLabel: " +
+                        double dist = userDesc.distance(node.getDesc());
+                        if (map.containsKey(dist)) {
+                            LinkedHashSet<Node> set = map.get(dist);
+                            set.add(node);
+                            map.put(dist, set);
+                        } else {
+                            LinkedHashSet<Node> set = new LinkedHashSet<>();
+                            set.add(node);
+                            map.put(dist, set);
+                        }
+
+                    } catch (Exception e) {
+                        status = FAIL;
+                        e.printStackTrace();
+                    }
+
+                    try {
+                        tz = izscan.get_next();
+                    } catch (Exception e) {
+                        status = FAIL;
+                        e.printStackTrace();
+                    }
+                }
+
+                 for (Map.Entry<Double, LinkedHashSet> entry: map.entrySet()) {
+                    if (0.0 != entry.getKey()) {
+                        for (Object obj : entry.getValue()) {
+                            Node node = (Node) obj;
+
+                            System.out.println(node.getLabel() + " -- Descriptor: " +
+                                    Arrays.toString(node.getDesc().value) + "DISTANCE: " +
+                                    entry.getKey());
+                        }
+                    }
+                 }
             } else if (index == 0) {
 
             }
@@ -271,7 +328,7 @@ public class NodeQuery
                     Integer.parseInt(tokens[4])
             );
 
-            distance = Integer.parseInt(tokens[5]);
+            int distance = Integer.parseInt(tokens[5]);
 
             if (index == 1) {
                 boolean status = OK;
@@ -279,7 +336,8 @@ public class NodeQuery
                 // start index scan
                 ZBTFileScan izscan = null;
                 Set<DescriptorRangePair> pairs = ZIndexUtils.getRangesForDescRange(
-                        ZIndexUtils.getDiagonalDescFromDistance(new DescriptorKey(userDesc), distance), userDesc, distance);
+                        ZIndexUtils.getDiagonalDescFromDistance(new DescriptorKey(userDesc), distance),
+                        userDesc, distance);
                 
                 SystemDefs.JavabaseDB.ztNodeDesc = new ZBTreeFile(SystemDefs.JavabaseDBName+"_ZTreeNodeIndex",
                         AttrType.attrString, 180, 1/*delete*/);
@@ -321,8 +379,6 @@ public class NodeQuery
                             status = FAIL;
                             e.printStackTrace();
                         }
-
-
                     }
                 }
                 // clean up
