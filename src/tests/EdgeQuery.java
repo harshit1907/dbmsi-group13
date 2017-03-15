@@ -14,6 +14,7 @@ import btree.BTreeFile;
 import btree.ConstructPageException;
 import btree.GetFileEntryException;
 import btree.IntegerKey;
+import btree.KeyClass;
 import btree.KeyDataEntry;
 import btree.LeafData;
 import btree.StringKey;
@@ -622,7 +623,9 @@ public class EdgeQuery
                 SystemDefs.JavabaseDB.btEdgeWeight = new BTreeFile(SystemDefs.JavabaseDBName+"_BTreeEdgeWeightIndex", AttrType.attrInteger, 32, 1/*delete*/);
 
                 try {
-                    iscan = SystemDefs.JavabaseDB.btEdgeWeight.new_scan(null, null);
+                	IntegerKey integerKey =new IntegerKey(lowerBound);
+                	IntegerKey integerKey2 = new IntegerKey(upperBound);
+                	iscan = SystemDefs.JavabaseDB.btEdgeWeight.new_scan(integerKey, integerKey2);
 
                 }
                 catch (Exception e) {
@@ -651,14 +654,10 @@ public class EdgeQuery
                         if(t==null) break;
                         IntegerKey k = (IntegerKey)t.key;
                         Integer curweight = k.getKey();
-                        if(lowerBound<=curweight&&curweight<=upperBound)
-                        {
-
-                            LeafData l = (LeafData)t.data;
+                        LeafData l = (LeafData)t.data;
                             RID rid =  l.getData();
                             EID eid = new EID(rid.pageNo, rid.slotNo);
                             listEid.add(eid);
-                        }
                     }
                     catch (Exception e) {
                         status = FAIL;
