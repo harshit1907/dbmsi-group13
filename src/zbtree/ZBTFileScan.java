@@ -95,8 +95,6 @@ public class ZBTFileScan extends IndexFileScan implements GlobalConst {
         }
     }
 
-
-
     @Override
     public int keysize() {
         return maxKeysize;

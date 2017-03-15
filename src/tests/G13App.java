@@ -44,7 +44,6 @@ import heap.InvalidTupleSizeException;
 // batchedgeinsert /home/prakhar/Documents/minjava/javaminibase/EdgeTestData.txt db1
 // batchedgedelete /home/prakhar/Documents/minjava/javaminibase/EdgeTestData2.txt db1
 
-
 public class G13App {
     public static void main(String[] agrs) throws InvalidSlotNumberException, InvalidTupleSizeException, HFException, HFDiskMgrException, HFBufMgrException, IOException, Exception {
         String graphDbName=null, inputFile = null, qOptions=null;

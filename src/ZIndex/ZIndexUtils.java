@@ -200,7 +200,6 @@ public class ZIndexUtils {
 	  KeyClass key2 = new DescriptorKey(desc2);
 
 	  if (((DescriptorKey)key1).getKey().compareTo(((DescriptorKey)key2).getKey()) > 0) {
-
           return new DescriptorRangePair((DescriptorKey) key2, (DescriptorKey) key1);
       } else {
           return new DescriptorRangePair((DescriptorKey) key1, (DescriptorKey) key2);
@@ -216,8 +215,6 @@ public class ZIndexUtils {
       } else {
           queue.add(pair);
       }
-      //System.out.println(pair.getStart().getDesc().getString()+" Dist: "+target.distance(pair.getStart().getDesc()));
-      //System.out.println(pair.getEnd().getDesc().getString()+" Dist: "+target.distance(pair.getEnd().getDesc()));
 
       while (!queue.isEmpty()) {
           DescriptorRangePair range = queue.remove();
@@ -240,20 +237,7 @@ public class ZIndexUtils {
                   lower = new DescriptorRangePair(
                           BitShufflingUtils.keyFromStrings(litStart),
                           BitShufflingUtils.keyFromStrings(litEnd));
-                  
-//                  System.out.println("///////");
-//                  System.out.println("Axis is : "+axis+" Position: "+);
-//                  System.out.println(startKey);
-//                  System.out.println( endKey);
-//                  System.out.println("=======");
-                  
-//                  System.out.println(BitShufflingUtils.keyFromStrings(litStart));
-//                  System.out.println( BitShufflingUtils.keyFromStrings(litEnd));
-//                  System.out.println(Arrays.toString(litStart));
-//                  System.out.println(Arrays.toString(litEnd));
-//                  System.out.println("-------");
-//                  
-                  
+
                   String[] bigStart = lit.clone();
                   bigStart[axis] = bigMin;
                   String[] bigEnd = big.clone();
@@ -261,27 +245,16 @@ public class ZIndexUtils {
                           BitShufflingUtils.keyFromStrings(bigStart),
                           BitShufflingUtils.keyFromStrings(bigEnd));
                   
-//                  System.out.println(BitShufflingUtils.keyFromStrings(bigStart));
-//                  System.out.println(BitShufflingUtils.keyFromStrings(bigEnd));
-//                  System.out.println(Arrays.toString(bigStart));
-//                  System.out.println(Arrays.toString(bigEnd));
-//                  System.out.println("///////");
-                  //System.out.println("From:"+lower.getStart().getDesc().getString()+" To: "+lower.getEnd().getDesc().getString());
                   if (substringMaxMatch(lower.getStart().getKey(), lower.getEnd().getKey(),target,distance)) {
-                      //System.out.println("TRUE LOWER");
                       DescriptorRangePair ansLow= new DescriptorRangePair(lower.getStart(), lower.getEnd());
                       result.add(ansLow);
                   } else {
-                      //System.out.println("FALSE LOWER");
                       queue.add(lower);
                   }
-                  //System.out.println("From:"+upper.getStart().getDesc().getString()+" To: "+upper.getEnd().getDesc().getString());
                   if (substringMaxMatch(upper.getStart().getKey(), upper.getEnd().getKey(),target,distance)) {
-                      //System.out.println("TRUE UPPER");
                       DescriptorRangePair ansHigh= new DescriptorRangePair(upper.getStart(), upper.getEnd());
                       result.add(ansHigh);
                   } else {
-                      //System.out.println("FALSE UPPER");
                       queue.add(upper);
                   }
                   break;
@@ -341,13 +314,13 @@ public class ZIndexUtils {
                 falsePts++;
             }
        //     System.out.println("Key: "+k.getKey()+" Label: "+node.getLabel()+" -- Descripotr: "+node.getDesc().value[0]+" "+node.getDesc().value[1]+" "+node.getDesc().value[2]+" "+node.getDesc().value[3]+" "+node.getDesc().value[4]);
-            
+
         }
         catch (Exception e) {
             status = FAIL;
             e.printStackTrace();
         }
-        
+
         try {
             tz = izscan.get_next();
         }
@@ -361,7 +334,7 @@ public class ZIndexUtils {
             break;
         }
     }
-    
+
     // clean up
     try {
         //iscan.close();
@@ -378,7 +351,7 @@ public class ZIndexUtils {
     return true;
   }
 
-  private static String getLitMax(String lit, int pos) {
+private static String getLitMax(String lit, int pos) {
       StringBuilder res = new StringBuilder();
 	  for (int i = 0; i < 32; i++) {
 		  if (i < pos) res.append(lit.charAt(i));
