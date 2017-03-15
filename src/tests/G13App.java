@@ -5,12 +5,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import bufmgr.BufMgr;
-import bufmgr.BufMgrException;
-import bufmgr.HashOperationException;
-import bufmgr.PageNotFoundException;
-import bufmgr.PagePinnedException;
-import bufmgr.PageUnpinnedException;
 import diskmgr.PCounter;
 import global.SystemDefs;
 import heap.HFBufMgrException;
@@ -22,115 +16,161 @@ import heap.InvalidTupleSizeException;
 // Shobhit
 // batchnodeinsert /home/anjoy92/Documents/dbmsi-group13/src/tests/NodeTestDataI.txt db1
 // batchnodedelete /home/anjoy92/Documents/dbmsi-group13/src/tests/NodeTestDataD.txt db1
-// fullnodescan db1
+
 // Harshit
 // batchnodeinsert C://NodeTestData.txt db1
 // batchnodedelete C://mihir.txt db1
 // batchedgeinsert C://EdgeTestData.txt db1
 // batchedgedelete C://EdgeTestData2.txt db1
 
-// fullnodescan db1
+// Mihir
+// batchnodeinsert /Users/mihir/dev/NodeTestData.txt db1
+// batchnodedelete /Users/mihir/dev/NodeTestData2.txt db1
+// batchedgeinsert /Users/mihir/dev/EdgeTestData.txt db1
+// batchedgedelete /Users/mihir/dev/EdgeTestData2.txt db1
+
+// COMMON Commands
+// nodequery GRAPHDBNAME NUMBUF QTYPE INDEX [QUERYOPTIONS]
+// nodequery db1 40 1 0 0
+// nodequery db1 40 5 1 10 20 30 40 50 5
+// edgequery GRAPHDBNAME NUMBUF QTYPE INDEX [QUERYOPTIONS]
+// edgequery db1 40 1 0 
+// fullnodescan db1 
 // fulledgescan db1
-// nodequery C://NodeTestData.txt db1
-// edgequery C://EdgeTestData.txt db1
+
+// Prakhar
+// batchnodeinsert /home/prakhar/Documents/minjava/javaminibase/NodeTestData.txt db1
+// batchnodedelete /home/prakhar/Documents/minjava/javaminibase/NodeTestData2.txt db1
+// batchedgeinsert /home/prakhar/Documents/minjava/javaminibase/EdgeTestData.txt db1
+// batchedgedelete /home/prakhar/Documents/minjava/javaminibase/EdgeTestData2.txt db1
 
 
-
-//Mihir
-//batchnodeinsert /Users/mihir/dev/NodeTestData.txt db1
-//batchnodedelete /Users/mihir/dev/NodeTestData2.txt db1
-//batchedgeinsert /Users/mihir/dev/EdgeTestData.txt db1
-//batchedgedelete /Users/mihir/dev/EdgeTestData2.txt db1
 public class G13App {
-	   public static void main(String[] agrs) throws InvalidSlotNumberException, InvalidTupleSizeException, HFException, HFDiskMgrException, HFBufMgrException, IOException, Exception {
-		   	//String graphdbname=args[0];
-		   	String graphdbname=null;
-		   	
-		   	while(true) {
-		   		PCounter.initialize();
-		   		System.out.print("Group13> ");
-		   		BufferedReader input = new BufferedReader (new InputStreamReader (System.in));
-		   		String line = input.readLine();
-		   		String []tokens = line.trim().split(" ");
-		   		String operation = tokens[0];
-		   		if(operation.equalsIgnoreCase("exit")) {
-		   			System.err.println("Bye! \n");
-		   			break;
-		   		}
-		   		if(operation.equalsIgnoreCase("help")) {
-		   			System.out.println("");
-		   		}
-		   		String inputFile = tokens[1];
-		   		String DBName=null;
-		   		if(tokens.length>2)
-		   			DBName = tokens[2];
-			   	
-			   	if(operation.equalsIgnoreCase("batchnodeinsert")) {
+    public static void main(String[] agrs) throws InvalidSlotNumberException, InvalidTupleSizeException, HFException, HFDiskMgrException, HFBufMgrException, IOException, Exception {
+        String graphDbName=null, inputFile = null, qOptions=null;
+        int numBuf=0, qType=0, Index=0;
+        
+        boolean created=false;
+        while(true) {
+            PCounter.initialize();
+            System.out.print("Group13> ");
+            BufferedReader input = new BufferedReader (new InputStreamReader (System.in));
 
-			   		if(graphdbname==null) {
-			   			graphdbname = DBName;
-			   			createDB(DBName);
-			   		}
-			   		//SystemDefs.JavabaseBM.flushAllPages();
-			   		//SystemDefs.JavabaseBM = new BufMgr(40, "Clock");
-			   		//SystemDefs.JavabaseBM.flushAllPages();
-			   		new BatchNodeInsert().batchNodeInsert(inputFile, graphdbname);
-			   	} else if (operation.equalsIgnoreCase("batchnodedelete")) {
-			   		if(graphdbname==null) {
-			   			graphdbname = DBName;
-			   			createDB(DBName);
-			   		}
-			   		/*SystemDefs.JavabaseBM.flushAllPages();
-			   		SystemDefs.JavabaseBM = new BufMgr(30, "Clock");
-			   		SystemDefs.JavabaseBM.flushAllPages();*/
-			   		new BatchNodeDelete().batchNodeDelete(inputFile, graphdbname);
-			   	} else if (operation.equalsIgnoreCase("fullnodescan")) {
-			   		SystemDefs.JavabaseBM.flushAllPages();
-			   		SystemDefs.JavabaseBM = new BufMgr(50, "Clock");
-			   		SystemDefs.JavabaseBM.flushAllPages();
-			   		new FullScanNode().fullScanNode( graphdbname);
-			   	} else if (operation.equalsIgnoreCase("fulledgescan")) {
-			   		new FullScanEdge().fullScanEdge( graphdbname);
-			   	} else if (operation.equalsIgnoreCase("batchedgeinsert")) {
-			   		if(graphdbname==null) {
-			   			graphdbname = DBName;
-			   			createDB(DBName);
-			   		} //else 
-			   		//	openDB(DBName);
-			   		//SystemDefs.JavabaseBM.flushAllPages();
-			   		new BatchEdgeInsert().batchEdgeInsert(inputFile);
-			   	} else if (operation.equalsIgnoreCase("nodequery")) {
-			   		//int numBuf = Integer.parseInt(tokens[3]);
-			   		if(graphdbname==null) {
-			   			graphdbname = DBName;
-			   		}
-			   		new NodeQuery().nodeQuery(graphdbname, 40,1,0,"30 40 50 60 70 5"); //put label
-			  	} else if (operation.equalsIgnoreCase("edgequery")) {
-				   		//int numBuf = Integer.parseInt(tokens[3]);
-				   		if(graphdbname==null) {
-				   			graphdbname = DBName;
-				   		}
-				   		//System.out.println("Whuy!!");
-				   	new EdgeQuery().edgeQuery(graphdbname, 40,1,0,"10 20");//put space sep lowerbound and upper bound
-				   //	System.out.println("Whuy!!--");
-			   	} else if (operation.equalsIgnoreCase("batchedgedelete")) {
-			   		if(graphdbname==null) {
-			   			graphdbname = DBName;
-			   			createDB(DBName);
-			   		}// else 
-			   		//	openDB(DBName);
-			   		new BatchEdgeDelete().batchEdgeDelete(inputFile);
-			   	} else {
-			   		System.out.println(operation + " is not recognized as a command.\nType help for more information.");
-			   	}
-		   	}
-		}  
-	   public static void createDB(String graphDbName) {
-		   SystemDefs sysdef = new SystemDefs(graphDbName,10000,20,"Clock",0);
-	   }
-	   public static void openDB(String graphDbName) throws HashOperationException, PageUnpinnedException, PagePinnedException, PageNotFoundException, BufMgrException, IOException {
-		   SystemDefs.JavabaseBM.flushAllPages();
-		   System.out.println("hihihihi");
-		   SystemDefs sysdef = new SystemDefs(graphDbName,0,20,"Clock",0);
-	   }
+            String line = input.readLine();
+            String []tokens = line.trim().split(" ");
+
+            String operation = tokens[0];
+
+            if(operation.equalsIgnoreCase("exit") || operation.equalsIgnoreCase("quit")) {
+                System.err.println("Bye! \n");
+                System.exit(0);
+                break;
+            }
+            if(operation.equalsIgnoreCase("help")) {
+                System.out.println("");
+                continue;
+            }
+
+            if(operation.equalsIgnoreCase("batchnodeinsert")) {
+
+                if(tokens.length<=2) {
+                    System.out.println("Not enough arguments!\n");
+                    continue;
+                }
+                inputFile = tokens[1];
+                graphDbName = tokens[2];
+                if(created==false) {
+                    createDB(graphDbName);
+                    created=true;
+                }
+                new BatchNodeInsert().batchNodeInsert(inputFile, graphDbName);
+
+            } else if (operation.equalsIgnoreCase("batchnodedelete")) {
+                if(tokens.length<=2) {
+                    System.out.println("Not enough arguments!\n");
+                    continue;
+                }
+                inputFile = tokens[1];
+                graphDbName = tokens[2];
+                if(created==false) {
+                    createDB(graphDbName);
+                    created=true;
+                }
+                new BatchNodeDelete().batchNodeDelete(inputFile, graphDbName);
+
+            } else if (operation.equalsIgnoreCase("batchedgeinsert")) {
+                if(tokens.length<=2) {
+                    System.out.println("Not enough arguments!\n");
+                    continue;
+                }
+                inputFile = tokens[1];
+                graphDbName = tokens[2];
+                if(created==false) {
+                    createDB(graphDbName);
+                    created=true;
+                }
+                new BatchEdgeInsert().batchEdgeInsert(inputFile);
+            } else if (operation.equalsIgnoreCase("batchedgedelete")) {
+                if(tokens.length<=2) {
+                    System.out.println("Not enough arguments!\n");
+                    continue;
+                }
+                inputFile = tokens[1];
+                graphDbName = tokens[2];
+                if(created==false) {
+                    createDB(graphDbName);
+                    created=true;
+                }
+                new BatchEdgeDelete().batchEdgeDelete(inputFile);
+            } else if (operation.equalsIgnoreCase("fullnodescan")) {
+                new FullScanNode().fullScanNode(graphDbName);
+            } else if (operation.equalsIgnoreCase("fulledgescan")) {
+                new FullScanEdge().fullScanEdge(graphDbName);
+
+            } else if (operation.equalsIgnoreCase("nodequery")) {
+                if(created==false) {
+                    System.out.println("Database does not exist!\n");
+                    continue;
+                }
+                graphDbName = tokens[1];
+                numBuf = Integer.parseInt(tokens[2]);
+                qType = Integer.parseInt(tokens[3]);
+                Index = Integer.parseInt(tokens[4]);
+                if(tokens.length>=5) { // "30 40 50 60 70 5"
+                    qOptions="";
+                    for(int i=5;i<tokens.length;i++)
+                        qOptions+=tokens[i]+" ";
+                }
+                if(qOptions!=null) qOptions = qOptions.trim();
+                System.out.println("Selected option: "+qOptions);
+                new NodeQuery().nodeQuery(graphDbName,numBuf,qType,Index,qOptions);
+                
+            } else if (operation.equalsIgnoreCase("edgequery")) {
+                if(created==false) {
+                    System.out.println("Database does not exist!\n");
+                    continue;
+                }
+                graphDbName = tokens[1];
+                numBuf = Integer.parseInt(tokens[2]);
+                qType = Integer.parseInt(tokens[3]);
+                Index = Integer.parseInt(tokens[4]);
+                if(tokens.length>=5) { //put space sep lowerbound and upper bound "10 20"
+                    qOptions="";
+                    for(int i=5;i<tokens.length;i++)
+                        qOptions+=tokens[i]+" ";
+                }
+                if(qOptions!=null) qOptions = qOptions.trim();
+                System.out.println("Selected option: "+qOptions);
+                new EdgeQuery().edgeQuery(graphDbName,numBuf,qType,Index,qOptions);
+
+            } else {
+                System.out.print(line);
+                System.out.println(" is not recognized as a command.\nType help for more information.");
+            }
+        }
+    }  
+    
+    public static void createDB(String graphDbName) {
+        SystemDefs sysdef = new SystemDefs(graphDbName,10000,40,"Clock",0);
+    }
 }

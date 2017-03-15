@@ -44,7 +44,7 @@ public class BatchNodeDelete {
 				nid=SystemDefs.JavabaseDB.nhfile.getNID(nd);
 				if(nid!=null)
 				{
-				List<EID> listEid= SystemDefs.JavabaseDB.ehfile.getEIDList(nid);
+				List<EID> listEid= SystemDefs.JavabaseDB.ehfile.getEIDListHeap(nid);
 				if(nid!=null){
 					try {
 						if(listEid!=null&&!listEid.isEmpty())

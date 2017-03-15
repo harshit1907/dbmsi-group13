@@ -55,81 +55,12 @@ public class NodeQuery
                     SystemDefs.JavabaseBM.flushAllPages();
                 SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
                 SystemDefs.JavabaseBM.flushAllPages();
-
+                new FullScanNode().fullScanNode(graphDBName);
                 // clean up
-                try {
-                    //iscan.close();
-                    SystemDefs.JavabaseDB.btNodeLabel.close();
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-//              
-//              System.out.println("*******************************************************************\n\n\n");
-//              
-//              status = OK;
-//              SystemDefs.JavabaseDB.ztNodeDesc = new ZBTreeFile(SystemDefs.JavabaseDBName+"_ZTreeNodeIndex", AttrType.attrString, 180, 1/*delete*/);
-//              
-//              // start index scan
-//              ZBTFileScan izscan = null;
-//              try {
-//                  izscan = SystemDefs.JavabaseDB.ztNodeDesc.new_scan(null, null);
-//              }
-//              catch (Exception e) {
-//                  status = FAIL;
-//                  e.printStackTrace();
-//              }
-//
-//              DescriptorDataEntry tz=null;
-//              try {
-//                  tz = izscan.get_next();
-//              }
-//              catch (Exception e) {
-//                  status = FAIL;
-//                  e.printStackTrace();
-//              }
-//              flag = true;
-//              //System.out.println(t+""+iscan);
-//              while (tz != null && izscan!=null) {
-//          //System.out.println("hii");
-//                  try {
-//                      tz = izscan.get_next();
-//                  }
-//                  catch (Exception e) {
-//                      status = FAIL;
-//                      e.printStackTrace();
-//                  }
-//                  
-//                  try {
-//                      if(tz==null) break;
-//                      DescriptorKey k = (DescriptorKey)tz.key;
-//                      
-//                      zbtree.LeafData l = (zbtree.LeafData)tz.data;
-//                      NID nid =  l.getData();
-//                      Node node = SystemDefs.JavabaseDB.nhfile.getNode(nid);
-//                      System.out.println("Key: "+k.getKey()+" Label: "+node.getLabel()+" -- Descripotr: "+node.getDesc().value[0]+" "+node.getDesc().value[1]+" "+node.getDesc().value[2]+" "+node.getDesc().value[3]+" "+node.getDesc().value[4]);
-//                  }
-//                  catch (Exception e) {
-//                      status = FAIL;
-//                      e.printStackTrace();
-//                  }
-//              }
-//
-//              if (flag && status) {
-//                  System.out.println("Test1 -- Index Scan OK");
-//              }
-//
-//              // clean up
-//              try {
-//                  //iscan.close();
-//                  SystemDefs.JavabaseDB.ztNodeDesc.close();
-//              }
-//              catch (Exception e) {
-//                  status = FAIL;
-//                  e.printStackTrace();
-//              }
-                
+            }
+            else
+            {
+            	System.out.println("No index found!!");                
                 
             }
             break;
@@ -161,7 +92,7 @@ public class NodeQuery
                 FileScan fscan = null;
 
                 try {
-                    fscan = new FileScan(SystemDefs.JavabaseDBName+"_Node", attrType, attrSize, (short) 6, 2, projlist, null);
+                    fscan = new FileScan(SystemDefs.JavabaseDBName+"_Node", attrType, attrSize, (short) 2, 2, projlist, null);
                 }
                 catch (Exception e) {
                     status = FAIL;
@@ -222,7 +153,7 @@ public class NodeQuery
 
                 // clean up
                 try {
-                    //sort.close();
+                   //sort.close();
                 }
                 catch (Exception e) {
                     status = FAIL;
@@ -378,7 +309,7 @@ public class NodeQuery
                             NID nid = l.getData();
                             Node node = SystemDefs.JavabaseDB.nhfile.getNode(nid);
                            // System.out.println("Key: " + k.getKey() + "\nLabel: " +
-                           System.out.println(node.getLabel() + " -- Descriptor: " + Arrays.toString(node.getDesc().value)+"DISTANCE: "+userDesc.distance(node.getDesc()));
+                           System.out.println(node.getLabel() + " -- Descriptor: " + Arrays.toString(node.getDesc().value)+" DISTANCE: "+userDesc.distance(node.getDesc()));
                         } catch (Exception e) {
                             status = FAIL;
                             e.printStackTrace();
@@ -459,7 +390,7 @@ public class NodeQuery
                 
                  NID nid =SystemDefs.JavabaseDB.nhfile.getNID(queryOptions);
                 if(nid!=null)   
-                  { listEid= SystemDefs.JavabaseDB.ehfile.getEIDList(nid);
+                  { listEid= SystemDefs.JavabaseDB.ehfile.getEIDListHeap(nid);
                   matchNode = SystemDefs.JavabaseDB.nhfile.getNode(nid);
                   }
             } 
@@ -512,9 +443,8 @@ public class NodeQuery
                         Node node = SystemDefs.JavabaseDB.nhfile.getNode(nid);
                         if(node.getLabel().equalsIgnoreCase(queryOptions))
                         {
-                            listEid= SystemDefs.JavabaseDB.ehfile.getEIDList(nid);
+                            listEid= SystemDefs.JavabaseDB.ehfile.getEIDListIndex(nid, graphDBName, numBuf);
                             matchNode = node;
-                            break;                          
                         }
                     
                     }
@@ -581,6 +511,125 @@ public class NodeQuery
             break;
         case 5:
             System.out.println("query will take a target descriptor and a distance and return all relevant information (including outgoing and incoming edges) about the nodes with the given distance from the target descriptor.");
+            userDesc  = new Descriptor();
+            tokens = queryOptions.split(" ");
+            userDesc.set(
+                    Integer.parseInt(tokens[0]),
+                    Integer.parseInt(tokens[1]),
+                    Integer.parseInt(tokens[2]),
+                    Integer.parseInt(tokens[3]),
+                    Integer.parseInt(tokens[4])
+            );
+
+            distance = Integer.parseInt(tokens[5]);
+            if (index == 1) {
+                boolean status = OK;
+                
+                // start index scan
+                ZBTFileScan izscan = null;
+                Set<DescriptorRangePair> pairs = ZIndexUtils.getRangesForDescRange(
+                        ZIndexUtils.getDiagonalDescFromDistance(new DescriptorKey(userDesc), distance), userDesc, distance);
+                
+                SystemDefs.JavabaseDB.ztNodeDesc = new ZBTreeFile(SystemDefs.JavabaseDBName+"_ZTreeNodeIndex",
+                        AttrType.attrString, 180, 1/*delete*/);
+                boolean flag = true;
+               // System.out.println(pairs.size());
+                for (DescriptorRangePair pair: pairs) {
+                    try {
+                        izscan = SystemDefs.JavabaseDB.ztNodeDesc.new_scan(pair.getStart(), pair.getEnd());
+                    } catch (Exception e) {
+                        status = FAIL;
+                        e.printStackTrace();
+                    }
+
+                    DescriptorDataEntry tz = null;
+                    try {
+                        tz = izscan.get_next();
+                    } catch (Exception e) {
+                        status = FAIL;
+                        e.printStackTrace();
+                    }
+                    flag = true;
+                    while (tz != null && izscan != null) {
+                        try {
+                            if (tz == null) break;
+                            DescriptorKey k = (DescriptorKey) tz.key;
+                            zbtree.LeafData l = (zbtree.LeafData) tz.data;
+                            NID nid = l.getData();
+                            Node node = SystemDefs.JavabaseDB.nhfile.getNode(nid);
+                            System.out.println(node.getLabel() + " -- Descriptor: " + Arrays.toString(node.getDesc().value)+" DISTANCE: "+userDesc.distance(node.getDesc()));
+                            
+                            List<EID> eidList=    SystemDefs.JavabaseDB.ehfile.getEIDListIndex(nid, graphDBName, numBuf);
+                        if(eidList!=null&&!eidList.isEmpty())
+                        {
+                         
+                        	// System.out.println("Key: " + k.getKey() + "\nLabel: " +
+                           
+                           List<Edge> listSource= new ArrayList<Edge>();
+                           List<Edge> listDes= new ArrayList<Edge>();
+                           for(EID i:eidList)
+                           {
+                               Edge curEdge = SystemDefs.JavabaseDB.ehfile.getEdge(i);
+                               NID nidSource =curEdge.getSource();
+                               NID nidDes = curEdge.getDestination();
+                               String nodeSource =  SystemDefs.JavabaseDB.nhfile.getNode(nidSource).getLabel();
+                               String nodeDes =  SystemDefs.JavabaseDB.nhfile.getNode(nidDes).getLabel();
+                               if(nodeSource.equalsIgnoreCase(queryOptions))   listSource.add(curEdge);
+                               if(nodeDes.equalsIgnoreCase(queryOptions))   listDes.add(curEdge);
+                           }
+                           if(!listDes.isEmpty())
+                           {
+                               System.out.println("Node Incomming Edges: "+listDes.size());
+                                               for(Edge e:listDes)
+                           {
+                                String src= SystemDefs.JavabaseDB.nhfile.getNode(e.getSource()).getLabel();
+                               System.out.println("Source Node: "+src+" Label: "+e.getLabel() + " Weight: "+e.getWeight());
+                           }
+                           }
+                           else
+                           System.out.println("Node Incomming Edges: "+listDes.size());
+                           if(!listSource.isEmpty())
+                           {
+                               System.out.println("Node Outgoing Edges: "+listSource.size());
+                           for(Edge e:listSource)
+                           {
+                                String des= SystemDefs.JavabaseDB.nhfile.getNode(e.getDestination()).getLabel();
+                               System.out.println("Destination Node: "+des+" Label: "+e.getLabel() + " Weight: "+e.getWeight());
+                           }
+                           }
+                           else    System.out.println("Node Outgoing Edges: "+listSource.size());
+                           
+                       }
+                       else 
+                           System.out.println("No mactch found!!");
+                    
+                        
+                        } catch (Exception e) {
+                            status = FAIL;
+                            e.printStackTrace();
+                        }
+                        
+                        try {
+                            tz = izscan.get_next();
+                        } catch (Exception e) {
+                            status = FAIL;
+                            e.printStackTrace();
+                        }
+
+
+                    }
+                }
+                // clean up
+                try {
+                    //iscan.close();
+                    SystemDefs.JavabaseDB.ztNodeDesc.close();
+                }
+                catch (Exception e) {
+                    status = FAIL;
+                    e.printStackTrace();
+                }
+
+            }
             break;
 
         default:

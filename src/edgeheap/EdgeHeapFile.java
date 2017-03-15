@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import btree.AddFileEntryException;
+import btree.BTFileScan;
 import btree.BTreeFile;
 import btree.ConstructPageException;
 import btree.ConvertException;
@@ -15,8 +16,10 @@ import btree.IndexSearchException;
 import btree.InsertException;
 import btree.IntegerKey;
 import btree.IteratorException;
+import btree.KeyDataEntry;
 import btree.KeyNotMatchException;
 import btree.KeyTooLongException;
+import btree.LeafData;
 import btree.LeafDeleteException;
 import btree.LeafInsertRecException;
 import btree.NodeNotMatchException;
@@ -33,6 +36,7 @@ import global.EID;
 import global.GlobalConst;
 import global.NID;
 import global.PageId;
+import global.RID;
 import global.SystemDefs;
 import heap.FileAlreadyDeletedException;
 import heap.HFBufMgrException;
@@ -1195,7 +1199,7 @@ public class EdgeHeapFile implements Filetype,  GlobalConst {
 
 	}
 
-	public List<EID> getEIDList(NID nid) throws InvalidSlotNumberException, InvalidTupleSizeException, HFException, HFDiskMgrException, HFBufMgrException, Exception {
+	public List<EID> getEIDListHeap(NID nid) throws InvalidSlotNumberException, InvalidTupleSizeException, HFException, HFDiskMgrException, HFBufMgrException, Exception {
 		boolean OK = true;
 		boolean FAIL = false;
 		EScan scan = null;
@@ -1253,6 +1257,87 @@ public class EdgeHeapFile implements Filetype,  GlobalConst {
 		
 		return listEid;
 	}
+
+	public List<EID> getEIDListIndex(NID nid,String graphDBName,int numBuf) throws InvalidSlotNumberException, 	InvalidTupleSizeException, HFException, HFDiskMgrException, HFBufMgrException, Exception 
+	{
+		 final boolean OK   = true; 
+		 final boolean FAIL = false;
+			List<EID> listEid =new ArrayList<EID>();  
+		/*if(SystemDefs.JavabaseDB!=null) 
+               SystemDefs.JavabaseBM.flushAllPages();
+           SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
+        */   //SystemDefs.JavabaseBM.flushAllPages();
+
+           boolean status = OK;
+           // start index scan
+           BTFileScan iscan = null;
+           SystemDefs.JavabaseDB.btEdgeLabel = new BTreeFile(SystemDefs.JavabaseDBName+"_BTreeEdgeIndex", AttrType.attrString, 32, 1/*delete*/);
+
+           try {
+
+               iscan = SystemDefs.JavabaseDB.btEdgeLabel.new_scan(null, null);
+
+           }
+           catch (Exception e) {
+               status = FAIL;
+               e.printStackTrace();
+           }
+
+           KeyDataEntry t=null;
+           try {
+               t = iscan.get_next();
+           }
+           catch (Exception e) {
+               status = FAIL;
+               e.printStackTrace();
+           }
+           boolean flag = true;
+           while (t != null && iscan!=null) {
+               try {
+                   t = iscan.get_next();
+               }
+               catch (Exception e) {
+                   status = FAIL;
+                   e.printStackTrace();
+               }
+
+               try {
+                   if(t==null) break;
+                   StringKey k = (StringKey)t.key;
+                   LeafData l = (LeafData)t.data;
+                   RID rid =  l.getData();
+                   EID eid = new EID(rid.pageNo, rid.slotNo);
+                   Edge edge = SystemDefs.JavabaseDB.ehfile.getEdge(eid);
+                  if (edge.getSource().equals(nid)||edge.getDestination().equals(nid))
+   					{
+   						 String sLabel = SystemDefs.JavabaseDB.nhfile.getNode(edge.getSource()).getLabel();
+   						 String dLabel = SystemDefs.JavabaseDB.nhfile.getNode(edge.getDestination()).getLabel();
+   						EID eidCur= SystemDefs.JavabaseDB.ehfile.getEID(edge, sLabel, dLabel);
+   						 listEid.add(eidCur);
+   								
+   					}
+               }
+               catch (Exception e) {
+                   status = FAIL;
+                   e.printStackTrace();
+               }
+
+           }
+
+        
+           // clean up
+           try {
+               //iscan.close();
+               SystemDefs.JavabaseDB.btEdgeLabel.close();
+           }
+           catch (Exception e) {
+               status = FAIL;
+               e.printStackTrace();
+           }
+           return listEid;
+       }
+	
+
 
 
 }// End of HeapFile 

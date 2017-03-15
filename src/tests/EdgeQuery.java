@@ -39,6 +39,7 @@ import iterator.FileScan;
 import iterator.FldSpec;
 import iterator.RelSpec;
 import iterator.Sort;
+import nodeheap.NScan;
 import nodeheap.Node;
 
 public class EdgeQuery
@@ -69,95 +70,8 @@ public class EdgeQuery
         case 1:
             System.out.println(" query will print the edge data  in increasing alphanumerical order of source labels.");
             if(index==0) {
-                if(SystemDefs.JavabaseDB!=null) 
-                    SystemDefs.JavabaseBM.flushAllPages();
-                SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
-                SystemDefs.JavabaseBM.flushAllPages();
-
-                //new FullScanEdge().fullScanEdge(graphDBName);
-                boolean status = OK;
-
-                AttrType[] attrType = new AttrType[6];
-                attrType[0] = new AttrType(AttrType.attrInteger);
-                attrType[1] = new AttrType(AttrType.attrInteger);
-                attrType[2] = new AttrType(AttrType.attrInteger);
-                attrType[3] = new AttrType(AttrType.attrInteger);
-                attrType[4] = new AttrType(AttrType.attrInteger);
-                attrType[5] = new AttrType(AttrType.attrString);
-                short[] attrSize = new short[1];
-                attrSize[0] = 20; //REC_LEN1;
-                TupleOrder[] order = new TupleOrder[1];
-                order[0] = new TupleOrder(TupleOrder.Ascending);
-                //order[1] = new TupleOrder(TupleOrder.Descending);
-
-                // create an iterator by open a file scan
-                FldSpec[] projlist = new FldSpec[6];
-                RelSpec rel = new RelSpec(RelSpec.outer); 
-                projlist[0] = new FldSpec(rel, 1);
-                projlist[1] = new FldSpec(rel, 2);
-                projlist[2] = new FldSpec(rel, 3);
-                projlist[3] = new FldSpec(rel, 4); 
-                projlist[4] = new FldSpec(rel, 5); 
-                projlist[5] = new FldSpec(rel, 6); 
-
-                FileScan fscan = null;
-                try {
-                    fscan = new FileScan(SystemDefs.JavabaseDBName+"_Edge", attrType, attrSize, (short) 6, 6, projlist, null);
-                }
-                catch (Exception e) {
-                    status = FAIL;
-                    e.printStackTrace();
-                }
-
-                // Sort 
-                Sort sort = null;
-                try {
-                    sort = new Sort(attrType, (short) 6, attrSize, fscan, 2, order[0], 8, 30);
-                }
-                catch (Exception e) {
-                    status = FAIL;
-                    e.printStackTrace();
-                }
-                int count = 0;
-                Tuple t = null;
-                String outval = null;
-
-                try {
-                    t = sort.get_next();
-                }
-                catch (Exception e) {
-                    status = FAIL;
-                    e.printStackTrace(); 
-                }
-
-                boolean flag = true;
-                while (t != null) {                   
-                    try {
-                        Edge edge =new Edge();
-                        edge.edgeInit(t.getTupleByteArray(), 0);
-                        System.out.println("Edge Label:\t"+edge.getLabel());
-                        //System.out.println(edge.getSource().slotNo);
-                        System.out.println("\tSource: "+SystemDefs.JavabaseDB.nhfile.getNode(edge.getSource()).getLabel());
-                        t = sort.get_next();
-                    }
-                    catch (Exception e) {
-                        status = FAIL;
-                        e.printStackTrace();
-                    }
-                    
-                }
-
-
-                // clean up
-                try {
-                    //sort.close();
-                }
-                catch (Exception e) {
-                    status = FAIL;
-                    e.printStackTrace();
-                }
-
-            } else {
+                      }
+            else {
                 String srcFileName = "_BTreeEdgeSourceIndex";
                 if(SystemDefs.JavabaseDB!=null) 
                     SystemDefs.JavabaseBM.flushAllPages();
@@ -329,7 +243,88 @@ public class EdgeQuery
                 SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
                 SystemDefs.JavabaseBM.flushAllPages();
 
-                new FullScanEdge().fullScanEdge(graphDBName);
+                //new FullScanEdge().fullScanEdge(graphDBName);
+                boolean status = OK;
+
+                AttrType[] attrType = new AttrType[6];
+                attrType[0] = new AttrType(AttrType.attrInteger);
+                attrType[1] = new AttrType(AttrType.attrInteger);
+                attrType[2] = new AttrType(AttrType.attrInteger);
+                attrType[3] = new AttrType(AttrType.attrInteger);
+                attrType[4] = new AttrType(AttrType.attrInteger);
+                attrType[5] = new AttrType(AttrType.attrString);
+                short[] attrSize = new short[1];
+                attrSize[0] = 20; //REC_LEN1;
+                TupleOrder[] order = new TupleOrder[1];
+                order[0] = new TupleOrder(TupleOrder.Ascending);
+                //order[1] = new TupleOrder(TupleOrder.Descending);
+
+                // create an iterator by open a file scan
+                FldSpec[] projlist = new FldSpec[6];
+                RelSpec rel = new RelSpec(RelSpec.outer); 
+                projlist[0] = new FldSpec(rel, 1);
+                projlist[1] = new FldSpec(rel, 2);
+                projlist[2] = new FldSpec(rel, 3);
+                projlist[3] = new FldSpec(rel, 4); 
+                projlist[4] = new FldSpec(rel, 5); 
+                projlist[5] = new FldSpec(rel, 6); 
+
+                FileScan fscan = null;
+                try {
+                    fscan = new FileScan(SystemDefs.JavabaseDBName+"_Edge", attrType, attrSize, (short) 6, 6, projlist, null);
+                }
+                catch (Exception e) {
+                    status = FAIL;
+                    e.printStackTrace();
+                }
+
+                // Sort 
+                Sort sort = null;
+                try {
+                    sort = new Sort(attrType, (short) 6, attrSize, fscan, 6, order[0], 8, 30);
+                }
+                catch (Exception e) {
+                    status = FAIL;
+                    e.printStackTrace();
+                }
+                int count = 0;
+                Tuple t = null;
+                String outval = null;
+
+                try {
+                    t = sort.get_next();
+                }
+                catch (Exception e) {
+                    status = FAIL;
+                    e.printStackTrace(); 
+                }
+
+                boolean flag = true;
+                while (t != null) {                   
+                    try {
+                        Edge edge =new Edge();
+                        edge.edgeInit(t.getTupleByteArray(), 0);
+                        System.out.println("\tSource: "+SystemDefs.JavabaseDB.nhfile.getNode(edge.getSource()).getLabel()+ "Edge Label:\t"+edge.getLabel());
+                        //System.out.println(edge.getSource().slotNo);
+                        t = sort.get_next();
+                    }
+                    catch (Exception e) {
+                        status = FAIL;
+                        e.printStackTrace();
+                    }
+                    
+                }
+
+
+                // clean up
+                try {
+                    sort.close();
+                }
+                catch (Exception e) {
+                    status = FAIL;
+                    e.printStackTrace();
+                }
+
             } 
             else {
 
@@ -387,10 +382,7 @@ public class EdgeQuery
 
                 }
 
-                if (flag && status) {
-                    System.out.println("Test1 -- Index Scan OK");
-                }
-
+              
                 // clean up
                 try {
                     //iscan.close();
@@ -470,10 +462,6 @@ public class EdgeQuery
                         e.printStackTrace();
                     }
 
-                }
-
-                if (flag && status) {
-                    System.out.println("Test1 -- Index Scan OK");
                 }
 
                 // clean up
@@ -622,8 +610,176 @@ public class EdgeQuery
                 System.out.println("No matching edges found!!");
             break;
         case 6:
-            System.out.println(" query will return pairs of incident graph edges");
-            break;
+    		System.out.println(" query will return pairs of incident graph edges");
+			if(index==0) {
+				if(SystemDefs.JavabaseDB!=null) 
+					SystemDefs.JavabaseBM.flushAllPages();
+				SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
+				SystemDefs.JavabaseBM.flushAllPages();
+				
+				NScan scan = null;
+				boolean status = OK;
+
+				if ( status == OK ) {	
+				
+					try {
+						scan = SystemDefs.JavabaseDB.nhfile.openScan();
+					}
+					catch (Exception e) {
+						status = FAIL;
+						System.err.println ("*** Error opening scan\n");
+						e.printStackTrace();
+					}
+
+					if ( status == OK &&  SystemDefs.JavabaseBM.getNumUnpinnedBuffers() 
+							== SystemDefs.JavabaseBM.getNumBuffers() ) {
+						System.err.println ("*** The heap-file scan has not pinned the first page\n");
+						status = FAIL;
+					}
+				}
+				NID nidTmp = new NID();
+
+				if ( status == OK ) {
+					Node node = null;
+
+					boolean done = false;
+					while (!done) { 
+						node = scan.getNext(nidTmp);
+						if (node == null) {
+							done = true;
+							break;
+						}
+						NID nid =SystemDefs.JavabaseDB.nhfile.getNID(node);
+						List<EID> eidList = SystemDefs.JavabaseDB.ehfile.getEIDListHeap(nid);
+						List<Edge> listSource= new ArrayList<Edge>();
+						List<Edge> listDes= new ArrayList<Edge>();
+						if(eidList!=null&&eidList.size()>1)
+						{
+						for(EID i:eidList)
+						{
+							Edge curEdge = SystemDefs.JavabaseDB.ehfile.getEdge(i);
+							NID nidSource =curEdge.getSource();
+							NID nidDes = curEdge.getDestination();
+							String nodeSource =  SystemDefs.JavabaseDB.nhfile.getNode(nidSource).getLabel();
+							String nodeDes =  SystemDefs.JavabaseDB.nhfile.getNode(nidDes).getLabel();
+							if(nodeSource.equalsIgnoreCase(node.getLabel()))   listSource.add(curEdge);
+							if(nodeDes.equalsIgnoreCase(node.getLabel()))   listDes.add(curEdge);
+						}
+						System.out.println("Node Label: "+node.getLabel());
+						if(listSource.size()>1&&listDes.size()>1)
+						{
+						for(Edge e:listSource)
+						{
+							for(Edge j:listDes)
+							{
+								System.out.println("Incident Pair: ["+e.getLabel()+" , "+j.getLabel()+" ]");
+							}
+						}
+						}
+						else
+							System.out.println("No incident pairs!!");
+						}
+					}
+
+				}
+				scan.closescan();
+			} 
+			else {
+			
+			if(SystemDefs.JavabaseDB!=null) 
+				SystemDefs.JavabaseBM.flushAllPages();
+			SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
+			//SystemDefs.JavabaseBM.flushAllPages();
+			
+			boolean status = OK;
+			SystemDefs.JavabaseDB.btNodeLabel = new BTreeFile(SystemDefs.JavabaseDBName+"_BTreeNodeIndex", AttrType.attrString, 32, 1/*delete*/);
+			
+			// start index scan
+			BTFileScan iscan = null;
+			try {
+				iscan = SystemDefs.JavabaseDB.btNodeLabel.new_scan(null, null);
+			}
+			catch (Exception e) {
+				status = FAIL;
+				e.printStackTrace();
+			}
+
+			KeyDataEntry t=null;
+			try {
+				t = iscan.get_next();
+			}
+			catch (Exception e) {
+				status = FAIL;
+				e.printStackTrace();
+			}
+			boolean flag = true;
+			//System.out.println(t+""+iscan);
+			while (t != null && iscan!=null) {
+		//System.out.println("hii");
+				try {
+					t = iscan.get_next();
+				}
+				catch (Exception e) {
+					status = FAIL;
+					e.printStackTrace();
+				}
+				
+				try {
+					if(t==null) break;
+					StringKey k = (StringKey)t.key;
+					
+					LeafData l = (LeafData)t.data;
+					RID rid =  l.getData();
+					NID nid = new NID(rid.pageNo, rid.slotNo);
+					Node node = SystemDefs.JavabaseDB.nhfile.getNode(nid);
+					
+					List<EID> eidList = SystemDefs.JavabaseDB.ehfile.getEIDListIndex(nid, graphDBName, numBuf);
+					List<Edge> listSource= new ArrayList<Edge>();
+					List<Edge> listDes= new ArrayList<Edge>();
+					if(eidList!=null&&eidList.size()>1)
+					{
+					for(EID i:eidList)
+					{
+						Edge curEdge = SystemDefs.JavabaseDB.ehfile.getEdge(i);
+						NID nidSource =curEdge.getSource();
+						NID nidDes = curEdge.getDestination();
+						String nodeSource =  SystemDefs.JavabaseDB.nhfile.getNode(nidSource).getLabel();
+						String nodeDes =  SystemDefs.JavabaseDB.nhfile.getNode(nidDes).getLabel();
+						if(nodeSource.equalsIgnoreCase(node.getLabel()))   listSource.add(curEdge);
+						if(nodeDes.equalsIgnoreCase(node.getLabel()))   listDes.add(curEdge);
+					}
+					System.out.println("Node Label: "+node.getLabel());
+					if(listSource.size()>1&&listDes.size()>1)
+					{
+					for(Edge e:listSource)
+					{
+						for(Edge j:listDes)
+						{
+							System.out.println("Incident Pair: ["+e.getLabel()+" , "+j.getLabel()+" ]");
+						}
+					}
+					}
+					else
+						System.out.println("No incident pairs!!");
+					}
+				}
+				catch (Exception e) {
+					status = FAIL;
+					e.printStackTrace();
+				}
+			}
+
+	
+			// clean up
+			try {
+				//iscan.close();
+				SystemDefs.JavabaseDB.btNodeLabel.close();
+			}
+			catch (Exception e) {
+				status = FAIL;
+				e.printStackTrace();
+			}
+			} break;
         default:
             System.out.println("invalid option");
             break;
