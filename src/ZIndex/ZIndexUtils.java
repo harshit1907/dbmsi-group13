@@ -328,7 +328,7 @@ public class ZIndexUtils {
             status = FAIL;
             e.printStackTrace();
         }
-        if(falsePts>0)
+        if(falsePts>3)
         {
            //izscan.DestroyZBTreeFileScan();
             break;
@@ -344,7 +344,7 @@ public class ZIndexUtils {
         status = FAIL;
         e.printStackTrace();
     }
-    if(falsePts>0)
+    if(falsePts>3)
     {
         return false; 
     }
