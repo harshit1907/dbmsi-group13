@@ -9,7 +9,6 @@ import nodeheap.Node;
 import java.io.IOException;
 import java.util.*;
 
-import btree.StringKey;
 import bufmgr.HashEntryNotFoundException;
 import bufmgr.InvalidFrameNumberException;
 import bufmgr.PageUnpinnedException;
@@ -181,35 +180,65 @@ public class ZIndexUtils {
     }
   }
 
+    private static int calculateDiagonalEdgeCeil(int v0, int distance) {
+        return (int) Math.ceil(v0 + distance / Math.sqrt(5.0));
+    }
+    private static int calculateDiagonalEdgeFloor(int v0, int distance) {
+        return (int) Math.floor(v0 - distance / Math.sqrt(5.0));
+    }
+
   public static DescriptorRangePair getDiagonalDescFromDistance(KeyClass key, int distance) {
-  	  int value[] = ((DescriptorKey) key).getDesc().value;
-  	  int res1[] = new int[5];
-	  int res2[] = new int[5];
-	  for (int i = 0; i < 5; i++) {
-	      int topDist = value[i] + (int) Math.ceil(distance / Math.sqrt(5.0));
-		  int botDist = value[i] - (int) Math.ceil(distance / Math.sqrt(5.0));
-		  res1[i] = topDist;
-		  res2[i] = (botDist < 0)? 0: botDist;
-	  }
+    int value[] = ((DescriptorKey) key).getDesc().value;
 
-	  Descriptor desc1 = new Descriptor();
-	  Descriptor desc2 = new Descriptor();
-	  desc1.set(res1[0], res1[1], res1[2], res1[3], res1[4]);
-	  desc2.set(res2[0], res2[1], res2[2], res2[3], res2[4]);
-	  KeyClass key1 = new DescriptorKey(desc1);
-	  KeyClass key2 = new DescriptorKey(desc2);
+    String min1 = "";
+    String max1 = "";
+    int res1[] = new int[5];
+    for (int i = 0; i < 2; i++) {
+        res1[0] = (i == 0) ? calculateDiagonalEdgeCeil(value[0], distance):
+                calculateDiagonalEdgeFloor(value[0], distance);
 
-	  if (((DescriptorKey)key1).getKey().compareTo(((DescriptorKey)key2).getKey()) > 0) {
-          return new DescriptorRangePair((DescriptorKey) key2, (DescriptorKey) key1);
-      } else {
-          return new DescriptorRangePair((DescriptorKey) key1, (DescriptorKey) key2);
-      }
-  }
+        for (int j = 0; j < 2; j++) {
+            res1[1] = j == 0 ? calculateDiagonalEdgeCeil(value[1], distance):
+                calculateDiagonalEdgeFloor(value[1], distance);
+            for (int k = 0; k < 2; k++) {
 
-  public static Set<DescriptorRangePair> getRangesForDescRange(DescriptorRangePair pair,Descriptor target,int distance) throws GetFileEntryException, ConstructPageException, AddFileEntryException, IOException, InvalidFrameNumberException, ReplacerException, PageUnpinnedException, HashEntryNotFoundException {
-      Set<DescriptorRangePair> result = new HashSet<>();
+                res1[2] = k == 0 ? calculateDiagonalEdgeCeil(value[2], distance):
+                calculateDiagonalEdgeFloor(value[2], distance);
+                for (int l = 0; l < 2; l++) {
+
+                    res1[3] = l == 0 ? calculateDiagonalEdgeCeil(value[3], distance):
+                calculateDiagonalEdgeFloor(value[3], distance);
+                    for (int m = 0; m < 2; m++) {
+
+                        res1[4] = m == 0 ? calculateDiagonalEdgeCeil(value[4], distance):
+                calculateDiagonalEdgeFloor(value[4], distance);
+                        Descriptor desc = new Descriptor();
+                        desc.set(res1[0], res1[1], res1[2], res1[3], res1[4]);
+                        String zvalue = new DescriptorKey(desc).getKey();
+                        if (min1.isEmpty()) min1 = zvalue;
+                        else
+                            min1 = zvalue.compareTo(min1) > 0 ? min1 : zvalue;
+                        if (max1.isEmpty()) max1 = zvalue;
+                        else
+                            max1 = zvalue.compareTo(max1) > 0 ? zvalue : max1;
+                    }
+                }
+            }
+        }
+    }
+    KeyClass lower=new DescriptorKey(min1);
+
+    KeyClass upper=new DescriptorKey(max1);
+    return new DescriptorRangePair((DescriptorKey) lower, (DescriptorKey) upper);
+    }
+
+  public static List<DescriptorRangePair> getRangesForDescRange(DescriptorRangePair pair,Descriptor target,
+                                                                int distance) throws
+          GetFileEntryException, ConstructPageException, AddFileEntryException, IOException,
+          InvalidFrameNumberException, ReplacerException, PageUnpinnedException, HashEntryNotFoundException {
+      List<DescriptorRangePair> result = new LinkedList<>();
       LinkedList<DescriptorRangePair> queue = new LinkedList<>();
-      if (substringMaxMatch(pair.getStart().getKey(), pair.getEnd().getKey(), target, distance)) {
+      if (findFalsePositives(pair.getStart().getKey(), pair.getEnd().getKey(), target, distance)) {
           result.add(pair);
           return result;
       } else {
@@ -245,13 +274,13 @@ public class ZIndexUtils {
                           BitShufflingUtils.keyFromStrings(bigStart),
                           BitShufflingUtils.keyFromStrings(bigEnd));
                   
-                  if (substringMaxMatch(lower.getStart().getKey(), lower.getEnd().getKey(),target,distance)) {
+                  if (findFalsePositives(lower.getStart().getKey(), lower.getEnd().getKey(),target,distance)) {
                       DescriptorRangePair ansLow= new DescriptorRangePair(lower.getStart(), lower.getEnd());
                       result.add(ansLow);
                   } else {
                       queue.add(lower);
                   }
-                  if (substringMaxMatch(upper.getStart().getKey(), upper.getEnd().getKey(),target,distance)) {
+                  if (findFalsePositives(upper.getStart().getKey(), upper.getEnd().getKey(),target,distance)) {
                       DescriptorRangePair ansHigh= new DescriptorRangePair(upper.getStart(), upper.getEnd());
                       result.add(ansHigh);
                   } else {
@@ -260,15 +289,20 @@ public class ZIndexUtils {
                   break;
               }
           }
-
-         
-
       }
+      result.forEach(x -> {
+          System.out.println("Start: " + x.getStart().getKey());
+          System.out.println("End: " + x.getEnd().getKey());
+          System.out.println();
+      });
       return result;
   }
 
-  private static boolean substringMaxMatch(String start, String end,Descriptor target,int distance) throws GetFileEntryException, ConstructPageException, AddFileEntryException, IOException, InvalidFrameNumberException, ReplacerException, PageUnpinnedException, HashEntryNotFoundException {
-      
+  private static boolean findFalsePositives(String start, String end, Descriptor target, int distance)
+          throws GetFileEntryException, ConstructPageException, AddFileEntryException,
+          IOException, InvalidFrameNumberException, ReplacerException,
+          PageUnpinnedException, HashEntryNotFoundException {
+
     boolean OK   = true; 
     boolean FAIL = false;
     int falsePts=0;
@@ -308,7 +342,7 @@ public class ZIndexUtils {
             Node node = SystemDefs.JavabaseDB.nhfile.getNode(nid);
 
             //System.out.println("Inside: "+node.getDesc().getString()+" Dist: "+((int)target.distance(node.getDesc())));
-            if(((int)target.distance(node.getDesc()))>distance)
+            if((target.distance(node.getDesc()))>distance)
             {
                 //System.out.println("Reason: "+node.getDesc().getString()+" Dist: "+((int)target.distance(node.getDesc())));
                 falsePts++;
@@ -328,7 +362,7 @@ public class ZIndexUtils {
             status = FAIL;
             e.printStackTrace();
         }
-        if(falsePts>3)
+        if(falsePts>0)
         {
            //izscan.DestroyZBTreeFileScan();
             break;
@@ -344,7 +378,7 @@ public class ZIndexUtils {
         status = FAIL;
         e.printStackTrace();
     }
-    if(falsePts>3)
+    if(falsePts>0)
     {
         return false; 
     }

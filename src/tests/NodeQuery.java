@@ -1,6 +1,7 @@
 package tests;
 //originally from : joins.C
 
+import java.io.IOException;
 import java.util.*;
 
 import ZIndex.ZIndexUtils;
@@ -30,6 +31,7 @@ import iterator.RelSpec;
 import iterator.Sort;
 import nodeheap.NScan;
 import nodeheap.Node;
+import sun.reflect.generics.tree.Tree;
 import zbtree.DescriptorDataEntry;
 import zbtree.DescriptorKey;
 import zbtree.ZBTFileScan;
@@ -403,7 +405,7 @@ public class NodeQuery
 
                 // start index scan
                 ZBTFileScan izscan = null;
-                Set<DescriptorRangePair> pairs = ZIndexUtils.getRangesForDescRange(
+                List<DescriptorRangePair> pairs = ZIndexUtils.getRangesForDescRange(
                         ZIndexUtils.getDiagonalDescFromDistance(new DescriptorKey(userDesc), distance),
                         userDesc, distance);
 
@@ -427,6 +429,7 @@ public class NodeQuery
                         e.printStackTrace();
                     }
                     flag = true;
+                    TreeMap<String, Node> map = new TreeMap<>();
                     while (tz != null && izscan != null) {
                         try {
                             if (tz == null) break;
@@ -435,7 +438,8 @@ public class NodeQuery
                             NID nid = l.getData();
                             Node node = SystemDefs.JavabaseDB.nhfile.getNode(nid);
                             // System.out.println("Key: " + k.getKey() + "\nLabel: " +
-                            System.out.println(node.getLabel() + " -- Descriptor: " + Arrays.toString(node.getDesc().value)+" DISTANCE: "+userDesc.distance(node.getDesc()));
+                            //System.out.println(node.getLabel() + " -- Descriptor: " + Arrays.toString(node.getDesc().value)+" DISTANCE: "+userDesc.distance(node.getDesc()));
+                            map.put(node.getLabel(), node);
                         } catch (Exception e) {
                             status = FAIL;
                             e.printStackTrace();
@@ -448,6 +452,16 @@ public class NodeQuery
                             e.printStackTrace();
                         }
                     }
+
+                    map.entrySet().forEach(node -> {
+                        try {
+                            System.out.println(node.getValue().getLabel() + " -- Descriptor: " +
+                                    Arrays.toString(node.getValue().getDesc().value)+" DISTANCE: "+
+                                    userDesc.distance(node.getValue().getDesc()));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
                 }
                 // clean up
                 try {
@@ -481,6 +495,8 @@ public class NodeQuery
                 }
                 NID nidTmp = new NID();
 
+                TreeMap<Double, Node> map  = new TreeMap<>();
+
                 if ( status == OK ) {
                     Node node = null;
 
@@ -492,9 +508,10 @@ public class NodeQuery
                             //break;
                         }
 
-                        if (userDesc.distance(node.getDesc())<distance) {
+                        if (node != null && userDesc.distance(node.getDesc())<distance) {
                             System.out.print("Label: " + node.getLabel());
-                            System.out.println(" Descriptor: " + node.getDesc().getString());
+                            System.out.print(" Descriptor: " + node.getDesc().getString());
+                            System.out.println(" : D: " + node.getDesc().distance(userDesc));
                         }
                     }
 
@@ -652,7 +669,7 @@ public class NodeQuery
 
                 // start index scan
                 ZBTFileScan izscan = null;
-                Set<DescriptorRangePair> pairs = ZIndexUtils.getRangesForDescRange(
+                List<DescriptorRangePair> pairs = ZIndexUtils.getRangesForDescRange(
                         ZIndexUtils.getDiagonalDescFromDistance(new DescriptorKey(userDesc), distance), userDesc, distance);
 
                 SystemDefs.JavabaseDB.ztNodeDesc = new ZBTreeFile(SystemDefs.JavabaseDBName+"_ZTreeNodeIndex",
