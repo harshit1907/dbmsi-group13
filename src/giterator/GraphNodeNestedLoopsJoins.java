@@ -2,11 +2,11 @@ package giterator;
 
 
 import bufmgr.PageNotReadException;
+import edgeheap.EScan;
 import edgeheap.EdgeHeapFile;
 import global.AttrType;
-import global.NID;
+import global.EID;
 import heap.*;
-import nodeheap.*;
 import index.IndexException;
 import iterator.*;
 import nodeheap.NodeHeapFile;
@@ -24,7 +24,7 @@ import java.io.IOException;
  *              if (ri == sj) then add (r, s) to the result.
  */
 
-public class GraphEdgeNestedLoopsJoins extends Iterator
+public class GraphNodeNestedLoopsJoins extends Iterator
 {
   private AttrType      _in1[],  _in2[];
   private   int        in1_len, in2_len;
@@ -39,9 +39,8 @@ public class GraphEdgeNestedLoopsJoins extends Iterator
   private   Tuple     Jtuple;           // Joined tuple
   private   FldSpec   perm_mat[];
   private   int        nOutFlds;
-  private NodeHeapFile nhf;
   private EdgeHeapFile ehf;
-  private   NScan      outer;
+  private   EScan      outer;
 
   /**constructor
    *Initialize the two relations which are joined, including relation type,
@@ -61,7 +60,7 @@ public class GraphEdgeNestedLoopsJoins extends Iterator
    *@exception IOException some I/O fault
    *@exception NestedLoopException exception from this class
    */
-  public GraphEdgeNestedLoopsJoins(AttrType    in1[],
+  public GraphNodeNestedLoopsJoins(AttrType    in1[],
                                    int     len_in1,
                                    short   t1_str_sizes[],
                                    AttrType    in2[],
@@ -110,7 +109,7 @@ public class GraphEdgeNestedLoopsJoins extends Iterator
       }
 
       try {
-          nhf = new NodeHeapFile(outer_relationName);
+          ehf = new EdgeHeapFile(outer_relationName);
 
       }
       catch(Exception e) {
@@ -168,7 +167,7 @@ public class GraphEdgeNestedLoopsJoins extends Iterator
           }
 
 	      try {
-            outer = nhf.openScan();
+            outer = ehf.openScan();
 	      } catch(Exception e){
             throw new NestedLoopException(e, "openScan failed");
 	      }
@@ -186,8 +185,8 @@ public class GraphEdgeNestedLoopsJoins extends Iterator
 	  // while the inner is not completely scanned && there
 	  // is no match (with pred),get a tuple from the inner.
 
-	      NID nid = new NID();
-	      while ((outer_tuple = outer.getNext(nid)) != null) {
+	      EID eid = new EID();
+	      while ((outer_tuple = outer.getNext(eid)) != null) {
               outer_tuple.setHdr((short)in1_len, _in1,t1_str_sizescopy);
 
               if (PredEval.Eval(OutputFilter, outer_tuple, null, _in1, null)) {
