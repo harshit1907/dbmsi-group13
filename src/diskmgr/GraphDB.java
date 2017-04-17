@@ -55,6 +55,8 @@ public class GraphDB implements GlobalConst {
     public BTreeFile btNodeLabel;
     public BTreeFile btEdgeLabel;
     public BTreeFile btEdgeWeight;
+    public BTreeFile btEdgeSource;
+    public BTreeFile btEdgeDest;
     public ZBTreeFile ztNodeDesc;
     public int type;
     public GraphDB(int type){

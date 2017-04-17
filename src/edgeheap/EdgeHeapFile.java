@@ -671,6 +671,33 @@ public class EdgeHeapFile implements Filetype,  GlobalConst {
             SystemDefs.JavabaseDB.btEdgeWeight.insert(new IntegerKey(nn.getWeight()),rid);
             SystemDefs.JavabaseDB.btEdgeWeight.close();
         }
+        if(SystemDefs.JavabaseDB.btEdgeSource!=null){
+			boolean status=true;
+			SystemDefs.JavabaseDB.btEdgeSource = new BTreeFile(SystemDefs.JavabaseDBName+"_BTreeEdgeSourceIndex",AttrType.attrString,32,1);
+			try {
+					String sLabel = SystemDefs.JavabaseDB.nhfile.getNode(nn.getSource()).getLabel();
+					SystemDefs.JavabaseDB.btEdgeSource.insert(new StringKey(sLabel),rid);
+					SystemDefs.JavabaseDB.btEdgeSource.close();
+
+			}
+			catch (Exception e) {
+				status = false;
+				e.printStackTrace();
+			}
+		}
+		if(SystemDefs.JavabaseDB.btEdgeDest!=null){
+			boolean status=true;
+			SystemDefs.JavabaseDB.btEdgeDest= new BTreeFile(SystemDefs.JavabaseDBName+"_BTreeEdgeDestIndex",AttrType.attrString,32,1);
+			try {
+				String dLabel = SystemDefs.JavabaseDB.nhfile.getNode(nn.getDestination()).getLabel();
+				SystemDefs.JavabaseDB.btEdgeSource.insert(new StringKey(dLabel),rid);
+				SystemDefs.JavabaseDB.btEdgeDest.close();
+			}
+			catch (Exception e) {
+				status = false;
+				e.printStackTrace();
+			}
+		}
         
         
 		return rid;
@@ -705,10 +732,37 @@ public class EdgeHeapFile implements Filetype,  GlobalConst {
 		}
 		
 		if(SystemDefs.JavabaseDB.btEdgeWeight!=null) { 
-            SystemDefs.JavabaseDB.btEdgeWeight = new BTreeFile(SystemDefs.JavabaseDBName+"_BTreeEdgeWeightIndex", AttrType.attrInteger, 8, 1/*delete*/); 
+            SystemDefs.JavabaseDB.btEdgeWeight = new BTreeFile(SystemDefs.JavabaseDBName+"_BTreeEdgeWeightIndex", AttrType.attrInteger, 8, 1/*delete*/);
             SystemDefs.JavabaseDB.btEdgeWeight.Delete(new IntegerKey(SystemDefs.JavabaseDB.ehfile.getEdge(rid).getWeight()),rid);
             SystemDefs.JavabaseDB.btEdgeWeight.close();
         }
+		if(SystemDefs.JavabaseDB.btEdgeSource!=null){
+			boolean status=true;
+			SystemDefs.JavabaseDB.btEdgeSource = new BTreeFile(SystemDefs.JavabaseDBName+"_BTreeEdgeSourceIndex",AttrType.attrString,32,1);
+			try {
+				NID snid = SystemDefs.JavabaseDB.ehfile.getEdge(rid).getSource();
+				String sLabel=SystemDefs.JavabaseDB.nhfile.getNode(snid).getLabel();
+				SystemDefs.JavabaseDB.btEdgeSource.Delete(new StringKey(sLabel),rid);
+				SystemDefs.JavabaseDB.btEdgeSource.close();
+			} catch (Exception e) {
+				status = false;
+				e.printStackTrace();
+			}
+		}
+		if(SystemDefs.JavabaseDB.btEdgeDest!=null){
+			boolean status=true;
+			SystemDefs.JavabaseDB.btEdgeDest= new BTreeFile(SystemDefs.JavabaseDBName+"_BTreeEdgeDestIndex",AttrType.attrString,32,1);
+			try {
+				NID dnid = SystemDefs.JavabaseDB.ehfile.getEdge(rid).getSource();
+				String dLabel = SystemDefs.JavabaseDB.nhfile.getNode(dnid).getLabel();
+				SystemDefs.JavabaseDB.btEdgeDest.Delete(new StringKey(dLabel),rid);
+				SystemDefs.JavabaseDB.btEdgeDest.close();
+			} catch (Exception e) {
+				status = false;
+				e.printStackTrace();
+			}
+		}
+
 		boolean status;
 		EHFPage currentDirPage = new EHFPage();
 		PageId currentDirPageId = new PageId();

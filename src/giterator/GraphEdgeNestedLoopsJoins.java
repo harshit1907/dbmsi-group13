@@ -111,7 +111,6 @@ public class GraphEdgeNestedLoopsJoins extends Iterator
 
       try {
           nhf = new NodeHeapFile(outer_relationName);
-
       }
       catch(Exception e) {
           throw new NestedLoopException(e, "Create new heapfile failed.");
