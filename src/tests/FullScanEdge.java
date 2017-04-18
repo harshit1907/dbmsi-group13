@@ -47,6 +47,7 @@ public class FullScanEdge {
 					break;
 				}
 				System.out.print(" Label: "+edge.getLabel());
+				System.out.println();
 				System.out.print(" Source: "+SystemDefs.JavabaseDB.nhfile.getNode(edge.getSource()).getLabel());
 				System.out.print(" Destination: "+SystemDefs.JavabaseDB.nhfile.getNode(edge.getDestination()).getLabel());
 				System.out.println(" Weight: "+edge.getWeight());
