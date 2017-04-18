@@ -199,7 +199,7 @@ public class GJoinTest {
                 Jsizes[1]=15;
 
                 FldSpec[] proj1 = {
-                        new FldSpec(new RelSpec(RelSpec.outer),1),
+                        new FldSpec(new RelSpec(RelSpec.outer),3),
                         new FldSpec(new RelSpec(RelSpec.innerRel),1)
                 };
                 CondExpr [] selects= new CondExpr[1];
@@ -218,7 +218,7 @@ public class GJoinTest {
                 IndexType b_index = new IndexType (IndexType.B_Index);
                 try {
                     am = new IndexScan( b_index, SystemDefs.JavabaseDBName+"_Node",
-                            "BTreeIndex", ntypes, nsizes, 4, 2,
+                            "BTreeIndex", ntypes, nsizes, 2, 1,
                             proj1, null, 1, false);
                 }
 
