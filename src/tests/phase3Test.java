@@ -18,6 +18,8 @@ import heap.HFDiskMgrException;
 import heap.HFException;
 import heap.InvalidSlotNumberException;
 import heap.InvalidTupleSizeException;
+import queryPojo.EdgeQueryPojo;
+import queryPojo.NodeQueryPojo;
 //
 
 // Mihir
@@ -63,17 +65,27 @@ public class phase3Test {
             new BatchNodeInsert().batchNodeInsert("/home/prakhar/Documents/minjava/javaminibase/NodeTestData.txt", name);
             new BatchEdgeInsert().batchEdgeInsert("/home/prakhar/Documents/minjava/javaminibase/EdgeTestData.txt");
         }
-        new FullScanNode().fullScanNode(name);
+//        new FullScanNode().fullScanNode(name);
 //        new NodeQuery().nodeQuery(name,400,1,1,"0");
 //        new EdgeQuery().edgeQuery(name,400,1,1,"0");
 //        new NodeQuery().nodeQuery(name,400,1,1,"0");
 //        new EdgeQuery().edgeQuery(name,400,1,0,"0");
       //  SystemDefs.JavabaseBM.flushAllPages();
-        
-        new Join().joinEdgeDNode(name);
-        new Join().joinEdgeDNode(name);
-        new Join().joinEdgeEdge(name);
-        new Join().joinEdgeEdge(name);
+
+
+        EdgeQueryPojo edgeQueryPojo = new EdgeQueryPojo();
+        edgeQueryPojo.setDestLabel("109");
+        new Join().joinNodeDEdge(name, edgeQueryPojo);
+        edgeQueryPojo.setSourceLabel("109");
+        new Join().joinNodeSEdge(name, edgeQueryPojo);
+
+        NodeQueryPojo nodeQueryPojo = new NodeQueryPojo();
+        nodeQueryPojo.setLabel("109");
+        new Join().joinEdgeSNode(name, nodeQueryPojo);
+//        new Join().joinEdgeDNode(name);
+//        new Join().joinEdgeDNode(name);
+//        new Join().joinEdgeEdge(name);
+//        new Join().joinEdgeEdge(name);
          
         SystemDefs.JavabaseBM.flushAllPages();
         scanner.close();

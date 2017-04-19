@@ -8,7 +8,7 @@ import diskmgr.*;
 import index.*;
 import java.lang.*;
 import java.io.*;
-/** 
+/**
  *
  *  This file contains an implementation of the nested loops join
  *  algorithm as described in the Shapiro paper.
@@ -51,7 +51,7 @@ public class NestedLoopsJoins  extends Iterator
    *@param outFilter   select expressions
    *@param rightFilter reference to filter applied on right i/p
    *@param proj_list shows what input fields go where in the output tuple
-   *@param n_out_flds number of outer relation fileds
+   *@param n_out_flds number of outer relation fields
    *@exception IOException some I/O fault
    *@exception NestedLoopException exception from this class
    */
