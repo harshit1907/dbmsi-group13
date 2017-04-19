@@ -376,10 +376,9 @@ public class Join {
         fN.deleteFile();
     }    
 
-
-
-    public void joinEdgeDNode(String name) throws JoinsException, IndexException, PageNotReadException, TupleUtilsException, PredEvalException, SortException, LowMemException, UnknowAttrType, UnknownKeyTypeException, Exception {
-
+    public void joinNodeDEdge(String name) throws JoinsException, IndexException, PageNotReadException,
+           TupleUtilsException, PredEvalException, SortException, LowMemException,
+            UnknowAttrType, UnknownKeyTypeException, Exception {
         final boolean OK   = true;
         final boolean FAIL = false;
         boolean status=true;
@@ -393,8 +392,10 @@ public class Join {
         outfilter[0].op=new AttrOperator(AttrOperator.aopEQ);
         outfilter[0].type1=new AttrType(AttrType.attrSymbol);
         outfilter[0].type2=new AttrType(AttrType.attrSymbol);
-        outfilter[0].operand1.symbol=new FldSpec(new RelSpec(RelSpec.outer),2);
-        outfilter[0].operand2.symbol=new FldSpec(new RelSpec(RelSpec.innerRel),7);
+        outfilter[0].operand1.symbol=new FldSpec(new
+                RelSpec(RelSpec.outer),2);
+        outfilter[0].operand2.symbol=new
+                FldSpec(new RelSpec(RelSpec.innerRel),7);
 
 //        outfilter[1].op    = new AttrOperator(AttrOperator.aopEQ);
 //        outfilter[1].next  = null;
@@ -411,7 +412,7 @@ public class Join {
 //        outfilter[1].type2 = new AttrType(AttrType.attrDesc);
 //        outfilter[1].operand1.symbol = new FldSpec (new RelSpec(RelSpec.innerRel),7);
 //        outfilter[1].operand2.desc =  tempDesc;
-//     
+
         outfilter[1]=null;
         Tuple t = new Tuple();
         t=null;
@@ -600,9 +601,15 @@ public class Join {
         f.deleteFile();
     }
 
-
-    
-    
-    
-    
+    public void joinEdgeSNode(String name) throws JoinsException, IndexException, PageNotReadException,
+            TupleUtilsException, PredEvalException, SortException, LowMemException,
+            UnknowAttrType, UnknownKeyTypeException, Exception {
+        final boolean OK   = true;
+        final boolean FAIL = false;
+        boolean status=true;
+        String graphDbName = name;
+        CondExpr [] outfilter=new CondExpr[2];
+        outfilter[0]=new CondExpr();
+        outfilter[1]=new CondExpr();
+    }
 }

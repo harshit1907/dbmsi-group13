@@ -58,8 +58,10 @@ public class phase3Test {
         else {
             System.out.println("Create!\n");
             createDB(name);
-            new BatchNodeInsert().batchNodeInsert("/home/anjoy92/Downloads/dbmsi/src/tests/NodeTestDataI.txt", name);
-            new BatchEdgeInsert().batchEdgeInsert("/home/anjoy92/Downloads/dbmsi/src/tests/EdgeTestData.txt");
+//            new BatchNodeInsert().batchNodeInsert("/home/prakhar/Documents/minjava/javaminibase/NodeInsertData.txt", name);
+//            new BatchEdgeInsert().batchEdgeInsert("/home/prakhar/Documents/minjava/javaminibase/EdgeInsertData.txt");
+            new BatchNodeInsert().batchNodeInsert("/home/prakhar/Documents/minjava/javaminibase/NodeTestData.txt", name);
+            new BatchEdgeInsert().batchEdgeInsert("/home/prakhar/Documents/minjava/javaminibase/EdgeTestData.txt");
         }
         new FullScanNode().fullScanNode(name);
 //        new NodeQuery().nodeQuery(name,400,1,1,"0");
@@ -76,10 +78,11 @@ public class phase3Test {
         SystemDefs.JavabaseBM.flushAllPages();
         scanner.close();
     }  
-    
+
     public static void createDB(String graphDbName) {
         SystemDefs sysdef = new SystemDefs(graphDbName,10000,4000,"Clock",0);
     }
+
     public static void openDB(String graphDbName) throws HashOperationException, PageUnpinnedException, PagePinnedException, PageNotFoundException, BufMgrException, IOException {
         //SystemDefs sysdef = new SystemDefs(graphDbName,0,400,"Clock",0);
         //if(SystemDefs.JavabaseDB!=null) 
