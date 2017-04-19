@@ -18,6 +18,8 @@ import heap.HFDiskMgrException;
 import heap.HFException;
 import heap.InvalidSlotNumberException;
 import heap.InvalidTupleSizeException;
+import queryPojo.EdgeQueryPojo;
+import queryPojo.NodeQueryPojo;
 //
 
 // Mihir
@@ -58,28 +60,46 @@ public class phase3Test {
         else {
             System.out.println("Create!\n");
             createDB(name);
+//            new BatchNodeInsert().batchNodeInsert("/home/prakhar/Documents/minjava/javaminibase/NodeInsertData.txt", name);
+//            new BatchEdgeInsert().batchEdgeInsert("/home/prakhar/Documents/minjava/javaminibase/EdgeInsertData.txt");
             new BatchNodeInsert().batchNodeInsert("/home/anjoy92/Downloads/dbmsi/src/tests/NodeTestDataI.txt", name);
             new BatchEdgeInsert().batchEdgeInsert("/home/anjoy92/Downloads/dbmsi/src/tests/EdgeTestData.txt");
+            new Join().createEdgeIndex();
         }
-        new FullScanNode().fullScanNode(name);
+//        new FullScanNode().fullScanNode(name);
 //        new NodeQuery().nodeQuery(name,400,1,1,"0");
 //        new EdgeQuery().edgeQuery(name,400,1,1,"0");
 //        new NodeQuery().nodeQuery(name,400,1,1,"0");
 //        new EdgeQuery().edgeQuery(name,400,1,0,"0");
       //  SystemDefs.JavabaseBM.flushAllPages();
+
+
+        EdgeQueryPojo edgeQueryPojo = new EdgeQueryPojo();
+        edgeQueryPojo.setDestLabel("109");
+        new Join().joinNodeDEdge(name, edgeQueryPojo);
+        edgeQueryPojo.setSourceLabel("109");
+        new Join().joinNodeSEdge(name, edgeQueryPojo);
+
+        NodeQueryPojo nodeQueryPojo = new NodeQueryPojo();
+        nodeQueryPojo.setLabel("109");
+        new Join().joinEdgeSNode(name, nodeQueryPojo);
+        new Join().joinEdgeDNode(name, nodeQueryPojo);
         
-        new Join().joinEdgeDNode(name);
-        new Join().joinEdgeDNode(name);
-        new Join().joinEdgeEdge(name);
-        new Join().joinEdgeEdge(name);
+          
+        
+//        new Join().joinNodeDEdge(name);
+//        new Join().joinEdgeDNode(name);
+//        new Join().joinEdgeEdge(name);
+//        new Join().joinEdgeEdge(name);
          
         SystemDefs.JavabaseBM.flushAllPages();
         scanner.close();
     }  
-    
+
     public static void createDB(String graphDbName) {
         SystemDefs sysdef = new SystemDefs(graphDbName,10000,4000,"Clock",0);
     }
+
     public static void openDB(String graphDbName) throws HashOperationException, PageUnpinnedException, PagePinnedException, PageNotFoundException, BufMgrException, IOException {
         //SystemDefs sysdef = new SystemDefs(graphDbName,0,400,"Clock",0);
         //if(SystemDefs.JavabaseDB!=null) 

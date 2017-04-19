@@ -401,7 +401,7 @@ public class SortMerge extends Iterator implements GlobalConst
 	   IndexException 
     {
       if (!closeFlag) {
-	
+          
 	try {
 	  p_i1.close();
 	  p_i2.close();

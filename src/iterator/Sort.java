@@ -760,8 +760,10 @@ public class Sort extends Iterator implements GlobalConst
 	catch (Exception e) {
 	  throw new SortException(e, "Sort.java: BUFmgr error");
 	}
+	
 	for (int i=0; i<_n_pages; i++) bufs_pids[i].pid = INVALID_PAGE;
       }
+      System.out.println("Unpinned pagesB: " + SystemDefs.JavabaseBM.getNumUnpinnedBuffers());
       
       for (int i = 0; i<temp_files.length; i++) {
 	if (temp_files[i] != null) {
