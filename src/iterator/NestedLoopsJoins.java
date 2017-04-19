@@ -170,6 +170,7 @@ public class NestedLoopsJoins  extends Iterator
 	      if ((outer_tuple=outer.get_next()) == null) {
               done = true;
               if (inner != null) {
+                  inner.closescan();
                   inner = null;
               }
               return null;

@@ -247,7 +247,6 @@ public class IndexScan extends Iterator {
 	throw new IndexException(e, "IndexScan.java: BTree error");
       }	  
     }
-    
     return null; 
   }
   
@@ -262,6 +261,7 @@ public class IndexScan extends Iterator {
     if (!closeFlag) {
       if (indScan instanceof BTFileScan) {
 	try {
+	    indFile.close();
 	  ((BTFileScan)indScan).DestroyBTreeFileScan();
 	}
 	catch(Exception e) {
@@ -274,7 +274,7 @@ public class IndexScan extends Iterator {
   }
   
   public FldSpec[]      perm_mat;
-  private IndexFile     indFile;
+  private BTreeFile     indFile;
   private IndexFileScan indScan;
   private AttrType[]    _types;
   private short[]       _s_sizes; 

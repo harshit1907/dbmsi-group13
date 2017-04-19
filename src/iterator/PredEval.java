@@ -125,10 +125,10 @@ public class PredEval
               break;
             case AttrType.attrDesc:
     //            str_size[0] = (short)(temp_ptr.operand1.desc.value.length + 1);
-                value.setHdr((short)5, val_type, null);
-                value.setDescFld(1, temp_ptr.operand1.desc);
+                value.setHdr((short)1, val_type, null);
+                value.setDescFld(1, temp_ptr.operand2.desc);
                 tuple2 = value;
-              //  comparison_type.attrType = AttrType.attrDesc;
+                comparison_type.attrType = AttrType.attrDesc;
                 break;
             default:
               break;

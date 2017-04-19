@@ -51,10 +51,6 @@ public class NodeQuery
 
             System.out.println("  query will print the node data in the order it occurs in the node heap");
             if(index==0) {
-                if(SystemDefs.JavabaseDB!=null) 
-                    SystemDefs.JavabaseBM.flushAllPages();
-                SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
-                SystemDefs.JavabaseBM.flushAllPages();
                 new FullScanNode().fullScanNode(graphDBName);
                 // clean up
             }
@@ -67,11 +63,109 @@ public class NodeQuery
         case 1:
             System.out.println("query will print the node data in increasing alphanumerical order of labels");
             if(index==0) {
-                if(SystemDefs.JavabaseDB!=null) 
-                    SystemDefs.JavabaseBM.flushAllPages();
-                SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
-                SystemDefs.JavabaseBM.flushAllPages();
 
+                
+                
+//                if(SystemDefs.JavabaseDB!=null) 
+//                    SystemDefs.JavabaseBM.flushAllPages();
+//                SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
+//                //SystemDefs.JavabaseBM.flushAllPages();
+//
+//                boolean status = OK;
+//
+//                AttrType[] attrType = new AttrType[2];
+//                attrType[0] = new AttrType(AttrType.attrDesc);
+//                attrType[1] = new AttrType(AttrType.attrString);
+//                short[] attrSize = new short[1];
+//                attrSize[0] = 20; //REC_LEN1;
+//                TupleOrder[] order = new TupleOrder[1];
+//                order[0] = new TupleOrder(TupleOrder.Ascending);
+//                //order[1] = new TupleOrder(TupleOrder.Descending);
+//                
+//                // create an iterator by open a file scan
+//                FldSpec[] projlist = new FldSpec[2];
+//                RelSpec rel = new RelSpec(RelSpec.outer); 
+//                projlist[0] = new FldSpec(rel, 1);
+//                projlist[1] = new FldSpec(rel, 2);
+//
+//                FileScan fscan = null;
+//
+//                try {
+//                    fscan = new FileScan(SystemDefs.JavabaseDBName+"_Node", attrType, attrSize, (short) 2, 2, projlist, null);
+//                }
+//                catch (Exception e) {
+//                    status = FAIL;
+//                    e.printStackTrace();
+//                }
+//
+//                // Sort 
+//                Sort sort = null;
+//                try {
+//                    sort = new Sort(attrType, (short) 2, attrSize, fscan, 2, order[0], 20, 30);
+//                }
+//                catch (Exception e) {
+//                    status = FAIL;
+//                    e.printStackTrace();
+//                }
+//
+//
+//                int count = 0;
+//                Tuple t = null;
+//                String outval = null;
+//
+//                try {
+//                    t = sort.get_next();
+//                }
+//                catch (Exception e) {
+//                    status = FAIL;
+//                    e.printStackTrace(); 
+//                }
+//
+//                boolean flag = true;
+//
+//                while (t != null) {
+//                    
+//                    try 
+//                    {
+//                        //System.out.println("HI: "+t.getStrFld(1));
+//                        //System.out.println(t.getStrFld(2));
+//                    }
+//                    catch (Exception e) {
+//                        status = FAIL;
+//                        e.printStackTrace();
+//                    }
+//
+//                    try {
+//                        
+//                        Node node =new Node ();
+//                        node.nodeInit(t.getTupleByteArray(), 0);
+//                        System.out.print("Label:\t"+node.getLabel());
+//                        System.out.println("\tDescriptor: "+node.getDesc().getString());
+//                        t = sort.get_next();
+//                    }
+//                    catch (Exception e) {
+//                        status = FAIL;
+//                        e.printStackTrace();
+//                    }
+//                }
+//                
+//
+//                // clean up
+//                try {
+//                    fscan.close();
+//                   sort.close();
+//                }
+//                catch (Exception e) {
+//                    status = FAIL;
+//                    e.printStackTrace();
+//                }
+//
+//                
+//                
+//                
+                
+
+                //new FullScanEdge().fullScanEdge(graphDBName);
                 boolean status = OK;
 
                 AttrType[] attrType = new AttrType[2];
@@ -82,7 +176,7 @@ public class NodeQuery
                 TupleOrder[] order = new TupleOrder[1];
                 order[0] = new TupleOrder(TupleOrder.Ascending);
                 //order[1] = new TupleOrder(TupleOrder.Descending);
-                
+
                 // create an iterator by open a file scan
                 FldSpec[] projlist = new FldSpec[2];
                 RelSpec rel = new RelSpec(RelSpec.outer); 
@@ -90,7 +184,6 @@ public class NodeQuery
                 projlist[1] = new FldSpec(rel, 2);
 
                 FileScan fscan = null;
-
                 try {
                     fscan = new FileScan(SystemDefs.JavabaseDBName+"_Node", attrType, attrSize, (short) 2, 2, projlist, null);
                 }
@@ -108,8 +201,6 @@ public class NodeQuery
                     status = FAIL;
                     e.printStackTrace();
                 }
-
-
                 int count = 0;
                 Tuple t = null;
                 String outval = null;
@@ -123,49 +214,31 @@ public class NodeQuery
                 }
 
                 boolean flag = true;
-
-                while (t != null) {
-                    
-                    try 
-                    {
-                        //System.out.println("HI: "+t.getStrFld(1));
-                        //System.out.println(t.getStrFld(2));
-                    }
-                    catch (Exception e) {
-                        status = FAIL;
-                        e.printStackTrace();
-                    }
-
+                while (t != null) {                   
                     try {
-                        
-                        Node node =new Node ();
-                        node.nodeInit(t.getTupleByteArray(), 0);
-                        System.out.print("Label:\t"+node.getLabel());
-                        System.out.println("\tDescriptor: "+node.getDesc().getString());
                         t = sort.get_next();
                     }
                     catch (Exception e) {
                         status = FAIL;
                         e.printStackTrace();
                     }
+                    
                 }
-                
+
 
                 // clean up
                 try {
-                   //sort.close();
+                    fscan.close();
+                    sort.close();
                 }
                 catch (Exception e) {
                     status = FAIL;
                     e.printStackTrace();
                 }
-
+                
             } 
             else {
 
-                if(SystemDefs.JavabaseDB!=null) 
-                    SystemDefs.JavabaseBM.flushAllPages();
-                SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
                 //SystemDefs.JavabaseBM.flushAllPages();
 
                 boolean status = OK;
@@ -383,11 +456,7 @@ public class NodeQuery
             List<EID> listEid = new ArrayList<EID>();
             Node matchNode = null;
             if(index==0) {
-                if(SystemDefs.JavabaseDB!=null) 
-                    SystemDefs.JavabaseBM.flushAllPages();
-                SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
-                SystemDefs.JavabaseBM.flushAllPages();
-                
+             
                  NID nid =SystemDefs.JavabaseDB.nhfile.getNID(queryOptions);
                 if(nid!=null)   
                   { listEid= SystemDefs.JavabaseDB.ehfile.getEIDListHeap(nid);
@@ -395,11 +464,7 @@ public class NodeQuery
                   }
             } 
             else {
-                if(SystemDefs.JavabaseDB!=null) 
-                    SystemDefs.JavabaseBM.flushAllPages();
-                SystemDefs sysdef = new SystemDefs(graphDBName,0,numBuf,"Clock",0);
-                //SystemDefs.JavabaseBM.flushAllPages();
-                
+                 
                 boolean status = OK;
                 SystemDefs.JavabaseDB.btNodeLabel = new BTreeFile(SystemDefs.JavabaseDBName+"_BTreeNodeIndex", AttrType.attrString, 32, 1/*delete*/);
                 

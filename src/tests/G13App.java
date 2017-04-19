@@ -16,6 +16,8 @@ import heap.InvalidTupleSizeException;
 // Shobhit
 // batchnodeinsert /home/anjoy92/Documents/dbmsi-group13/src/tests/NodeTestDataI.txt db1
 // batchnodedelete /home/anjoy92/Documents/dbmsi-group13/src/tests/NodeTestDataD.txt db1
+// batchedgeinsert /home/anjoy92/Documents/dbmsi-group13/src/tests/EdgeTestData.txt  db1
+// batchedgedelete /home/anjoy92/Documents/dbmsi-group13/src/tests/EdgeTestData2.txt  db1
 
 // Harshit
 // batchnodeinsert C://NodeTestData.txt db1
@@ -37,6 +39,7 @@ import heap.InvalidTupleSizeException;
 // edgequery db1 40 1 0 
 // fullnodescan db1 
 // fulledgescan db1
+// edgequery db1 40 5 0 6 20
 
 // Prakhar
 // batchnodeinsert /home/prakhar/Documents/minjava/javaminibase/NodeTestData.txt db1

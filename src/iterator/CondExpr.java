@@ -42,11 +42,7 @@ public class CondExpr {
   public  CondExpr() {
     operand1 = new Operand();
     operand2 = new Operand();
-
-    if(type1.attrType==AttrType.attrDesc) {
-      distance = 0;  // not know what value to set
-    } // TODO: DOUBT
-
+    distance=0;
     operand1.integer = 0;
     operand2.integer = 0;
 
