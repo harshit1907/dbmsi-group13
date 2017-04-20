@@ -919,7 +919,6 @@ class JoinsDriver implements GlobalConst {
       Runtime.getRuntime().exit(1);
     }
    
-    
     NestedLoopsJoins nlj = null;
     try {
       nlj = new NestedLoopsJoins (Stypes2, 2, Ssizes,

@@ -48,9 +48,8 @@ public class FullScanNode {
 					break;
 				}
 				System.out.print("Label:\t"+node.getLabel());
-				System.out.println("\tDescriptor: "+node.getDesc().getString());
+				System.out.println("\tDescriptor: "+node.getDesc().getString()+"\tNID- Slot No:\t"+nidTmp.slotNo+"\tPage No:\t"+nidTmp.pageNo);
 			}
-
 		}
 		scan.closescan();
 

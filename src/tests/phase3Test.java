@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Scanner;
 
 import bufmgr.BufMgrException;
@@ -12,6 +15,7 @@ import bufmgr.PageNotFoundException;
 import bufmgr.PagePinnedException;
 import bufmgr.PageUnpinnedException;
 import diskmgr.PCounter;
+import global.Descriptor;
 import global.SystemDefs;
 import heap.HFBufMgrException;
 import heap.HFDiskMgrException;
@@ -20,6 +24,7 @@ import heap.InvalidSlotNumberException;
 import heap.InvalidTupleSizeException;
 import queryPojo.EdgeQueryPojo;
 import queryPojo.NodeQueryPojo;
+import queryPojo.QueryProcessor;
 //
 
 // Mihir
@@ -62,49 +67,79 @@ public class phase3Test {
             createDB(name);
 //            new BatchNodeInsert().batchNodeInsert("/home/prakhar/Documents/minjava/javaminibase/NodeInsertData.txt", name);
 //            new BatchEdgeInsert().batchEdgeInsert("/home/prakhar/Documents/minjava/javaminibase/EdgeInsertData.txt");
-            new BatchNodeInsert().batchNodeInsert("/home/anjoy92/Downloads/dbmsi/src/tests/NodeTestDataI.txt", name);
-            new BatchEdgeInsert().batchEdgeInsert("/home/anjoy92/Downloads/dbmsi/src/tests/EdgeTestData.txt");
+//            new BatchNodeInsert().batchNodeInsert("/home/anjoy92/Downloads/dbmsi/src/tests/NodeTestDataI.txt", name);
+//            new BatchEdgeInsert().batchEdgeInsert("/home/anjoy92/Downloads/dbmsi/src/tests/EdgeTestData.txt");
+            
+    //        new BatchNodeInsert().batchNodeInsert("/home/anjoy92/Documents/dbmsi-group13/src/tests/clean/NodeTestDataOld.txt", name);
+      //      new BatchEdgeInsert().batchEdgeInsert("/home/anjoy92/Documents/dbmsi-group13/src/tests/clean/EdgeTestDataOld.txt");
+          
+            new BatchNodeInsert().batchNodeInsert("/home/anjoy92/Documents/dbmsi-group13/src/tests/clean/NodeInsertDataNew.txt", name);
+            new BatchEdgeInsert().batchEdgeInsert("/home/anjoy92/Documents/dbmsi-group13/src/tests/clean/EdgeInsertDataNew.txt");
+          
+            
             new Join().createEdgeIndex();
         }
-//        new FullScanNode().fullScanNode(name);
-//        new NodeQuery().nodeQuery(name,400,1,1,"0");
-//        new EdgeQuery().edgeQuery(name,400,1,1,"0");
-//        new NodeQuery().nodeQuery(name,400,1,1,"0");
-//        new EdgeQuery().edgeQuery(name,400,1,0,"0");
-      //  SystemDefs.JavabaseBM.flushAllPages();
-
-
-        EdgeQueryPojo edgeQueryPojo = new EdgeQueryPojo();
-        edgeQueryPojo.setDestLabel("109");
-        new Join().joinNodeDEdge(name, edgeQueryPojo);
-        edgeQueryPojo.setSourceLabel("109");
-        new Join().joinNodeSEdge(name, edgeQueryPojo);
-
-        NodeQueryPojo nodeQueryPojo = new NodeQueryPojo();
-        nodeQueryPojo.setLabel("109");
-        new Join().joinEdgeSNode(name, nodeQueryPojo);
-        new Join().joinEdgeDNode(name, nodeQueryPojo);
+        new FullScanNode().fullScanNode(name);
+//        PCounter.initialize();
+//        NodeQueryPojo nodeQueryPojo = new NodeQueryPojo();
+//        Descriptor desc=new Descriptor();
+//        
+//        desc.set(18, 38, 42, 29, 49);
+//        nodeQueryPojo.setDesc(desc);
+//   
+//        new Join().joinNodeSEdge(name, nodeQueryPojo);
+//        SystemDefs.JavabaseBM.flushAllPages();
+//        System.out.println("****** Read Counter "+PCounter.readCounter+" ==== Write Counter"+ PCounter.writeCounter);
+//        nodeQueryPojo.setLabel("50");
         
-          
+//        PCounter.initialize();
+//        new Join().joinEdgeEdge(name);
+//        SystemDefs.JavabaseBM.flushAllPages();
+//        System.out.println("****** Read Counter "+PCounter.readCounter+" ==== Write Counter"+ PCounter.writeCounter);
+//     
+        //*********************** query PE1 ************************//
         
-//        new Join().joinNodeDEdge(name);
-//        new Join().joinEdgeDNode(name);
-//        new Join().joinEdgeEdge(name);
-//        new Join().joinEdgeEdge(name);
-         
+        
+        // Page First then slot no 85, 1 - 109
+        List<NodeQueryPojo> li= new QueryProcessor().PathExpression1("19/214");
+        
+//        for( NodeQueryPojo tmpLi : li)
+//        {
+//            if(tmpLi.getKey()==1)
+//            System.out.println(tmpLi.getLabel()+" /");
+//            else if(tmpLi.getKey()==2)
+//            System.out.println(tmpLi.getDesc().getString()+" /");
+//            else if(tmpLi.getKey()==3)
+//                System.out.println(tmpLi.getNd().pageNo+" "+tmpLi.getNd().slotNo+" /");
+//                
+//        }
+
+        List<NodeQueryPojo> ansPojo = new LinkedList<NodeQueryPojo>();
+        new Queries().queryPE1(name, li, ansPojo);
+       
+      for( NodeQueryPojo tmpLi : ansPojo)
+      {
+          if(tmpLi.getKey()==1)
+          System.out.println(tmpLi.getLabel()+" /");
+          else if(tmpLi.getKey()==2)
+          System.out.println(tmpLi.getDesc().getString()+" /");
+          else if(tmpLi.getKey()==3)
+              System.out.println(tmpLi.getNd().pageNo+" "+tmpLi.getNd().slotNo+" /");
+      }
         SystemDefs.JavabaseBM.flushAllPages();
+       
         scanner.close();
     }  
 
     public static void createDB(String graphDbName) {
-        SystemDefs sysdef = new SystemDefs(graphDbName,10000,4000,"Clock",0);
+        SystemDefs sysdef = new SystemDefs(graphDbName,500000,5000,"Clock",0);
     }
 
     public static void openDB(String graphDbName) throws HashOperationException, PageUnpinnedException, PagePinnedException, PageNotFoundException, BufMgrException, IOException {
         //SystemDefs sysdef = new SystemDefs(graphDbName,0,400,"Clock",0);
         //if(SystemDefs.JavabaseDB!=null) 
         //SystemDefs.JavabaseBM.flushAllPages();
-        SystemDefs sysdef = new SystemDefs(graphDbName,0,4000,"Clock",0);
+        SystemDefs sysdef = new SystemDefs(graphDbName,0,5000,"Clock",0);
         SystemDefs.JavabaseBM.flushAllPages();
     }
 }

@@ -7,18 +7,21 @@ import global.NID;
 import heap.InvalidTupleSizeException;
 import heap.InvalidTypeException;
 import heap.Tuple;
+import index.IndexException;
 import iterator.*;
 import nodeheap.NodeHeapFile;
 import zbtree.*;
 
 import java.io.IOException;
 
+import btree.BTFileScan;
+
 /**
  * Created by prakhar on 3/10/17.
  */
 public class ZIndexScan extends Iterator {
     public FldSpec[] perm_mat;
-    private ZIndexFile indFile;
+    private zbtree.ZBTreeFile indFile;
     private IndexFileScan indScan;
     private AttrType[] _types;
     private short[] _s_sizes;
@@ -190,9 +193,11 @@ public class ZIndexScan extends Iterator {
 
     @Override
     public void close() throws IOException, JoinsException, SortException, ZIndexException {
+            
         if (!closeFlag) {
             if (indScan instanceof ZBTFileScan) {
                 try {
+                    indFile.close();
                     ((ZBTFileScan)indScan).DestroyZBTreeFileScan();
                 } catch(Exception e) {
                     throw new ZIndexException(e, "ZBTree error in destroying index scan.");

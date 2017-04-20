@@ -82,8 +82,18 @@ public class TupleUtils
             if(t1_s.compareTo( t2_s)>0)return 1;
             if (t1_s.compareTo( t2_s)<0)return -1;
             return 0;
-
-
+        case AttrType.attrDesc:                // Compare two Descriptors
+            try {
+                t1_d = t1.getDescFld(t1_fld_no);
+                t2_d = t2.getDescFld(t2_fld_no);
+            }catch (FieldNumberOutOfBoundException e){
+                throw new TupleUtilsException(e, "FieldNumberOutOfBoundException is caught by TupleUtils.java");
+            }
+            
+            if(t1_d.equal(t2_d)==1)
+                return 0;
+            else
+                return 1;
 
 
         default:
@@ -152,6 +162,7 @@ public class TupleUtils
             }catch (FieldNumberOutOfBoundException e){
                 throw new TupleUtilsException(e, "FieldNumberOutOfBoundException is caught by TupleUtils.java");
             }
+            
             Descriptor checkTarget = new Descriptor();
             checkTarget.set(-1, -1, -1, -1, -1);
             if(target.equals(checkTarget))

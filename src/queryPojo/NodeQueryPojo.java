@@ -1,7 +1,15 @@
 package queryPojo;
 
+import java.io.IOException;
+
 import global.Descriptor;
 import global.NID;
+import global.SystemDefs;
+import heap.HFBufMgrException;
+import heap.HFDiskMgrException;
+import heap.HFException;
+import heap.InvalidSlotNumberException;
+import heap.InvalidTupleSizeException;
 
 /**
  * Key 1 : Node Label;
@@ -16,13 +24,12 @@ public class NodeQueryPojo {
     public int getKey() {
         return key;
     }
-    public void setKey(int key) {
-        this.key = key;
-    }
     public NID getNd() {
         return nd;
     }
-    public void setNd(NID nd) {
+    public void setNd(NID nd) throws InvalidSlotNumberException, InvalidTupleSizeException, HFException, HFDiskMgrException, HFBufMgrException, IOException, Exception {
+        this.key=1;
+        this.label= SystemDefs.JavabaseDB.nhfile.getNode(nd).getLabel();
         this.nd = nd;
     }
     public String getLabel() {

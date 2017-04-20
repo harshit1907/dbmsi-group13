@@ -75,7 +75,7 @@ public class Projection
 		  Jtuple.setStrFld(i+1, t2.getStrFld(perm_mat[i].offset));
 		  break;
 		case AttrType.attrDesc:
-          Jtuple.setDescFld(i+1, t1.getDescFld(perm_mat[i].offset));
+          Jtuple.setDescFld(i+1, t2.getDescFld(perm_mat[i].offset));
           break;
 		default:
 		  

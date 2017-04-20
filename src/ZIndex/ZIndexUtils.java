@@ -169,7 +169,8 @@ public class ZIndexUtils {
     
     switch (type.attrType) {
     case AttrType.attrDesc:
-      if (choice == 1) return new DescriptorKey(cd.operand1.string);
+      if (choice == 1) return new DescriptorKey(cd.operand1.desc);
+        else return new DescriptorKey(cd.operand2.desc);
 
       /*
       // need FloatKey class in bt.java

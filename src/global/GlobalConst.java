@@ -24,10 +24,10 @@ public interface GlobalConst {
   /**
    * also the name of a relation
    */
-  public static final int MAXFILENAME  = 15;          
+  public static final int MAXFILENAME  = 50;          
   public static final int MAXINDEXNAME = 40;
   public static final int MAXATTRNAME  = 15;    
-  public static final int MAX_NAME = 50;
+  public static final int MAX_NAME = 100;
 
   public static final int INVALID_PAGE = -1;
 }
