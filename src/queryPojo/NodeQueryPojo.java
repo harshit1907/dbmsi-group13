@@ -30,6 +30,7 @@ public class NodeQueryPojo {
     public void setNd(NID nd) throws InvalidSlotNumberException, InvalidTupleSizeException, HFException, HFDiskMgrException, HFBufMgrException, IOException, Exception {
         this.key=1;
         this.label= SystemDefs.JavabaseDB.nhfile.getNode(nd).getLabel();
+        this.desc = SystemDefs.JavabaseDB.nhfile.getNode(nd).getDesc();
         this.nd = nd;
     }
     public String getLabel() {

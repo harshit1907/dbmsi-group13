@@ -79,8 +79,10 @@ public class phase3Test {
             
             new Join().createEdgeIndex();
         }
-        new FullScanNode().fullScanNode(name);
-//        PCounter.initialize();
+   //     new FullScanNode().fullScanNode(name);
+
+        
+        //        PCounter.initialize();
 //        NodeQueryPojo nodeQueryPojo = new NodeQueryPojo();
 //        Descriptor desc=new Descriptor();
 //        
@@ -100,8 +102,8 @@ public class phase3Test {
         //*********************** query PE1 ************************//
         
         
-        // Page First then slot no 85, 1 - 109
-        List<NodeQueryPojo> li= new QueryProcessor().PathExpression1("19/214");
+        // Page First then slot no 85, 1 - 109 ||| 72,1 for 19
+        List<NodeQueryPojo> li= new QueryProcessor().PathExpression1("72,1/47,20,29,1,38"); // 19/811
         
 //        for( NodeQueryPojo tmpLi : li)
 //        {
@@ -114,17 +116,14 @@ public class phase3Test {
 //                
 //        }
 
-        List<NodeQueryPojo> ansPojo = new LinkedList<NodeQueryPojo>();
-        new Queries().queryPE1(name, li, ansPojo);
+        List<NodeQueryPojo> ansNids = new LinkedList<NodeQueryPojo>();
+        new Queries();
+        ansNids= Queries.queryPE1(name, li);
        
-      for( NodeQueryPojo tmpLi : ansPojo)
+      for( NodeQueryPojo tmpLi : ansNids)
       {
-          if(tmpLi.getKey()==1)
-          System.out.println(tmpLi.getLabel()+" /");
-          else if(tmpLi.getKey()==2)
-          System.out.println(tmpLi.getDesc().getString()+" /");
-          else if(tmpLi.getKey()==3)
-              System.out.println(tmpLi.getNd().pageNo+" "+tmpLi.getNd().slotNo+" /");
+        //  System.out.println(ansNids.size()+" "+tmpLi.getKey());
+          System.out.println("(Page No: "+tmpLi.getNd().pageNo+" | Slot no: "+tmpLi.getNd().slotNo+" | Label: "+tmpLi.getLabel()+" | Desr:"+tmpLi.getDesc().getString2()+"),");
       }
         SystemDefs.JavabaseBM.flushAllPages();
        

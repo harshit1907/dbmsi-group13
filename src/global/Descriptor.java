@@ -34,6 +34,14 @@ public class Descriptor {
 		}
 		return str;
 	}
+	public String getString2() {
+        String str="";
+        for(int val:value)
+        {
+            str=str+" "+val;
+        }
+        return str;
+    }
 
 	public double distance(Descriptor desc) {
 		double d;

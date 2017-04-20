@@ -1,12 +1,19 @@
 package tests;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import javax.sound.midi.Soundbank;
+
 import com.sun.org.apache.regexp.internal.RE;
 
 import bufmgr.PageNotReadException;
+import global.Descriptor;
+import global.NID;
+import global.PageId;
+import global.SystemDefs;
 import heap.Tuple;
 import index.IndexException;
 import iterator.JoinsException;
@@ -24,75 +31,90 @@ public class Queries {
 
 
 
-    public static void queryPE1(String name,List<NodeQueryPojo> nodeQueryPojo, List<NodeQueryPojo> ansPojo) throws JoinsException, IndexException, PageNotReadException, TupleUtilsException, PredEvalException, SortException, LowMemException, UnknowAttrType, UnknownKeyTypeException, Exception
+    public static List<NodeQueryPojo> queryPE1(String name,List<NodeQueryPojo> nodeQuery) throws JoinsException, IndexException, PageNotReadException, TupleUtilsException, PredEvalException, SortException, LowMemException, UnknowAttrType, UnknownKeyTypeException, Exception
     {
 
+        List<NodeQueryPojo> ansNids= new LinkedList<NodeQueryPojo>();
+        int i=0;
+        List<NodeQueryPojo> childQuery = new LinkedList<NodeQueryPojo>();
 
-        if(nodeQueryPojo.size()==1)
-            return ;
-        NestedLoopsJoins nlj;
+        while(nodeQuery.size()>1)
+        {
 
-        nlj  = new Join().joinNodeSEdge(name, nodeQueryPojo.get(0));
-        Tuple t = new Tuple();
-        iterator.Iterator children=(iterator.Iterator)nlj;
-
-        //List<NodeQueryPojo> BFS = new LinkedList<NodeQueryPojo>();
-        List<NodeQueryPojo> BFS = new LinkedList<NodeQueryPojo>();
-        
-        
-        while ((t = children.get_next()) != null) {
-            NodeQueryPojo tmp=new NodeQueryPojo();
-            tmp.setLabel(t.getStrFld(7));
-            BFS.add(tmp);
-        }
-        
-        nlj.close();
-        
-
-        while(BFS.size()>0) {
-            NodeQueryPojo current = BFS.get(0);
-            
-            NestedLoopsJoins nlj2;
-
-            nlj2  = new Join().joinNodeSEdge(name, nodeQueryPojo.get(0));
-            children=(iterator.Iterator)nlj2;
-            
-            
-            while ((t = children.get_next()) != null) {
-
-
-                //              //  System.out.println("Label:\t"+t.getStrFld(6)+ " "+t.getStrFld(7)+" "+t.getDescFld(9).getString());
-                //              NodeQueryPojo tmp=new NodeQueryPojo();
-                //              tmp.setLabel(t.getStrFld(7));
-                //              NodeQueryPojo ansTmp=new NodeQueryPojo();
-                //              ansTmp.setLabel(t.getStrFld(8));
-                //                       boolean lastFlg = false;
-                //                       if(nodeQueryPojo.get(1).getKey()==2)
-                //                       {
-                //                           if(t.getDescFld(9).equals(nodeQueryPojo.get(1).getDesc())){
-                //                               nodeQueryPojo.add(tmp);
-                //                               
-                //                           }
-                //                       }
-                //                       else
-                //                       {
-                //                           if(t.getStrFld(7).equals(nodeQueryPojo.get(1).getLabel())){
-                //                               nodeQueryPojo.add(tmp);
-                //                           }
-                //                       }  
-                //              
-
+            if(i==0)
+            {
+                i=1;
+                childQuery.add(nodeQuery.get(0));
             }
-            nlj2.close();  
+            Iterator<NodeQueryPojo> iterQuery = childQuery.iterator();
+            List<NodeQueryPojo> children = new LinkedList<NodeQueryPojo>();
 
-            //nodeQueryPojo.remove(0);
+            while (iterQuery.hasNext()) {
+
+                NestedLoopsJoins nlj;
+
+                nlj  = new Join().joinNodeSEdge(name, iterQuery.next());
+                Tuple t = new Tuple();
+                iterator.Iterator joinResult=(iterator.Iterator)nlj;
+
+                while ((t = joinResult.get_next()) != null) {
+                    NodeQueryPojo tmp=new NodeQueryPojo();
+                    tmp.setLabel(t.getStrFld(8)); // has destination Label
+
+                    //                    NID destNid2 = new NID();
+                    //                    destNid2.pageNo=new PageId(t.getIntFld(4));
+                    //                    destNid2.slotNo=t.getIntFld(5);
+                    //                    System.out.println("Dest Page No: "+t.getIntFld(4) +" slot: "+ t.getIntFld(5));
+                    //                    Descriptor destDisc2 = new Descriptor();
+                    //                    destDisc2 =  SystemDefs.JavabaseDB.nhfile.getNode(destNid2).getDesc();
+                    //                    System.out.println(" Descriptor"+ destDisc2.getString());
+
+                    NID destNid = new NID(); 
+                    destNid.pageNo=new PageId(t.getIntFld(4));
+                    destNid.slotNo=t.getIntFld(5);
+                    
+                    if(nodeQuery.get(1).getKey()==2)
+                    {
+                        Descriptor destDisc = new Descriptor();
+                        destDisc =  SystemDefs.JavabaseDB.nhfile.getNode(destNid).getDesc();
+                        //System.out.println("Destination: "+ t.getStrFld(8) +" Des: "+destDisc.getString2());
+                        if(destDisc.equal(nodeQuery.get(1).getDesc())==1){
+                            {
+                                children.add(tmp);
+
+                                if(nodeQuery.size()==2)
+                                {
+                                    NodeQueryPojo destNidPojo = new NodeQueryPojo();
+                                    destNidPojo.setNd(destNid);
+                                    ansNids.add(destNidPojo);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if(t.getStrFld(8).equals(nodeQuery.get(1).getLabel())){
+                            children.add(tmp);
+                            
+                            if(nodeQuery.size()==2)
+                            {
+                                NodeQueryPojo destNidPojo = new NodeQueryPojo();
+                                destNidPojo.setNd(destNid);
+                                ansNids.add(destNidPojo);
+                            }
+                        }
+                    }  
+
+                }
+                nlj.close();
+            }
+
+            nodeQuery.remove(0);
+            childQuery=children;
+            //            if(nodeQuery.size()==1)
+            //                ansNids=children;
         }
-
-        System.out.println("AYA ANDAAR " + nodeQueryPojo.size());
-
-        queryPE1(name,nodeQueryPojo,ansPojo);
-
-        return;
+        return ansNids;
     }
 
 }
