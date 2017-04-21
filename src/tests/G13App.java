@@ -23,6 +23,10 @@ import heap.InvalidTupleSizeException;
 // batchedgeinsert C://EdgeTestData.txt db1
 // batchedgedelete C://EdgeTestData2.txt db1
 
+//Nishi
+//batchnodeinsert /home/nishi/dbmsi-group13/NodeInsertData1.txt db1
+//batchedgeinsert /home/nishi/dbmsi-group13/EdgeInsertData1.txt db1
+
 // Mihir
 // batchnodeinsert /Users/mihir/dev/NodeTestData.txt db1
 // batchnodedelete /Users/mihir/dev/NodeTestData2.txt db1
@@ -134,7 +138,7 @@ public class G13App {
                 }
                 graphDbName = tokens[1];
                 numBuf = Integer.parseInt(tokens[2]);
-                qType = Integer.parseInt(tokens[3]);
+                qType = Integer.parseInt(tokens[5]);
                 Index = Integer.parseInt(tokens[4]);
                 if(tokens.length>=5) { // "30 40 50 60 70 5"
                     qOptions="";
