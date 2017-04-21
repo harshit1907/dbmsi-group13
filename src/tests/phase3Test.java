@@ -17,11 +17,7 @@ import bufmgr.PageUnpinnedException;
 import diskmgr.PCounter;
 import global.Descriptor;
 import global.SystemDefs;
-import heap.HFBufMgrException;
-import heap.HFDiskMgrException;
-import heap.HFException;
-import heap.InvalidSlotNumberException;
-import heap.InvalidTupleSizeException;
+import heap.*;
 import queryPojo.EdgeQueryPojo;
 import queryPojo.NodeQueryPojo;
 import queryPojo.QueryProcessor;
@@ -65,33 +61,45 @@ public class phase3Test {
         else {
             System.out.println("Create!\n");
             createDB(name);
-//            new BatchNodeInsert().batchNodeInsert("/home/prakhar/Documents/minjava/javaminibase/NodeInsertData.txt", name);
-//            new BatchEdgeInsert().batchEdgeInsert("/home/prakhar/Documents/minjava/javaminibase/EdgeInsertData.txt");
+            new BatchNodeInsert().batchNodeInsert("/home/prakhar/Documents/minjava/javaminibase/NodeInsertData.txt", name);
+            new BatchEdgeInsert().batchEdgeInsert("/home/prakhar/Documents/minjava/javaminibase/EdgeInsertData.txt");
 //            new BatchNodeInsert().batchNodeInsert("/home/anjoy92/Downloads/dbmsi/src/tests/NodeTestDataI.txt", name);
 //            new BatchEdgeInsert().batchEdgeInsert("/home/anjoy92/Downloads/dbmsi/src/tests/EdgeTestData.txt");
             
     //        new BatchNodeInsert().batchNodeInsert("/home/anjoy92/Documents/dbmsi-group13/src/tests/clean/NodeTestDataOld.txt", name);
       //      new BatchEdgeInsert().batchEdgeInsert("/home/anjoy92/Documents/dbmsi-group13/src/tests/clean/EdgeTestDataOld.txt");
           
-            new BatchNodeInsert().batchNodeInsert("/home/anjoy92/Documents/dbmsi-group13/src/tests/clean/NodeInsertDataNew.txt", name);
-            new BatchEdgeInsert().batchEdgeInsert("/home/anjoy92/Documents/dbmsi-group13/src/tests/clean/EdgeInsertDataNew.txt");
-          
-            
+//            new BatchNodeInsert().batchNodeInsert("/home/anjoy92/Documents/dbmsi-group13/src/tests/clean/NodeInsertDataNew.txt", name);
+//            new BatchEdgeInsert().batchEdgeInsert("/home/anjoy92/Documents/dbmsi-group13/src/tests/clean/EdgeInsertDataNew.txt");
             new Join().createEdgeIndex();
         }
-   //     new FullScanNode().fullScanNode(name);
 
-        
-        //        PCounter.initialize();
+        /* TESTING TEMPLATE START */
+        PCounter.initialize();
 //        NodeQueryPojo nodeQueryPojo = new NodeQueryPojo();
 //        Descriptor desc=new Descriptor();
-//        
-//        desc.set(18, 38, 42, 29, 49);
-//        nodeQueryPojo.setDesc(desc);
-//   
-//        new Join().joinNodeSEdge(name, nodeQueryPojo);
-//        SystemDefs.JavabaseBM.flushAllPages();
-//        System.out.println("****** Read Counter "+PCounter.readCounter+" ==== Write Counter"+ PCounter.writeCounter);
+////        desc.set(7, 1, 44, 22, 12);
+////        nodeQueryPojo.setDesc(desc);
+//        nodeQueryPojo.setLabel("434");
+//
+//        iterator.Iterator hmm = new Join().joinNodeDEdge(name, nodeQueryPojo);
+        EdgeQueryPojo edgeQueryPojo = new EdgeQueryPojo();
+        edgeQueryPojo.setEdgelabel("4_41");
+        iterator.Iterator hmm = new Join().joinEdgeSNode(name, edgeQueryPojo);
+        Tuple t = new Tuple();
+        while ((t = hmm.get_next()) != null) {
+            System.out.println("Label:\t"+t.getStrFld(6)+ " "+t.getStrFld(7)+" "+
+                    t.getDescFld(9).getString());
+        }
+        hmm.close();
+        SystemDefs.JavabaseBM.flushAllPages();
+        System.out.println("****** Read Counter "+PCounter.readCounter+" ==== Write Counter"+ PCounter.writeCounter);
+        /* TESTING TEMPLATE END */
+
+
+
+        //     new FullScanNode().fullScanNode(name);
+
 //        nodeQueryPojo.setLabel("50");
         
 //        PCounter.initialize();
@@ -103,7 +111,7 @@ public class phase3Test {
         
         
         // Page First then slot no 85, 1 - 109 ||| 72,1 for 19
-        List<NodeQueryPojo> li= new QueryProcessor().PathExpression1("72,1/47,20,29,1,38"); // 19/811
+//        List<NodeQueryPojo> li= new QueryProcessor().PathExpression1("72,1/47,20,29,1,38"); // 19/811
         
 //        for( NodeQueryPojo tmpLi : li)
 //        {
@@ -116,16 +124,16 @@ public class phase3Test {
 //                
 //        }
 
-        List<NodeQueryPojo> ansNids = new LinkedList<NodeQueryPojo>();
-        new Queries();
-        ansNids= Queries.queryPE1(name, li);
-       
-      for( NodeQueryPojo tmpLi : ansNids)
-      {
-        //  System.out.println(ansNids.size()+" "+tmpLi.getKey());
-          System.out.println("(Page No: "+tmpLi.getNd().pageNo+" | Slot no: "+tmpLi.getNd().slotNo+" | Label: "+tmpLi.getLabel()+" | Desr:"+tmpLi.getDesc().getString2()+"),");
-      }
-        SystemDefs.JavabaseBM.flushAllPages();
+//        List<NodeQueryPojo> ansNids = new LinkedList<NodeQueryPojo>();
+//        new Queries();
+////        ansNids= Queries.queryPE1(name, li);
+//
+//      for( NodeQueryPojo tmpLi : ansNids)
+//      {
+//        //  System.out.println(ansNids.size()+" "+tmpLi.getKey());
+//          System.out.println("(Page No: "+tmpLi.getNd().pageNo+" | Slot no: "+tmpLi.getNd().slotNo+" | Label: "+tmpLi.getLabel()+" | Desr:"+tmpLi.getDesc().getString2()+"),");
+//      }
+//        SystemDefs.JavabaseBM.flushAllPages();
        
         scanner.close();
     }  
