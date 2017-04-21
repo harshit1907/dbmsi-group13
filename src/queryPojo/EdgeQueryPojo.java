@@ -7,6 +7,7 @@ import global.NID;
  * Key = 2 : Weight
  * Key = 3 : Source Label
  * Key = 4 : Dest Label
+ * key=5 : nid
  */
 public class EdgeQueryPojo {
     public EdgeQueryPojo() {
@@ -26,6 +27,7 @@ public class EdgeQueryPojo {
     }
 
     public void setNd(NID nd) {
+    	this.key = 5;
         this.nd = nd;
     }
 
