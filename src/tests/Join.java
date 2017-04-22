@@ -2,6 +2,7 @@ package tests;
 import java.io.IOException;
 
 import btree.BTreeFile;
+import btree.IntegerKey;
 import btree.StringKey;
 import bufmgr.PageNotReadException;
 import edgeheap.EScan;
@@ -34,12 +35,12 @@ public class Join {
     //    }
     public void joinEdgeEdge(String name) throws JoinsException, IndexException, PageNotReadException, TupleUtilsException, PredEvalException, SortException, LowMemException, UnknowAttrType, UnknownKeyTypeException, Exception {
 
-        final boolean OK   = true;
+        final boolean OK = true;
         final boolean FAIL = false;
-        boolean status=true;
+        boolean status = true;
         String graphDbName = name;
         Tuple t = new Tuple();
-        t=null;
+        t = null;
         AttrType[] etypes = new AttrType[7];
         etypes[0] = new AttrType(AttrType.attrInteger);
         etypes[1] = new AttrType(AttrType.attrInteger);
@@ -49,23 +50,23 @@ public class Join {
         etypes[5] = new AttrType(AttrType.attrString);
         etypes[6] = new AttrType(AttrType.attrString);
 
-        AttrType [] ntypes={
+        AttrType[] ntypes = {
                 new AttrType(AttrType.attrDesc),
                 new AttrType(AttrType.attrString),
         };
         short[] esizes = new short[2];
         esizes[0] = 20;
         esizes[1] = 20;
-        short [] nsizes= new short[1];
-        nsizes[0]=20;
-        AttrType [] Jtypes={
+        short[] nsizes = new short[1];
+        nsizes[0] = 20;
+        AttrType[] Jtypes = {
                 new AttrType(AttrType.attrString),
                 new AttrType(AttrType.attrString)
         };
-        short [] Jsizes=new short[2];
-        Jsizes[0]=20;
-        Jsizes[1]=20;
-        FldSpec [] proj1 = new FldSpec[7];
+        short[] Jsizes = new short[2];
+        Jsizes[0] = 20;
+        Jsizes[1] = 20;
+        FldSpec[] proj1 = new FldSpec[7];
         //       proj1[0] = new FldSpec(new RelSpec(RelSpec.outer), 1);
         //       proj1[1] = new FldSpec(new RelSpec(RelSpec.outer), 2);
         //       proj1[2] = new FldSpec(new RelSpec(RelSpec.outer), 3);
@@ -128,7 +129,7 @@ public class Join {
 
         //new hesp file
 
-        Tuple nhp =new Tuple();
+        Tuple nhp = new Tuple();
         AttrType[] attrType = new AttrType[7];
         attrType[0] = new AttrType(AttrType.attrInteger);
         attrType[1] = new AttrType(AttrType.attrInteger);
@@ -141,37 +142,35 @@ public class Join {
         short[] attrSize = new short[2];
         attrSize[0] = 20;
         attrSize[1] = 20;
-        nhp.setHdr((short)7, attrType, attrSize);
+        nhp.setHdr((short) 7, attrType, attrSize);
 
         EScan scan = null;
         boolean statusN = OK;
 
 
-        Heapfile f = new Heapfile(SystemDefs.JavabaseDBName+"p3tempEfile11.in");
+        Heapfile f = new Heapfile(SystemDefs.JavabaseDBName + "p3tempEfile11.in");
 
-        if ( statusN == OK ) {  
-            System.out.println ("  - Scan the records just inserted\n");
+        if (statusN == OK) {
+            System.out.println("  - Scan the records just inserted\n");
 
             try {
                 scan = SystemDefs.JavabaseDB.ehfile.openScan();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 statusN = FAIL;
-                System.err.println ("*** Error opening scan\n");
+                System.err.println("*** Error opening scan\n");
                 e.printStackTrace();
             }
 
-            if ( statusN == OK &&  SystemDefs.JavabaseBM.getNumUnpinnedBuffers()
-                    == SystemDefs.JavabaseBM.getNumBuffers() ) {
-                System.err.println ("*** The heap-file scan has not pinned the first page\n");
+            if (statusN == OK && SystemDefs.JavabaseBM.getNumUnpinnedBuffers()
+                    == SystemDefs.JavabaseBM.getNumBuffers()) {
+                System.err.println("*** The heap-file scan has not pinned the first page\n");
                 statusN = FAIL;
             }
         }
         EID eidTmp = new EID();
 
 
-
-        if ( status == OK ) {
+        if (status == OK) {
             Edge edge = null;
 
             boolean done = false;
@@ -198,7 +197,7 @@ public class Join {
         // new edge headp 2 file
 
 
-        Tuple newT =new Tuple();
+        Tuple newT = new Tuple();
         AttrType[] attrTypeN = new AttrType[7];
         attrTypeN[0] = new AttrType(AttrType.attrInteger);
         attrTypeN[1] = new AttrType(AttrType.attrInteger);
@@ -211,37 +210,35 @@ public class Join {
         short[] attrSizeN = new short[2];
         attrSizeN[0] = 20;
         attrSizeN[1] = 20;
-        newT.setHdr((short)7, attrTypeN, attrSizeN);
+        newT.setHdr((short) 7, attrTypeN, attrSizeN);
 
         EScan scanNew = null;
         boolean statusNe = OK;
 
 
-        Heapfile fN = new Heapfile(SystemDefs.JavabaseDBName+"p3tempEfile22.in");
+        Heapfile fN = new Heapfile(SystemDefs.JavabaseDBName + "p3tempEfile22.in");
 
-        if ( statusNe == OK ) {  
-            System.out.println ("  - Scan the records just inserted\n");
+        if (statusNe == OK) {
+            System.out.println("  - Scan the records just inserted\n");
 
             try {
                 scanNew = SystemDefs.JavabaseDB.ehfile.openScan();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 statusNe = FAIL;
-                System.err.println ("*** Error opening scan\n");
+                System.err.println("*** Error opening scan\n");
                 e.printStackTrace();
             }
 
-            if ( statusNe == OK &&  SystemDefs.JavabaseBM.getNumUnpinnedBuffers()
-                    == SystemDefs.JavabaseBM.getNumBuffers() ) {
-                System.err.println ("*** The heap-file scan has not pinned the first page\n");
+            if (statusNe == OK && SystemDefs.JavabaseBM.getNumUnpinnedBuffers()
+                    == SystemDefs.JavabaseBM.getNumBuffers()) {
+                System.err.println("*** The heap-file scan has not pinned the first page\n");
                 statusNe = FAIL;
             }
         }
         EID eidT = new EID();
 
 
-
-        if ( statusNe == OK ) {
+        if (statusNe == OK) {
             Edge edgeT = null;
 
             boolean done = false;
@@ -266,50 +263,48 @@ public class Join {
         scanNew.closescan();
 
         TupleOrder ascending = new TupleOrder(TupleOrder.Ascending);
-        CondExpr [] outfilter=new CondExpr[2];
-        outfilter[0]=new CondExpr();
-        outfilter[1]=new CondExpr();
+        CondExpr[] outfilter = new CondExpr[2];
+        outfilter[0] = new CondExpr();
+        outfilter[1] = new CondExpr();
 
-        outfilter[0].next=null;
-        outfilter[0].op=new AttrOperator(AttrOperator.aopEQ);
-        outfilter[0].type1=new AttrType(AttrType.attrSymbol);
-        outfilter[0].type2=new AttrType(AttrType.attrSymbol);
-        outfilter[0].operand1.symbol=new FldSpec(new RelSpec(RelSpec.outer),7);
-        outfilter[0].operand2.symbol=new FldSpec(new RelSpec(RelSpec.innerRel),7);
+        outfilter[0].next = null;
+        outfilter[0].op = new AttrOperator(AttrOperator.aopEQ);
+        outfilter[0].type1 = new AttrType(AttrType.attrSymbol);
+        outfilter[0].type2 = new AttrType(AttrType.attrSymbol);
+        outfilter[0].operand1.symbol = new FldSpec(new RelSpec(RelSpec.outer), 7);
+        outfilter[0].operand2.symbol = new FldSpec(new RelSpec(RelSpec.innerRel), 7);
 
-        outfilter[1]=null;
+        outfilter[1] = null;
 
         FileScan am2 = null;
         try {
-            am2 = new FileScan(SystemDefs.JavabaseDBName+"p3tempEfile11.in", etypes, esizes, 
-                    (short)7, (short) 7,
+            am2 = new FileScan(SystemDefs.JavabaseDBName + "p3tempEfile11.in", etypes, esizes,
+                    (short) 7, (short) 7,
                     projlist2, null);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             status = FAIL;
-            System.err.println (""+e);
+            System.err.println("" + e);
         }
 
         if (status != OK) {
             //bail out
-            System.err.println ("*** Error setting up scan for reserves");
+            System.err.println("*** Error setting up scan for reserves");
             Runtime.getRuntime().exit(1);
         }
 
         FileScan am = null;
         try {
-            am  = new FileScan(SystemDefs.JavabaseDBName+"p3tempEfile22.in", etypes, esizes, 
-                    (short)7, (short)7,
+            am = new FileScan(SystemDefs.JavabaseDBName + "p3tempEfile22.in", etypes, esizes,
+                    (short) 7, (short) 7,
                     projlist, null);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             status = FAIL;
-            System.err.println (""+e);
+            System.err.println("" + e);
         }
 
         if (status != OK) {
             //bail out
-            System.err.println ("*** Error setting up scan for sailors");
+            System.err.println("*** Error setting up scan for sailors");
             Runtime.getRuntime().exit(1);
         }
 
@@ -317,16 +312,15 @@ public class Join {
         try {
             sm = new SortMerge(etypes, 7, esizes,
                     etypes, 7, esizes,
-                    7, 20, 
-                    7, 20, 
+                    7, 20,
+                    7, 20,
                     2000,
-                    am, am2, 
+                    am, am2,
                     false, false, ascending,
                     outfilter, proj1, 7);
-        }
-        catch (Exception e) {
-            System.err.println ("*** Error preparing for nested_loop_join");
-            System.err.println (""+e);
+        } catch (Exception e) {
+            System.err.println("*** Error preparing for nested_loop_join");
+            System.err.println("" + e);
             e.printStackTrace();
             Runtime.getRuntime().exit(1);
         }
@@ -336,70 +330,57 @@ public class Join {
 
         try {
             while ((t = sm.get_next()) != null) {
-                System.out.println(t.getIntFld(1)+" "+t.getStrFld(2)+" "+t.getStrFld(3)+" "+t.getIntFld(4)+" "+t.getIntFld(5)+" "+t.getStrFld(6)+" "+t.getStrFld(7));
+                System.out.println(t.getIntFld(1) + " " + t.getStrFld(2) + " " + t.getStrFld(3) + " " + t.getIntFld(4) + " " + t.getIntFld(5) + " " + t.getStrFld(6) + " " + t.getStrFld(7));
 
             }
-        }
-        catch (Exception e) {
-            System.err.println (""+e);
+        } catch (Exception e) {
+            System.err.println("" + e);
             e.printStackTrace();
             status = FAIL;
         }
         if (status != OK) {
             //bail out
-            System.err.println ("*** Error in get next tuple ");
+            System.err.println("*** Error in get next tuple ");
             Runtime.getRuntime().exit(1);
         }
         try {
             sm.close();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             status = FAIL;
             e.printStackTrace();
         }
-        System.out.println ("\n"); 
+        System.out.println("\n");
         if (status != OK) {
             //bail out
-            System.err.println ("*** Error in closing ");
+            System.err.println("*** Error in closing ");
             Runtime.getRuntime().exit(1);
         }
         f.deleteFile();
         fN.deleteFile();
-    }    
+    }
 
-    public void joinNodeDEdge(String name, EdgeQueryPojo edgeQueryPojo) throws JoinsException,
-    IndexException, PageNotReadException,
-    TupleUtilsException, PredEvalException, SortException, LowMemException,
-    UnknowAttrType, UnknownKeyTypeException, Exception {
-        final boolean OK   = true;
+    public NestedLoopsJoins joinNodeDEdge(String name, NodeQueryPojo nodeQueryPojo) throws JoinsException,
+            IndexException, PageNotReadException,
+            TupleUtilsException, PredEvalException, SortException, LowMemException,
+            UnknowAttrType, UnknownKeyTypeException, Exception {
+        final boolean OK = true;
         final boolean FAIL = false;
-        boolean status=true;
+        boolean status = true;
 
         String graphDbName = name;
-        CondExpr [] outfilter=new CondExpr[3];
-        outfilter[0]=new CondExpr();
-        outfilter[1]=new CondExpr();
+        CondExpr[] outfilter = new CondExpr[2];
+        outfilter[0] = new CondExpr();
+        outfilter[1] = new CondExpr();
 
-        outfilter[0].next= null;
-        outfilter[0].op=new AttrOperator(AttrOperator.aopEQ);
-        outfilter[0].type1=new AttrType(AttrType.attrSymbol);
-        outfilter[0].type2=new AttrType(AttrType.attrSymbol);
-        outfilter[0].operand1.symbol=new FldSpec(new
-                RelSpec(RelSpec.outer),2);
-        outfilter[0].operand2.symbol=new
-                FldSpec(new RelSpec(RelSpec.innerRel),8);
-
-        outfilter[1].op    = new AttrOperator(AttrOperator.aopEQ);
-        outfilter[1].next  = null;
-        outfilter[1].type1 = new AttrType(AttrType.attrSymbol);
-        outfilter[1].type2 = new AttrType(AttrType.attrString);
-        if (edgeQueryPojo.getKey() == 4) {
-            outfilter[1].operand1.symbol = new FldSpec (new RelSpec(RelSpec.innerRel), 8);
-            outfilter[1].operand2.string = edgeQueryPojo.getDestLabel();
-        } else {
-            throw new Exception("Condition not valid; Need Edge Destination");
-        }
-        outfilter[2] = null;
+        outfilter[0].next = null;
+        outfilter[0].op = new AttrOperator(AttrOperator.aopEQ);
+        outfilter[0].type1 = new AttrType(AttrType.attrSymbol);
+        outfilter[0].type2 = new AttrType(AttrType.attrSymbol);
+        outfilter[0].operand1.symbol = new FldSpec(new
+                RelSpec(RelSpec.outer), 2);
+        outfilter[0].operand2.symbol = new
+                FldSpec(new RelSpec(RelSpec.innerRel), 8);
+        outfilter[1] = null;
 
         Tuple t = new Tuple();
         AttrType[] etypes = new AttrType[8];
@@ -412,7 +393,7 @@ public class Join {
         etypes[6] = new AttrType(AttrType.attrString);
         etypes[7] = new AttrType(AttrType.attrString);
 
-        AttrType [] ntypes={
+        AttrType[] ntypes = {
                 new AttrType(AttrType.attrDesc),
                 new AttrType(AttrType.attrString),
         };
@@ -420,14 +401,14 @@ public class Join {
         esizes[0] = 20;
         esizes[1] = 20;
         esizes[2] = 20;
-        short [] nsizes= new short[1];
-        nsizes[0]=20;
+        short[] nsizes = new short[1];
+        nsizes[0] = 20;
 
         FldSpec[] proj1 = {
-                new FldSpec(new RelSpec(RelSpec.outer),1),
-                new FldSpec(new RelSpec(RelSpec.outer),2)
+                new FldSpec(new RelSpec(RelSpec.outer), 1),
+                new FldSpec(new RelSpec(RelSpec.outer), 2)
         };
-        FldSpec[] projlist = new FldSpec[8];
+        FldSpec[] projlist = new FldSpec[9];
         RelSpec rel = new RelSpec(RelSpec.innerRel);
         projlist[0] = new FldSpec(rel, 1);
         projlist[1] = new FldSpec(rel, 2);
@@ -437,106 +418,88 @@ public class Join {
         projlist[5] = new FldSpec(rel, 6);
         projlist[6] = new FldSpec(rel, 7);
         projlist[7] = new FldSpec(rel, 8);
-        CondExpr [] selects= new CondExpr[1];
-        selects[0]=null;
+        projlist[8] = new FldSpec(new RelSpec(RelSpec.outer), 1);
+
+        CondExpr[] condNode = new CondExpr[2];
+        condNode[0] = new CondExpr();
+        condNode[0].op = new AttrOperator(AttrOperator.aopEQ);
+        condNode[0].next = null;
+        condNode[0].type1 = new AttrType(AttrType.attrSymbol);
+        if (nodeQueryPojo.getKey() == 1) {
+            condNode[0].type2 = new AttrType(AttrType.attrString);
+            condNode[0].operand1.symbol = new FldSpec(new RelSpec(RelSpec.outer), 2);
+            condNode[0].operand2.string = nodeQueryPojo.getLabel();
+        } else if (nodeQueryPojo.getKey() == 2) {
+            condNode[0].type2 = new AttrType(AttrType.attrDesc);
+            condNode[0].operand1.symbol = new FldSpec(new RelSpec(RelSpec.outer), 1);
+            condNode[0].operand2.desc = nodeQueryPojo.getDesc();
+        } else {
+            throw new Exception("Condition not valid");
+        }
+        condNode[1] = null;
 
         iterator.Iterator nodeIndexIterator = null;
 
-        //   SystemDefs.JavabaseBM.flushAllPages();
-
-        //        System.out.println("Unpinned pagesSHO: " + SystemDefs.JavabaseBM.getNumUnpinnedBuffers());
-
-
-
-        IndexType b_index = new IndexType (IndexType.B_Index);
-        try {
-            nodeIndexIterator = new IndexScan( b_index, SystemDefs.JavabaseDBName+"_Node",
-                    SystemDefs.JavabaseDBName+"_BTreeNodeIndex", ntypes, nsizes, 2, 2,
-                    proj1, null, 2, false);
+        IndexType b_index = new IndexType(IndexType.B_Index);
+        if (nodeQueryPojo.getKey() == 1) {
+            try {
+                nodeIndexIterator = new IndexScan(b_index, SystemDefs.JavabaseDBName + "_Node",
+                        SystemDefs.JavabaseDBName + "_BTreeNodeIndex", ntypes, nsizes, 2, 2,
+                        proj1, condNode, 2, false);
+            } catch (Exception e) {
+                System.err.println("*** Error creating scan for Index scan");
+                System.err.println("" + e);
+                Runtime.getRuntime().exit(1);
+            }
+        } else if (nodeQueryPojo.getKey() == 2) {
+            try {
+                nodeIndexIterator = new ZIndex.ZIndexScan(b_index, SystemDefs.JavabaseDBName + "_Node",
+                        SystemDefs.JavabaseDBName + "_ZTreeNodeIndex", ntypes, nsizes, 2, 2,
+                        proj1, condNode, 1, false);
+            } catch (Exception e) {
+                System.err.println("*** Error creating scan for Index scan");
+                System.err.println("" + e);
+                Runtime.getRuntime().exit(1);
+            }
         }
 
-        catch (Exception e) {
-            System.err.println ("*** Error creating scan for Index scan");
-            System.err.println (""+e);
-            Runtime.getRuntime().exit(1);
-        }
-
-
-        //        iterator.Iterator am2=(iterator.Iterator)nodeIndexIterator;
-        //      while ((t = am2.get_next()) != null) {
-        //          System.out.println("Label:\t"+t.noOfFlds()+" "+t.getStrFld(2));
-        //      }
-        //        
-        //am2.close();
-        System.out.println("Unpinned pagesB: " + SystemDefs.JavabaseBM.getNumUnpinnedBuffers());
-
-
-        NestedLoopsJoins nlj=null;
+        NestedLoopsJoins nlj = null;
         try {
             nlj = new NestedLoopsJoins(ntypes, 2, nsizes,
                     etypes, 8, esizes,
                     100,
                     nodeIndexIterator, "UniqueEdge",
-                    outfilter, null, projlist, 8);
-        }
-        catch (Exception e) {
-            System.err.println ("*** Error preparing for nested_loop_join");
-            System.err.println (""+e);
+                    outfilter, null, projlist, 9);
+        } catch (Exception e) {
+            System.err.println("*** Error preparing for nested_loop_join");
+            System.err.println("" + e);
             e.printStackTrace();
             Runtime.getRuntime().exit(1);
         }
 
-        iterator.Iterator am2=(iterator.Iterator)nlj;
-        while ((t = am2.get_next()) != null) {
-            System.out.println("Label:\t"+t.getStrFld(6)+ " "+t.getStrFld(8));
-        }
-
-
-        nlj.close();
-
-
+        return nlj;
     }
 
     public NestedLoopsJoins joinNodeSEdge(String name, NodeQueryPojo nodeQueryPojo) throws JoinsException, IndexException, PageNotReadException,
-    TupleUtilsException, PredEvalException, SortException, LowMemException,
-    UnknowAttrType, UnknownKeyTypeException, Exception {
-        final boolean OK   = true;
+            TupleUtilsException, PredEvalException, SortException, LowMemException,
+            UnknowAttrType, UnknownKeyTypeException, Exception {
+        final boolean OK = true;
         final boolean FAIL = false;
-        boolean status=true;
+        boolean status = true;
 
-        CondExpr [] outfilter=new CondExpr[2];
-        outfilter[0]=new CondExpr();
-        outfilter[1]=new CondExpr();
+        CondExpr[] outfilter = new CondExpr[2];
+        outfilter[0] = new CondExpr();
+        outfilter[1] = new CondExpr();
 
-        outfilter[0].next= null;
-        outfilter[0].op=new AttrOperator(AttrOperator.aopEQ);
-        outfilter[0].type1=new AttrType(AttrType.attrSymbol);
-        outfilter[0].type2=new AttrType(AttrType.attrSymbol);
-        outfilter[0].operand1.symbol=new FldSpec(new
-                RelSpec(RelSpec.outer),2);
-        outfilter[0].operand2.symbol=new
-                FldSpec(new RelSpec(RelSpec.innerRel),7);
-        //
-        //        outfilter[1].op    = new AttrOperator(AttrOperator.aopEQ);
-        //        outfilter[1].next  = null;
-        //        outfilter[1].type1 = new AttrType(AttrType.attrSymbol);
-        //        outfilter[1].type2 = new AttrType(AttrType.attrString);
-        //        if (edgeQueryPojo.getKey() == 3) {
-        //            outfilter[1].operand1.symbol = new FldSpec (new RelSpec(RelSpec.innerRel), 7);
-        //            outfilter[1].operand2.string = edgeQueryPojo.getSourceLabel();
-        //        } else {
-        //            throw new Exception("Condition not valid; Need Edge Source");
-        //        }
+        outfilter[0].next = null;
+        outfilter[0].op = new AttrOperator(AttrOperator.aopEQ);
+        outfilter[0].type1 = new AttrType(AttrType.attrSymbol);
+        outfilter[0].type2 = new AttrType(AttrType.attrSymbol);
+        outfilter[0].operand1.symbol = new FldSpec(new
+                RelSpec(RelSpec.outer), 2);
+        outfilter[0].operand2.symbol = new
+                FldSpec(new RelSpec(RelSpec.innerRel), 7);
         outfilter[1] = null;
-
-        //        Descriptor tempDesc = new Descriptor();
-        //        tempDesc.set(10,4, 10, 44, 5);
-        //        outfilter[1].op    = new AttrOperator(AttrOperator.aopEQ);
-        //        outfilter[1].next  = null;
-        //        outfilter[1].type1 = new AttrType(AttrType.attrSymbol);
-        //        outfilter[1].type2 = new AttrType(AttrType.attrDesc);
-        //        outfilter[1].operand1.symbol = new FldSpec (new RelSpec(RelSpec.innerRel),7);
-        //        outfilter[1].operand2.desc =  tempDesc;
 
         AttrType[] etypes = new AttrType[8];
         etypes[0] = new AttrType(AttrType.attrInteger);
@@ -548,7 +511,7 @@ public class Join {
         etypes[6] = new AttrType(AttrType.attrString);
         etypes[7] = new AttrType(AttrType.attrString);
 
-        AttrType [] ntypes={
+        AttrType[] ntypes = {
                 new AttrType(AttrType.attrDesc),
                 new AttrType(AttrType.attrString),
         };
@@ -556,12 +519,12 @@ public class Join {
         esizes[0] = 20;
         esizes[1] = 20;
         esizes[2] = 20;
-        short [] nsizes= new short[1];
-        nsizes[0]=20;
+        short[] nsizes = new short[1];
+        nsizes[0] = 20;
 
         FldSpec[] proj1 = {
-                new FldSpec(new RelSpec(RelSpec.outer),1),
-                new FldSpec(new RelSpec(RelSpec.outer),2)
+                new FldSpec(new RelSpec(RelSpec.outer), 1),
+                new FldSpec(new RelSpec(RelSpec.outer), 2)
         };
 
         FldSpec[] projlist = new FldSpec[9];
@@ -576,391 +539,342 @@ public class Join {
         projlist[7] = new FldSpec(rel, 8);
         projlist[8] = new FldSpec(new RelSpec(RelSpec.outer), 1);
 
-
-        CondExpr [] condNode=new CondExpr[2];
-        condNode[0]=new CondExpr();
-        condNode[0].op    = new AttrOperator(AttrOperator.aopEQ);
-        condNode[0].next  = null;
+        CondExpr[] condNode = new CondExpr[2];
+        condNode[0] = new CondExpr();
+        condNode[0].op = new AttrOperator(AttrOperator.aopEQ);
+        condNode[0].next = null;
         condNode[0].type1 = new AttrType(AttrType.attrSymbol);
         if (nodeQueryPojo.getKey() == 1) {
             condNode[0].type2 = new AttrType(AttrType.attrString);
-            condNode[0].operand1.symbol = new FldSpec (new RelSpec(RelSpec.outer), 2);
+            condNode[0].operand1.symbol = new FldSpec(new RelSpec(RelSpec.outer), 2);
             condNode[0].operand2.string = nodeQueryPojo.getLabel();
         } else if (nodeQueryPojo.getKey() == 2) {
             condNode[0].type2 = new AttrType(AttrType.attrDesc);
-            condNode[0].operand1.symbol = new FldSpec (new RelSpec(RelSpec.outer), 1);
+            condNode[0].operand1.symbol = new FldSpec(new RelSpec(RelSpec.outer), 1);
             condNode[0].operand2.desc = nodeQueryPojo.getDesc();
-
         } else {
             throw new Exception("Condition not valid; Need Edge Source");
         }
-        condNode[1]   =null; 
-
+        condNode[1] = null;
 
         iterator.Iterator nodeIndexIterator = null;
 
-        //   SystemDefs.JavabaseBM.flushAllPages();
-
-        //        System.out.println("Unpinned pagesSHO: " + SystemDefs.JavabaseBM.getNumUnpinnedBuffers());
-
-        if(nodeQueryPojo.getKey() == 1)
-        {
-
-            IndexType b_index = new IndexType (IndexType.B_Index);
+        if (nodeQueryPojo.getKey() == 1) {
+            IndexType b_index = new IndexType(IndexType.B_Index);
             try {
-                nodeIndexIterator = new IndexScan( b_index, SystemDefs.JavabaseDBName+"_Node",
-                        SystemDefs.JavabaseDBName+"_BTreeNodeIndex", ntypes, nsizes, 2, 2,
+                nodeIndexIterator = new IndexScan(b_index, SystemDefs.JavabaseDBName + "_Node",
+                        SystemDefs.JavabaseDBName + "_BTreeNodeIndex", ntypes, nsizes, 2, 2,
                         proj1, condNode, 2, false);
-            }
-
-            catch (Exception e) {
-                System.err.println ("*** Error creating scan for Index scan");
-                System.err.println (""+e);
+            } catch (Exception e) {
+                System.err.println("*** Error creating scan for Index scan");
+                System.err.println("" + e);
                 Runtime.getRuntime().exit(1);
             }
-        }
-        
-        else if (nodeQueryPojo.getKey() == 2) {
-
-            IndexType b_index = new IndexType (IndexType.ZIndex);
+        } else if (nodeQueryPojo.getKey() == 2) {
+            IndexType b_index = new IndexType(IndexType.ZIndex);
             try {
-                nodeIndexIterator = new ZIndex.ZIndexScan ( b_index, SystemDefs.JavabaseDBName+"_Node",
-                        SystemDefs.JavabaseDBName+"_ZTreeNodeIndex", ntypes, nsizes, 2, 2,
+                nodeIndexIterator = new ZIndex.ZIndexScan(b_index, SystemDefs.JavabaseDBName + "_Node",
+                        SystemDefs.JavabaseDBName + "_ZTreeNodeIndex", ntypes, nsizes, 2, 2,
                         proj1, condNode, 1, false);
-            }
-            catch (Exception e) {
-                System.err.println ("*** Error creating scan for Index scan");
-                System.err.println (""+e);
+            } catch (Exception e) {
+                System.err.println("*** Error creating scan for Index scan");
+                System.err.println("" + e);
                 Runtime.getRuntime().exit(1);
             }
-            
         }
 
-        NestedLoopsJoins nlj=null;
+        NestedLoopsJoins nlj = null;
         try {
             nlj = new NestedLoopsJoins(ntypes, 2, nsizes,
                     etypes, 8, esizes,
                     100,
                     nodeIndexIterator, "UniqueEdge",
                     outfilter, null, projlist, 9);
-        }
-        catch (Exception e) {
-            System.err.println ("*** Error preparing for nested_loop_join");
-            System.err.println (""+e);
+        } catch (Exception e) {
+            System.err.println("*** Error preparing for nested_loop_join");
+            System.err.println("" + e);
             e.printStackTrace();
             Runtime.getRuntime().exit(1);
         }
 
-        return  nlj;
-        
-//        Tuple t = new Tuple();
-//        iterator.Iterator am2=(iterator.Iterator)nlj;
-//        while ((t = am2.get_next()) != null) {
-//            System.out.println("Label:\t"+t.getStrFld(6)+ " "+t.getStrFld(7)+" "+t.getDescFld(9).getString());
+        return nlj;
+    }
+
+    public NestedLoopsJoins joinEdgeSNode(String name, EdgeQueryPojo edgeQueryPojo) throws JoinsException, IndexException, PageNotReadException,
+            TupleUtilsException, PredEvalException, SortException, LowMemException,
+            UnknowAttrType, UnknownKeyTypeException, Exception {
+        final boolean OK = true;
+        final boolean FAIL = false;
+        boolean status = true;
+
+        CondExpr[] outfilter = new CondExpr[2];
+        outfilter[0] = new CondExpr();
+        outfilter[1] = new CondExpr();
+
+        outfilter[0].next = null;
+        outfilter[0].op = new AttrOperator(AttrOperator.aopEQ);
+        outfilter[0].type1 = new AttrType(AttrType.attrSymbol);
+        outfilter[0].type2 = new AttrType(AttrType.attrSymbol);
+        outfilter[0].operand1.symbol = new FldSpec(new
+                RelSpec(RelSpec.outer), 7);
+        outfilter[0].operand2.symbol = new
+                FldSpec(new RelSpec(RelSpec.innerRel), 2);
+        outfilter[1] = null;
+
+        AttrType[] etypes = new AttrType[8];
+        etypes[0] = new AttrType(AttrType.attrInteger);
+        etypes[1] = new AttrType(AttrType.attrInteger);
+        etypes[2] = new AttrType(AttrType.attrInteger);
+        etypes[3] = new AttrType(AttrType.attrInteger);
+        etypes[4] = new AttrType(AttrType.attrInteger);
+        etypes[5] = new AttrType(AttrType.attrString);
+        etypes[6] = new AttrType(AttrType.attrString);
+        etypes[7] = new AttrType(AttrType.attrString);
+
+        AttrType[] ntypes = {
+                new AttrType(AttrType.attrDesc),
+                new AttrType(AttrType.attrString),
+        };
+        short[] esizes = new short[3];
+        esizes[0] = 20;
+        esizes[1] = 20;
+        esizes[2] = 20;
+        short[] nsizes = new short[1];
+        nsizes[0] = 20;
+
+        FldSpec[] edgeFileProjList = new FldSpec[9];
+        RelSpec rel = new RelSpec(RelSpec.outer);
+        edgeFileProjList[0] = new FldSpec(rel, 1);
+        edgeFileProjList[1] = new FldSpec(rel, 2);
+        edgeFileProjList[2] = new FldSpec(rel, 3);
+        edgeFileProjList[3] = new FldSpec(rel, 4);
+        edgeFileProjList[4] = new FldSpec(rel, 5);
+        edgeFileProjList[5] = new FldSpec(rel, 6);
+        edgeFileProjList[6] = new FldSpec(rel, 7);
+        edgeFileProjList[7] = new FldSpec(rel, 8);
+        edgeFileProjList[8] = new FldSpec(new RelSpec(RelSpec.innerRel), 1);
+
+        CondExpr[] condEdge = new CondExpr[2];
+        condEdge[0] = new CondExpr();
+        if (edgeQueryPojo.getKey() == 1) {
+           condEdge[0].op = new AttrOperator(AttrOperator.aopEQ);
+            condEdge[0].next = null;
+            condEdge[0].type1 = new AttrType(AttrType.attrSymbol);
+            condEdge[0].type2 = new AttrType(AttrType.attrString);
+            condEdge[0].operand1.symbol = new FldSpec(new RelSpec(RelSpec.outer), 6);
+            condEdge[0].operand2.string = edgeQueryPojo.getEdgelabel();
+        } else if (edgeQueryPojo.getKey() == 2) {
+            condEdge[0].op = new AttrOperator(AttrOperator.aopLE);
+            condEdge[0].next = null;
+            condEdge[0].type1 = new AttrType(AttrType.attrSymbol);
+            condEdge[0].type2 = new AttrType(AttrType.attrInteger);
+            condEdge[0].operand1.symbol = new FldSpec(new RelSpec(RelSpec.outer), 1);
+            condEdge[0].operand2.integer = edgeQueryPojo.getWeight();
+        } else {
+            throw new Exception("Condition not valid; Need Edge Source");
+        }
+        condEdge[1] = null;
+
+        FldSpec[] projlist = new FldSpec[8];
+        RelSpec rel1 = new RelSpec(RelSpec.outer);
+        projlist[0] = new FldSpec(rel1, 1);
+        projlist[1] = new FldSpec(rel1, 2);
+        projlist[2] = new FldSpec(rel1, 3);
+        projlist[3] = new FldSpec(rel1, 4);
+        projlist[4] = new FldSpec(rel1, 5);
+        projlist[5] = new FldSpec(rel1, 6);
+        projlist[6] = new FldSpec(rel1, 7);
+        projlist[7] = new FldSpec(rel1, 8);
+        Iterator edgeIterator = null;
+
+        IndexType b_index = new IndexType(IndexType.B_Index);
+        if (edgeQueryPojo.getKey() == 1) {
+        try {
+          edgeIterator = new IndexScan(b_index, "UniqueEdge",
+                    "EdgeLabelIndex", etypes, esizes, 8, 8,
+                    projlist, condEdge, 6, false);
+        } catch (Exception e) {
+            System.err.println("*** Error creating scan for Index scan");
+            System.err.println("" + e);
+            Runtime.getRuntime().exit(1);
+        }
+        }
+        else if (edgeQueryPojo.getKey() == 2) 
+        {
+        	   try {
+        	          edgeIterator = new IndexScan(b_index, "UniqueEdge",
+        	                    "EdgeWeightIndex", etypes, esizes, 8, 8,
+        	                    projlist, condEdge, 1, false);
+        	        } catch (Exception e) {
+        	            System.err.println("*** Error creating scan for Index scan");
+        	            System.err.println("" + e);
+        	            Runtime.getRuntime().exit(1);
+        	        }
+        }
+//
+//        Tuple test = new Tuple();
+//        while((test = edgeIterator.get_next()) != null) {
+//            System.out.println("HERE");
+//            System.out.println(test.getStrFld(6));
 //        }
-//        nlj.close();
-    }
 
-    public void joinEdgeSNode(String name, NodeQueryPojo nodeQueryPojo) throws JoinsException, IndexException, PageNotReadException,
-    TupleUtilsException, PredEvalException, SortException, LowMemException,
-    UnknowAttrType, UnknownKeyTypeException, Exception {
-        final boolean OK   = true;
-        final boolean FAIL = false;
-        boolean status=true;
-
-        CondExpr [] outfilter=new CondExpr[3];
-        outfilter[0]=new CondExpr();
-        outfilter[1]=new CondExpr();
-        //outfilter[2]=new CondExpr();
-
-        outfilter[0].next= null;
-        outfilter[0].op=new AttrOperator(AttrOperator.aopEQ);
-        outfilter[0].type1=new AttrType(AttrType.attrSymbol);
-        outfilter[0].type2=new AttrType(AttrType.attrSymbol);
-        outfilter[0].operand1.symbol=new FldSpec(new
-                RelSpec(RelSpec.outer),7);
-        outfilter[0].operand2.symbol=new
-                FldSpec(new RelSpec(RelSpec.innerRel),2);
-
-        //   outfilter[1] = null;
-
-        outfilter[1].op    = new AttrOperator(AttrOperator.aopEQ);
-        outfilter[1].next  = null;
-        outfilter[1].type1 = new AttrType(AttrType.attrSymbol);
-        if (nodeQueryPojo.getKey() == 1) {
-            outfilter[1].type2 = new AttrType(AttrType.attrString);
-            outfilter[1].operand1.symbol = new FldSpec (new RelSpec(RelSpec.innerRel), 2);
-            outfilter[1].operand2.string = nodeQueryPojo.getLabel();
-        } else if (nodeQueryPojo.getKey() == 2) {
-            outfilter[1].type2 = new AttrType(AttrType.attrDesc);
-            outfilter[1].operand1.symbol = new FldSpec (new RelSpec(RelSpec.innerRel), 1);
-            outfilter[1].operand2.desc = nodeQueryPojo.getDesc();
-        } else {
-            throw new Exception("Condition not valid; Need Edge Source");
-        }
-        outfilter[2] = null;
-
-        Tuple t = new Tuple();
-        AttrType[] etypes = new AttrType[8];
-        etypes[0] = new AttrType(AttrType.attrInteger);
-        etypes[1] = new AttrType(AttrType.attrInteger);
-        etypes[2] = new AttrType(AttrType.attrInteger);
-        etypes[3] = new AttrType(AttrType.attrInteger);
-        etypes[4] = new AttrType(AttrType.attrInteger);
-        etypes[5] = new AttrType(AttrType.attrString);
-        etypes[6] = new AttrType(AttrType.attrString);
-        etypes[7] = new AttrType(AttrType.attrString);
-
-        AttrType [] ntypes={
-                new AttrType(AttrType.attrDesc),
-                new AttrType(AttrType.attrString),
-        };
-        short[] esizes = new short[3];
-        esizes[0] = 20;
-        esizes[1] = 20;
-        esizes[2] = 20;
-        short [] nsizes= new short[1];
-        nsizes[0]=20;
-
-        //        FldSpec[] proj1 = {
-        //                new FldSpec(new RelSpec(RelSpec.outer),1),
-        //                new FldSpec(new RelSpec(RelSpec.outer),2)
-        //        };
-        FldSpec[] projlist = new FldSpec[3];
-        projlist[0] = new FldSpec(new RelSpec(RelSpec.innerRel), 1);
-        projlist[1] = new FldSpec(new RelSpec(RelSpec.innerRel), 2);
-        projlist[2] = new FldSpec(new RelSpec(RelSpec.outer), 6);
-        CondExpr [] selects= new CondExpr[1];
-        selects[0]=null;
-
-        FldSpec[] edgeFileProjList = new FldSpec[8];
-        RelSpec rel = new RelSpec(RelSpec.outer);
-        edgeFileProjList[0] = new FldSpec(rel, 1);
-        edgeFileProjList[1] = new FldSpec(rel, 2);
-        edgeFileProjList[2] = new FldSpec(rel, 3);
-        edgeFileProjList[3] = new FldSpec(rel, 4);
-        edgeFileProjList[4] = new FldSpec(rel, 5);
-        edgeFileProjList[5] = new FldSpec(rel, 6);
-        edgeFileProjList[6] = new FldSpec(rel, 7);
-        edgeFileProjList[7] = new FldSpec(rel, 8);
-
-        Iterator edgeIterator = null;
-
-
-        CondExpr [] condNode=new CondExpr[2];
-        condNode[0]=new CondExpr();
-        condNode[0].op    = new AttrOperator(AttrOperator.aopEQ);
-        condNode[0].next  = null;
-        condNode[0].type1 = new AttrType(AttrType.attrSymbol);
-        condNode[0].type2 = new AttrType(AttrType.attrString);
-        if (nodeQueryPojo.getKey() == 1) {
-            condNode[0].type2 = new AttrType(AttrType.attrString);
-            condNode[0].operand1.symbol = new FldSpec (new RelSpec(RelSpec.outer), 7);
-            condNode[0].operand2.string = nodeQueryPojo.getLabel();
-        } else if (nodeQueryPojo.getKey() == 2) {
-            condNode[0].type2 = new AttrType(AttrType.attrDesc);
-            condNode[0].operand1.symbol = new FldSpec (new RelSpec(RelSpec.outer), 1);
-            condNode[0].operand2.desc = nodeQueryPojo.getDesc();
-        } else {
-            throw new Exception("Condition not valid; Need Edge Source");
-        }
-        condNode[1]   =null; 
-
-
-        IndexType b_index = new IndexType (IndexType.B_Index);
-        try {
-            edgeIterator = new IndexScan( b_index, "UniqueEdge",
-                    "EdgeSourceIndex", etypes, esizes, 8,8,
-                    edgeFileProjList, condNode, 7, false);
-        } catch (Exception e) {
-            System.err.println ("*** Error creating scan for Index scan");
-            System.err.println (""+e);
-            Runtime.getRuntime().exit(1);
-        }
-
-
-
-        NestedLoopsJoins nlj=null;
+        NestedLoopsJoins nlj = null;
         try {
             nlj = new NestedLoopsJoins(etypes, 8, esizes,
                     ntypes, 2, nsizes,
                     100,
-                    edgeIterator, SystemDefs.JavabaseDBName+"_Node",
-                    outfilter, null, projlist, 3);
-        }
-        catch (Exception e) {
-            System.err.println ("*** Error preparing for nested_loop_join");
-            System.err.println (""+e);
+                    edgeIterator, SystemDefs.JavabaseDBName + "_Node",
+                    outfilter, null, edgeFileProjList, 9);
+        } catch (Exception e) {
+            System.err.println("*** Error preparing for nested_loop_join");
+            System.err.println("" + e);
             e.printStackTrace();
             Runtime.getRuntime().exit(1);
         }
-        Tuple node = null;
 
-        iterator.Iterator am2=(iterator.Iterator)nlj;
-        while ((t = am2.get_next()) != null) {
-            //System.out.println("Label:\t"+t.getStrFld(3));
-            System.out.println(t.noOfFlds()+ " -----"+t.getStrFld(3));
-        }
-        nlj.close();
-        //f.deleteFile();
-
+        return nlj;
     }
 
-    public void joinEdgeDNode(String name, NodeQueryPojo nodeQueryPojo) throws JoinsException, IndexException, PageNotReadException,
-    TupleUtilsException, PredEvalException, SortException, LowMemException,
-    UnknowAttrType, UnknownKeyTypeException, Exception {
-        final boolean OK   = true;
-        final boolean FAIL = false;
-        boolean status=true;
+    public NestedLoopsJoins joinEdgeDNode(String name, EdgeQueryPojo edgeQueryPojo) throws JoinsException, IndexException, PageNotReadException,
+            TupleUtilsException, PredEvalException, SortException, LowMemException,
+            UnknowAttrType, UnknownKeyTypeException, Exception {
+    	  final boolean OK = true;
+          final boolean FAIL = false;
+          boolean status = true;
 
-        CondExpr [] outfilter=new CondExpr[3];
-        outfilter[0]=new CondExpr();
-        outfilter[1]=new CondExpr();
-        //outfilter[2]=new CondExpr();
+          CondExpr[] outfilter = new CondExpr[2];
+          outfilter[0] = new CondExpr();
+          outfilter[1] = new CondExpr();
 
-        outfilter[0].next= null;
-        outfilter[0].op=new AttrOperator(AttrOperator.aopEQ);
-        outfilter[0].type1=new AttrType(AttrType.attrSymbol);
-        outfilter[0].type2=new AttrType(AttrType.attrSymbol);
-        outfilter[0].operand1.symbol=new FldSpec(new
-                RelSpec(RelSpec.outer),8);
-        outfilter[0].operand2.symbol=new
-                FldSpec(new RelSpec(RelSpec.innerRel),2);
+          outfilter[0].next = null;
+          outfilter[0].op = new AttrOperator(AttrOperator.aopEQ);
+          outfilter[0].type1 = new AttrType(AttrType.attrSymbol);
+          outfilter[0].type2 = new AttrType(AttrType.attrSymbol);
+          outfilter[0].operand1.symbol = new FldSpec(new
+                  RelSpec(RelSpec.outer), 8);
+          outfilter[0].operand2.symbol = new
+                  FldSpec(new RelSpec(RelSpec.innerRel), 2);
+          outfilter[1] = null;
 
-        //   outfilter[1] = null;
+          AttrType[] etypes = new AttrType[8];
+          etypes[0] = new AttrType(AttrType.attrInteger);
+          etypes[1] = new AttrType(AttrType.attrInteger);
+          etypes[2] = new AttrType(AttrType.attrInteger);
+          etypes[3] = new AttrType(AttrType.attrInteger);
+          etypes[4] = new AttrType(AttrType.attrInteger);
+          etypes[5] = new AttrType(AttrType.attrString);
+          etypes[6] = new AttrType(AttrType.attrString);
+          etypes[7] = new AttrType(AttrType.attrString);
 
-        outfilter[1].op    = new AttrOperator(AttrOperator.aopEQ);
-        outfilter[1].next  = null;
-        outfilter[1].type1 = new AttrType(AttrType.attrSymbol);
-        if (nodeQueryPojo.getKey() == 1) {
-            outfilter[1].type2 = new AttrType(AttrType.attrString);
-            outfilter[1].operand1.symbol = new FldSpec (new RelSpec(RelSpec.innerRel), 2);
-            outfilter[1].operand2.string = nodeQueryPojo.getLabel();
-        } else if (nodeQueryPojo.getKey() == 2) {
-            outfilter[1].type2 = new AttrType(AttrType.attrDesc);
-            outfilter[1].operand1.symbol = new FldSpec (new RelSpec(RelSpec.innerRel), 1);
-            outfilter[1].operand2.desc = nodeQueryPojo.getDesc();
-        } else {
-            throw new Exception("Condition not valid; Need Edge Source");
-        }
-        outfilter[2] = null;
+          AttrType[] ntypes = {
+                  new AttrType(AttrType.attrDesc),
+                  new AttrType(AttrType.attrString),
+          };
+          short[] esizes = new short[3];
+          esizes[0] = 20;
+          esizes[1] = 20;
+          esizes[2] = 20;
+          short[] nsizes = new short[1];
+          nsizes[0] = 20;
 
-        Tuple t = new Tuple();
-        AttrType[] etypes = new AttrType[8];
-        etypes[0] = new AttrType(AttrType.attrInteger);
-        etypes[1] = new AttrType(AttrType.attrInteger);
-        etypes[2] = new AttrType(AttrType.attrInteger);
-        etypes[3] = new AttrType(AttrType.attrInteger);
-        etypes[4] = new AttrType(AttrType.attrInteger);
-        etypes[5] = new AttrType(AttrType.attrString);
-        etypes[6] = new AttrType(AttrType.attrString);
-        etypes[7] = new AttrType(AttrType.attrString);
+          FldSpec[] edgeFileProjList = new FldSpec[9];
+          RelSpec rel = new RelSpec(RelSpec.outer);
+          edgeFileProjList[0] = new FldSpec(rel, 1);
+          edgeFileProjList[1] = new FldSpec(rel, 2);
+          edgeFileProjList[2] = new FldSpec(rel, 3);
+          edgeFileProjList[3] = new FldSpec(rel, 4);
+          edgeFileProjList[4] = new FldSpec(rel, 5);
+          edgeFileProjList[5] = new FldSpec(rel, 6);
+          edgeFileProjList[6] = new FldSpec(rel, 7);
+          edgeFileProjList[7] = new FldSpec(rel, 8);
+          edgeFileProjList[8] = new FldSpec(new RelSpec(RelSpec.innerRel), 1);
 
-        AttrType [] ntypes={
-                new AttrType(AttrType.attrDesc),
-                new AttrType(AttrType.attrString),
-        };
-        short[] esizes = new short[3];
-        esizes[0] = 20;
-        esizes[1] = 20;
-        esizes[2] = 20;
-        short [] nsizes= new short[1];
-        nsizes[0]=20;
+          CondExpr[] condEdge = new CondExpr[2];
+          condEdge[0] = new CondExpr();
+          if (edgeQueryPojo.getKey() == 1) {
+             condEdge[0].op = new AttrOperator(AttrOperator.aopEQ);
+              condEdge[0].next = null;
+              condEdge[0].type1 = new AttrType(AttrType.attrSymbol);
+              condEdge[0].type2 = new AttrType(AttrType.attrString);
+              condEdge[0].operand1.symbol = new FldSpec(new RelSpec(RelSpec.outer), 6);
+              condEdge[0].operand2.string = edgeQueryPojo.getEdgelabel();
+          } else if (edgeQueryPojo.getKey() == 2) {
+              condEdge[0].op = new AttrOperator(AttrOperator.aopLE);
+              condEdge[0].next = null;
+              condEdge[0].type1 = new AttrType(AttrType.attrSymbol);
+              condEdge[0].type2 = new AttrType(AttrType.attrInteger);
+              condEdge[0].operand1.symbol = new FldSpec(new RelSpec(RelSpec.outer), 1);
+              condEdge[0].operand2.integer = edgeQueryPojo.getWeight();
+          } else {
+              throw new Exception("Condition not valid; Need Edge Source");
+          }
+          condEdge[1] = null;
 
-        //FldSpec[] proj1 = {
-        //        new FldSpec(new RelSpec(RelSpec.outer),1),
-        //        new FldSpec(new RelSpec(RelSpec.outer),2)
-        //};
-        FldSpec[] projlist = new FldSpec[3];
-        projlist[0] = new FldSpec(new RelSpec(RelSpec.innerRel), 1);
-        projlist[1] = new FldSpec(new RelSpec(RelSpec.innerRel), 2);
-        projlist[2] = new FldSpec(new RelSpec(RelSpec.outer), 6);
-        CondExpr [] selects= new CondExpr[1];
-        selects[0]=null;
+          FldSpec[] projlist = new FldSpec[8];
+          RelSpec rel1 = new RelSpec(RelSpec.outer);
+          projlist[0] = new FldSpec(rel1, 1);
+          projlist[1] = new FldSpec(rel1, 2);
+          projlist[2] = new FldSpec(rel1, 3);
+          projlist[3] = new FldSpec(rel1, 4);
+          projlist[4] = new FldSpec(rel1, 5);
+          projlist[5] = new FldSpec(rel1, 6);
+          projlist[6] = new FldSpec(rel1, 7);
+          projlist[7] = new FldSpec(rel1, 8);
+          Iterator edgeIterator = null;
 
-        FldSpec[] edgeFileProjList = new FldSpec[8];
-        RelSpec rel = new RelSpec(RelSpec.outer);
-        edgeFileProjList[0] = new FldSpec(rel, 1);
-        edgeFileProjList[1] = new FldSpec(rel, 2);
-        edgeFileProjList[2] = new FldSpec(rel, 3);
-        edgeFileProjList[3] = new FldSpec(rel, 4);
-        edgeFileProjList[4] = new FldSpec(rel, 5);
-        edgeFileProjList[5] = new FldSpec(rel, 6);
-        edgeFileProjList[6] = new FldSpec(rel, 7);
-        edgeFileProjList[7] = new FldSpec(rel, 8);
+          IndexType b_index = new IndexType(IndexType.B_Index);
+          if (edgeQueryPojo.getKey() == 1) {
+          try {
+            edgeIterator = new IndexScan(b_index, "UniqueEdge",
+                      "EdgeLabelIndex", etypes, esizes, 8, 8,
+                      projlist, condEdge, 6, false);
+          } catch (Exception e) {
+              System.err.println("*** Error creating scan for Index scan");
+              System.err.println("" + e);
+              Runtime.getRuntime().exit(1);
+          }
+          }
+          else if (edgeQueryPojo.getKey() == 2) 
+          {
+          	   try {
+          	          edgeIterator = new IndexScan(b_index, "UniqueEdge",
+          	                    "EdgeWeightIndex", etypes, esizes, 8, 8,
+          	                    projlist, condEdge, 1, false);
+          	        } catch (Exception e) {
+          	            System.err.println("*** Error creating scan for Index scan");
+          	            System.err.println("" + e);
+          	            Runtime.getRuntime().exit(1);
+          	        }
+          }
+  //
+//          Tuple test = new Tuple();
+//          while((test = edgeIterator.get_next()) != null) {
+//              System.out.println("HERE");
+//              System.out.println(test.getStrFld(6));
+//          }
 
-        Iterator edgeIterator = null;
+          NestedLoopsJoins nlj = null;
+          try {
+              nlj = new NestedLoopsJoins(etypes, 8, esizes,
+                      ntypes, 2, nsizes,
+                      100,
+                      edgeIterator, SystemDefs.JavabaseDBName + "_Node",
+                      outfilter, null, edgeFileProjList, 9);
+          } catch (Exception e) {
+              System.err.println("*** Error preparing for nested_loop_join");
+              System.err.println("" + e);
+              e.printStackTrace();
+              Runtime.getRuntime().exit(1);
+          }
 
-        IndexType b_index = new IndexType (IndexType.B_Index);
-        try {
-            edgeIterator = new IndexScan( b_index, "UniqueEdge",
-                    "EdgeDestinationIndex", etypes, esizes, 8,8,
-                    edgeFileProjList, null, 8, false);
-        } catch (Exception e) {
-            System.err.println ("*** Error creating scan for Index scan");
-            System.err.println (""+e);
-            Runtime.getRuntime().exit(1);
-        }
-
-        //NestedLoopsJoins nlj=null;
-        //try {
-        //    nlj = new NestedLoopsJoins(etypes, 8, esizes,
-        //            ntypes, 2, nsizes,
-        //            100, edgeIterator
-        //            , SystemDefs.JavabaseDBName + "_Node",
-        //            outfilter, null, projlist, 3);
-        //}
-        //catch (Exception e) {
-        //    System.err.println ("*** Error preparing for nested_loop_join");
-        //    System.err.println (""+e);
-        //    e.printStackTrace();
-        //    Runtime.getRuntime().exit(1);
-        //}
-        //
-        //Iterator am2 = (Iterator)nlj;
-        //while ((t = am2.get_next()) != null) {
-        //    System.out.println(t.noOfFlds()+ " -----"+t.getStrFld(3));
-        //////    System.out.println("Descriptor :\t"+
-        //////            t.getDescFld(1).toString()+
-        //////            " Node Label"+ t.getStrFld(2) +
-        //////            " Edge Label : " + t.getStrFld(3));
-        //}
-        //
-        //nlj.close();        
-        //
-        ////// 
-
-        NestedLoopsJoins nlj=null;
-        try {
-            nlj = new NestedLoopsJoins(etypes, 8, esizes,
-                    ntypes, 2, nsizes,
-                    100,
-                    edgeIterator, SystemDefs.JavabaseDBName+"_Node",
-                    outfilter, null, projlist, 3);
-        }
-        catch (Exception e) {
-            System.err.println ("*** Error preparing for nested_loop_join");
-            System.err.println (""+e);
-            e.printStackTrace();
-            Runtime.getRuntime().exit(1);
-        }
-        Tuple node = null;
-
-        iterator.Iterator am2=(iterator.Iterator)nlj;
-        while ((t = am2.get_next()) != null) {
-            //System.out.println("Label:\t"+t.getStrFld(3));
-            System.out.println(t.noOfFlds()+ " -----"+t.getStrFld(3));
-        }
-        nlj.close();
-        //f.deleteFile();
-
+          return nlj;
     }
 
 
     public static void createEdgeIndex() throws InvalidSlotNumberException, Exception {
-        final boolean OK   = true;
+        final boolean OK = true;
         final boolean FAIL = false;
-        boolean status=true;
+        boolean status = true;
 
         Tuple t = new Tuple();
         AttrType[] etypes = new AttrType[8];
@@ -978,8 +892,8 @@ public class Join {
         esizes[1] = 20;
         esizes[2] = 20;
 
-        Tuple nhp =new Tuple();
-        nhp.setHdr((short)8, etypes, esizes);
+        Tuple nhp = new Tuple();
+        nhp.setHdr((short) 8, etypes, esizes);
 
         EScan scan = null;
         boolean statusN = OK;
@@ -989,12 +903,15 @@ public class Join {
         // create the index file
         BTreeFile btf1 = null;
         BTreeFile btf2 = null;
+        BTreeFile btf3 = null;
+        BTreeFile btf4 = null;
 
         try {
             btf1 = new BTreeFile("EdgeSourceIndex", AttrType.attrString, 20, 1);
             btf2 = new BTreeFile("EdgeDestinationIndex", AttrType.attrString, 20, 1);
-        }
-        catch (Exception e) {
+            btf3 = new BTreeFile("EdgeLabelIndex", AttrType.attrString, 20, 1);
+            btf4 = new BTreeFile("EdgeWeightIndex", AttrType.attrInteger, 4, 1);
+        } catch (Exception e) {
             status = FAIL;
             e.printStackTrace();
             Runtime.getRuntime().exit(1);
@@ -1003,31 +920,32 @@ public class Join {
         RID rid = new RID();
         String key = "";
         String key2 = "";
+        String key3 = "";
+        Integer key4 = 0;
         Tuple temp = null;
 
 
-        if ( statusN == OK ) {
-            System.out.println ("  - Scan the records just inserted\n");
+        if (statusN == OK) {
+            System.out.println("  - Scan the records just inserted\n");
 
             try {
                 scan = SystemDefs.JavabaseDB.ehfile.openScan();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 statusN = FAIL;
-                System.err.println ("*** Error opening scan\n");
+                System.err.println("*** Error opening scan\n");
                 e.printStackTrace();
             }
 
-            if ( statusN == OK &&  SystemDefs.JavabaseBM.getNumUnpinnedBuffers()
-                    == SystemDefs.JavabaseBM.getNumBuffers() ) {
-                System.err.println ("*** The heap-file scan has not pinned the first page\n");
+            if (statusN == OK && SystemDefs.JavabaseBM.getNumUnpinnedBuffers()
+                    == SystemDefs.JavabaseBM.getNumBuffers()) {
+                System.err.println("*** The heap-file scan has not pinned the first page\n");
                 statusN = FAIL;
             }
         }
         EID eidTmp = new EID();
 
 
-        if ( status == OK ) {
+        if (status == OK) {
             Edge edge = null;
 
             boolean done = false;
@@ -1051,15 +969,18 @@ public class Join {
                 try {
                     key = nhp.getStrFld(7);
                     key2 = nhp.getStrFld(8);
-                }
-                catch (Exception e) {
+                    key3 = nhp.getStrFld(6);
+                    key4 = nhp.getIntFld(1);
+                } catch (Exception e) {
                     status = FAIL;
                     e.printStackTrace();
                 }
 
                 try {
-                    btf1.insert(new StringKey(key), rid);
+                	btf1.insert(new StringKey(key), rid);
                     btf2.insert(new StringKey(key2), rid);
+                    btf3.insert(new StringKey(key3), rid);
+                    btf4.insert(new IntegerKey(key4), rid);
                 } catch (Exception e) {
                     status = FAIL;
                     e.printStackTrace();
@@ -1068,6 +989,7 @@ public class Join {
         }
         btf1.close();
         btf2.close();
-        scan.closescan();
+        btf3.close();
+        btf4.close();
     }
 }

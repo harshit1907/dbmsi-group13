@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,6 +25,7 @@ import heap.InvalidSlotNumberException;
 import heap.InvalidTupleSizeException;
 import queryPojo.EdgeQueryPojo;
 import queryPojo.NodeQueryPojo;
+import queryPojo.Pair;
 import queryPojo.QueryProcessor;
 //
 
@@ -76,10 +78,9 @@ public class phase3Test {
             new BatchNodeInsert().batchNodeInsert("/home/anjoy92/Documents/dbmsi-group13/src/tests/clean/NodeInsertDataNew.txt", name);
             new BatchEdgeInsert().batchEdgeInsert("/home/anjoy92/Documents/dbmsi-group13/src/tests/clean/EdgeInsertDataNew.txt");
           
-            
             new Join().createEdgeIndex();
         }
-   //     new FullScanNode().fullScanNode(name);
+  //      new FullScanNode().fullScanNode(name);
 
         
         //        PCounter.initialize();
@@ -101,9 +102,8 @@ public class phase3Test {
 //     
         //*********************** query PE1 ************************//
         
-        
-        // Page First then slot no 85, 1 - 109 ||| 72,1 for 19
-        List<NodeQueryPojo> li= new QueryProcessor().PathExpression1("72,1/47,20,29,1,38"); // 19/811
+        // Page First then slot no 85, 1 - 109 ||| 38,19 for 19
+        List<NodeQueryPojo> li= new QueryProcessor().PathExpression1("19/47,20,29,1,38"); // 19/811
         
 //        for( NodeQueryPojo tmpLi : li)
 //        {
@@ -116,17 +116,32 @@ public class phase3Test {
 //                
 //        }
 
-        List<NodeQueryPojo> ansNids = new LinkedList<NodeQueryPojo>();
+        List<NodeQueryPojo> ansNids = new ArrayList<NodeQueryPojo>();
+        List<Pair<NodeQueryPojo,NodeQueryPojo>> ansNodes= new ArrayList<Pair<NodeQueryPojo,NodeQueryPojo>>();
+        
         new Queries();
         ansNids= Queries.queryPE1(name, li);
-       
-      for( NodeQueryPojo tmpLi : ansNids)
-      {
-        //  System.out.println(ansNids.size()+" "+tmpLi.getKey());
-          System.out.println("(Page No: "+tmpLi.getNd().pageNo+" | Slot no: "+tmpLi.getNd().slotNo+" | Label: "+tmpLi.getLabel()+" | Desr:"+tmpLi.getDesc().getString2()+"),");
-      }
+        
+        for( NodeQueryPojo tmpLi : ansNids)
+        {
+          //  System.out.println(ansNids.size()+" "+tmpLi.getKey());
+            System.out.println("(Page No: "+tmpLi.getNd().pageNo+" | Slot no: "+tmpLi.getNd().slotNo+" | Label: "+tmpLi.getLabel()+" | Desr:"+tmpLi.getDesc().getString2()+"),");
+        }
         SystemDefs.JavabaseBM.flushAllPages();
-       
+          
+        
+        //29 2 46 14 20
+        //7 1 44 22 12
+        li= new QueryProcessor().PathExpression1("7,1,44,22,12/4");
+        
+        ansNodes= Queries.queryPE2(name, li);
+        
+        for( Pair<NodeQueryPojo,NodeQueryPojo> tmpLi : ansNodes)
+        {
+            System.out.println("(Head: "+tmpLi.getLeft().getLabel()+" | Tail: "+tmpLi.getRight().getLabel()+"),");
+        }
+          SystemDefs.JavabaseBM.flushAllPages();
+      
         scanner.close();
     }  
 

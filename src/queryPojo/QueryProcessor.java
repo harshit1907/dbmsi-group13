@@ -23,7 +23,7 @@ public class QueryProcessor {
     public List<EdgeQueryPojo> PathExpression2(String input)
     {
          String paths[]=new String[1000];
-         List<EdgeQueryPojo> list=new LinkedList<EdgeQueryPojo>();
+         List<EdgeQueryPojo> list=new ArrayList<EdgeQueryPojo>();
          paths=input.split("/");
          for(int i=0;i<paths.length;i++)
          {
@@ -77,7 +77,7 @@ public class QueryProcessor {
     public List<NodeQueryPojo> PathExpression1(String input) throws InvalidSlotNumberException, InvalidTupleSizeException, HFException, HFDiskMgrException, HFBufMgrException, IOException, Exception
     {
          String paths[]=new String[1000];
-         List<NodeQueryPojo> list=new LinkedList<NodeQueryPojo>();
+         List<NodeQueryPojo> list=new ArrayList<NodeQueryPojo>();
          paths=input.split("/");
          for(int i=0;i<paths.length;i++)
          {
