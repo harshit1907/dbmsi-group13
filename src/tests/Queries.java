@@ -26,8 +26,9 @@ import queryPojo.Pair;
 
 public class Queries {
   
-    public static List<Pair<NodeQueryPojo,NodeQueryPojo>> queryPE2(String name,List<NodeQueryPojo> nodeQuery) throws JoinsException, IndexException, PageNotReadException, TupleUtilsException, PredEvalException, SortException, LowMemException, UnknowAttrType, UnknownKeyTypeException, Exception
+    public static List<Pair<NodeQueryPojo,NodeQueryPojo>> queryPQ1a(String name,List<NodeQueryPojo> nodeQuery) throws JoinsException, IndexException, PageNotReadException, TupleUtilsException, PredEvalException, SortException, LowMemException, UnknowAttrType, UnknownKeyTypeException, Exception
     {
+        
 
         List<Pair<NodeQueryPojo,NodeQueryPojo>> ansNids= new ArrayList<Pair<NodeQueryPojo,NodeQueryPojo>>();
         int i=0;

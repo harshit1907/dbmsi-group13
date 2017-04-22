@@ -134,7 +134,7 @@ public class phase3Test {
         //7 1 44 22 12
         li= new QueryProcessor().PathExpression1("7,1,44,22,12/4");
         
-        ansNodes= Queries.queryPE2(name, li);
+        ansNodes= Queries.queryPQ1a(name, li);
         
         for( Pair<NodeQueryPojo,NodeQueryPojo> tmpLi : ansNodes)
         {
