@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Scanner;
 //
 //Demo queries
-//task-2.3 db23 path_expression
+//task-2.3 db23 path_exp
 // Mihir
 // batchnodeinsert /Users/mihir/dev/NodeInsertData.txt db1
 // batchnodedelete /Users/mihir/dev/NodeDeleteData.txt db1
