@@ -47,7 +47,7 @@ public class QueryProcessor {
                    
                    nd.pageNo=p;
                    nd.slotNo=Integer.parseInt(page_slot[1]);
-                   pe.setWeight(-1);
+                   //pe.setWeight(-1);
                    pe.setNd(nd);
                    
                  
@@ -55,7 +55,7 @@ public class QueryProcessor {
              else if(r2.matcher(pv).find())
              {
                  //System.out.println("label"); 
-            	 pe.setWeight(-1);
+            	 //pe.setWeight(-1);
                     pe.setEdgelabel(pv);
                     
                  

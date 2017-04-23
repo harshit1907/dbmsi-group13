@@ -21,17 +21,26 @@ public class EdgeQueryPojo {
     private String edgelabel;
     private String sourceLabel;
     private String destLabel;
+    private Integer uniqueKey;
+    private NID nd;
 
+    
     public NID getNd() {
         return nd;
     }
-
-    public void setNd(NID nd) {
-    	this.key = 5;
-        this.nd = nd;
+    public Integer getUniqueKey() {
+        return uniqueKey;
     }
 
-    private NID nd;
+    public void setNd(NID nd) {
+        this.key = 5;
+        this.nd = nd;
+    }
+    
+    public void setUniqueKey(Integer uK) {
+        this.key = 6;
+        this.uniqueKey = uK;
+    }
 
     public void setWeight(int weight) {
         this.key = 2;
