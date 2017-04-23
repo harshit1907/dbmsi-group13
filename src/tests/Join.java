@@ -74,13 +74,13 @@ public class Join {
         nsizes[0] = 20;
 
         FldSpec[] edgeFileProjList = new FldSpec[8];
-        RelSpec rel = new RelSpec(RelSpec.outer);
-        edgeFileProjList[0] = new FldSpec(rel, 1);
-        edgeFileProjList[1] = new FldSpec(rel, 6);
-        edgeFileProjList[2] = new FldSpec(rel, 7);
-        edgeFileProjList[3] = new FldSpec(rel, 8);
         RelSpec relN = new RelSpec(RelSpec.innerRel);
-        edgeFileProjList[4] = new FldSpec(relN, 1);
+        edgeFileProjList[0] = new FldSpec(relN, 1);
+        edgeFileProjList[1] = new FldSpec(relN, 2);
+        edgeFileProjList[2] = new FldSpec(relN, 3);
+        edgeFileProjList[3] = new FldSpec(relN, 4);
+        //RelSpec relN = new RelSpec(RelSpec.innerRel);
+        edgeFileProjList[4] = new FldSpec(relN, 5);
         edgeFileProjList[5] = new FldSpec(relN, 6);
         edgeFileProjList[6] = new FldSpec(relN, 7);
         edgeFileProjList[7] = new FldSpec(relN, 8);
