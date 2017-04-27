@@ -69,7 +69,7 @@ public class NestedLoopsJoins  extends Iterator
 			   FldSpec   proj_list[],
 			   int        n_out_flds
 			   ) throws IOException,NestedLoopException {
-
+      System.out.println("NestedLoop Join called");
       _in1 = new AttrType[in1.length];
       _in2 = new AttrType[in2.length];
       System.arraycopy(in1,0,_in1,0,in1.length);
