@@ -6,6 +6,10 @@ import diskmgr.*;
 import bufmgr.*;
 import index.*;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.sound.midi.Soundbank;
 
 /**
  * This file contains the interface for the sort_merg joins.
@@ -18,6 +22,9 @@ import java.io.*;
 public class SortMerge extends Iterator implements GlobalConst
 {
   private AttrType  _in1[], _in2[];
+  private List<Tuple> stack = new ArrayList<Tuple>();
+  private List<Tuple> tempStack = new ArrayList<Tuple>();
+  private boolean setLooper=false;
   private  int        in1_len, in2_len;
   private  Iterator  p_i1,        // pointers to the two iterators. If the
     p_i2;               // inputs are sorted, then no sorting is done
@@ -40,7 +47,9 @@ public class SortMerge extends Iterator implements GlobalConst
   private  Tuple     Jtuple;
   private  FldSpec   perm_mat[];
   private  int        nOutFlds;
-  
+  private short   s2_sizes_glo[];
+  private short   s1_sizes_glo[];
+  private Tuple gloTp = new Tuple();
   /**
    *constructor,initialization
    *@param in1[]   Array containing field types of R
@@ -99,6 +108,8 @@ public class SortMerge extends Iterator implements GlobalConst
 	   IOException
 		   
     {
+      s2_sizes_glo = s2_sizes;
+      s1_sizes_glo = s1_sizes;
       _in1 = new AttrType[in1.length];
       _in2 = new AttrType[in2.length];
       System.arraycopy(in1,0,_in1,0,in1.length);
@@ -255,7 +266,8 @@ public class SortMerge extends Iterator implements GlobalConst
       int    comp_res;
       Tuple _tuple1,_tuple2;
       if (done) return null;
-      
+      if(setLooper==false)
+      {
       while (true)
 	{
 	  if (process_next_block)
@@ -264,12 +276,15 @@ public class SortMerge extends Iterator implements GlobalConst
 	      if (get_from_in1)
 		if ((tuple1 = p_i1.get_next()) == null)
 		  {
+		    System.out.println("NULL1");
 		    done = true;
 		    return null;
 		  }
 	      if (get_from_in2)
 		if ((tuple2 = p_i2.get_next()) == null)
 		  {
+
+            System.out.println("NULL2");
 		    done = true;
 		    return null;
 		  }
@@ -325,6 +340,7 @@ public class SortMerge extends Iterator implements GlobalConst
 		  // Insert tuple1 into io_buf1
 		  try {
 		    io_buf1.Put(tuple1);
+     //       System.out.println("Tuple1\t"+tuple1.getStrFld(6));
 		  }
 		  catch (Exception e){
 		    throw new JoinsException(e,"IoBuf error in sortmerge");
@@ -343,6 +359,13 @@ public class SortMerge extends Iterator implements GlobalConst
 		  
 		  try {
 		    io_buf2.Put(tuple2);
+		    Tuple tp=new Tuple();
+		    tp.setHdr((short)in2_len, _in2, s2_sizes_glo);
+		    tp.tupleCopy(tuple2);
+		    stack.add(tp);
+		    //put in list
+		//    System.out.println("Tuple2\t"+tuple2.getStrFld(6)+" "+stack.size());
+		    
 		  }
 		  catch (Exception e){
 		    throw new JoinsException(e,"IoBuf error in sortmerge");
@@ -369,6 +392,7 @@ public class SortMerge extends Iterator implements GlobalConst
 	    {
 	      if (( _tuple1= io_buf1.Get(TempTuple1)) == null)
 		{
+	      stack.clear();    
 		  process_next_block = true;
 		  continue;                                // Process next equivalence class
 		}
@@ -376,6 +400,26 @@ public class SortMerge extends Iterator implements GlobalConst
 		{
 		  io_buf2.reread();
 		  _tuple2= io_buf2.Get( TempTuple2);
+//		  gloTp.setHdr((short)in1_len, _in1, s1_sizes_glo);
+//          gloTp.tupleCopy(TempTuple1);
+//          tempStack=stack;
+//          
+	//	  System.out.println("Check: "+ _tuple1.getStrFld(6)+" SZ "+stack.size());
+		  setLooper=true;
+
+          gloTp.setHdr((short)in1_len, _in1, s1_sizes_glo);
+          gloTp.tupleCopy(_tuple1);
+          tempStack.clear();
+          for(Tuple pp :stack)
+          {
+              Tuple tp2=new Tuple();
+              tp2.setHdr((short)in2_len, _in2, s2_sizes_glo);
+              tp2.tupleCopy(pp);
+              tempStack.add(tp2);
+          }
+      //    System.out.println("Re: "+TempTuple2.getStrFld(6));
+		  return get_next();
+		  
 		}
 	    }
 	  if (PredEval.Eval(OutputFilter, TempTuple1, TempTuple2, _in1, _in2) == true)
@@ -386,6 +430,40 @@ public class SortMerge extends Iterator implements GlobalConst
 	      return Jtuple;
 	    }
 	}
+      }
+      else
+      {
+          if(tempStack.size()>0){
+              Tuple tp=new Tuple();
+                tp.setHdr((short)in2_len, _in2, s2_sizes_glo);
+                tp.tupleCopy(tempStack.get(0));
+          tempStack.remove(0);
+          
+          
+         // System.out.println("**Look at Stack**");
+        //  tempStack.remove(0);
+//          for(Tuple kk : tempStack)
+//          {
+//              System.out.println(kk.getStrFld(6));
+//          }
+//          System.out.println("*************");
+          
+          if (PredEval.Eval(OutputFilter, gloTp, tp, _in1, _in2) == true)
+          {
+            Projection.Join(gloTp, _in1, 
+                    tp, _in2, 
+                    Jtuple, perm_mat, nOutFlds);
+            return Jtuple;
+          }
+          }
+          else{
+              setLooper=false;
+          return get_next();
+          }
+      }
+    return gloTp;
+      
+      
     }
 
   /** 
@@ -403,6 +481,7 @@ public class SortMerge extends Iterator implements GlobalConst
       if (!closeFlag) {
           
 	try {
+	   while ((tuple1=p_i1.get_next()) != null);
 	  p_i1.close();
 	  p_i2.close();
 	}catch (Exception e) {
