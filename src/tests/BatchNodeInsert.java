@@ -57,6 +57,8 @@ public class BatchNodeInsert
 					try {
 
 						NID nid = SystemDefs.JavabaseDB.nhfile.insertNode(currentNode.getNodeByteArray());
+						System.out.println("pageid :"+nid.pageNo);
+						System.out.println("slot no:"+nid.slotNo);
 						insertI++;
 					}
 					catch (Exception e) {

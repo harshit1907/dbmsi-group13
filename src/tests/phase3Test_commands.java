@@ -4,6 +4,7 @@ import bufmgr.*;
 import diskmgr.PCounter;
 import global.SystemDefs;
 import heap.*;
+import queryPojo.EdgeQueryPojo;
 import queryPojo.NodeQueryPojo;
 import queryPojo.Pair;
 import queryPojo.QueryProcessor;
@@ -41,7 +42,6 @@ import java.util.List;
 
 public class phase3Test_commands {
     public static void main(String[] agrs) throws InvalidSlotNumberException, InvalidTupleSizeException, HFException, HFDiskMgrException, HFBufMgrException, IOException, Exception {
-        while (true) {
 
             PCounter.initialize();
             System.out.print("Group13> ");
@@ -65,26 +65,28 @@ public class phase3Test_commands {
                 //        new BatchNodeInsert().batchNodeInsert("/home/anjoy92/Documents/dbmsi-group13/src/tests/clean/NodeTestDataOld.txt", name);
                 //      new BatchEdgeInsert().batchEdgeInsert("/home/anjoy92/Documents/dbmsi-group13/src/tests/clean/EdgeTestDataOld.txt");
 
-                new BatchNodeInsert().batchNodeInsert("/home/nishi/dbmsi-group13/insertN.txt", name);
-                new BatchEdgeInsert().batchEdgeInsert("/home/nishi/dbmsi-group13/insertE.txt");
+                new BatchNodeInsert().batchNodeInsert("/home/nishi/dbmsi-group13/Phase3NodeInsertData.txt", name);
+                new BatchEdgeInsert().batchEdgeInsert("/home/nishi/dbmsi-group13/Phase3EdgeInsertData.txt");
 
                 new Join().createEdgeIndex();
+                new Join().createEdgeIndexEid();
             }
+            /*
             if (operation.equalsIgnoreCase("exit") || operation.equalsIgnoreCase("quit")) {
                 System.err.println("Bye! \n");
                 System.exit(0);
                 break;
-            }
+            }*/
             if (operation.equalsIgnoreCase("help")) {
                 System.out.println("");
-                continue;
+               // continue;
             }
 
 
             //String inputFile = scanner.nextLine();
 
 
-            if (operation.equalsIgnoreCase("task-2.3")) {
+            if (operation.equalsIgnoreCase("2.3")) {
 
                 List<NodeQueryPojo> li= new QueryProcessor().PathExpression1(path_expr); // 19/811
                 List<NodeQueryPojo> ansNids = new ArrayList<NodeQueryPojo>();
@@ -96,30 +98,151 @@ public class phase3Test_commands {
                 for( NodeQueryPojo tmpLi : ansNids)
                 {
                     //  System.out.println(ansNids.size()+" "+tmpLi.getKey());
-                    System.out.println("task 2.3");
+                    System.out.println("pe1");
                     System.out.println("(Page No: "+tmpLi.getNd().pageNo+" | Slot no: "+tmpLi.getNd().slotNo+" | Label: "+tmpLi.getLabel()+" | Desr:"+tmpLi.getDesc().getString2()+"),");
                 }
                 SystemDefs.JavabaseBM.flushAllPages();
 
             }
-            if (operation.equalsIgnoreCase("task-2.6")) {
+            if (operation.equalsIgnoreCase("2.4")) {
+                List<EdgeQueryPojo> ansNids = new ArrayList<EdgeQueryPojo>();
+                List<EdgeQueryPojo> ansNodes= new ArrayList<EdgeQueryPojo>();
+                List<EdgeQueryPojo> edgeQuery= new QueryProcessor().PathExpression2(path_expr);
+                ansNodes=new Query47().queryPE2(name, edgeQuery);
+                for( EdgeQueryPojo tmpLi : ansNodes)
+                {
+                    System.out.println("(Page id: "+tmpLi.getNd().pageNo+" | Slot no: "+tmpLi.getNd().slotNo+"),");
+                }
+                SystemDefs.JavabaseBM.flushAllPages();
+            }
+            if (operation.equalsIgnoreCase("2.6a")) {
                 List<NodeQueryPojo> li= new QueryProcessor().PathExpression1(path_expr); // 19/811
                 List<NodeQueryPojo> ansNids = new ArrayList<NodeQueryPojo>();
                 List<Pair<NodeQueryPojo,NodeQueryPojo>> ansNodes= new ArrayList<Pair<NodeQueryPojo,NodeQueryPojo>>();
 
 
-                ansNodes= Queries.queryPQ1a(name, li);
+                ansNodes= Queries.queryPQ1(name, li,"a");
 
                 for( Pair<NodeQueryPojo,NodeQueryPojo> tmpLi : ansNodes)
                 {
-                    System.out.println("task 2.6");
+                    System.out.println("task 2.6a");
+                    System.out.println("(Head: "+tmpLi.getLeft().getLabel()+" | Tail: "+tmpLi.getRight().getLabel()+"),");
+                }
+                SystemDefs.JavabaseBM.flushAllPages();
+            }
+            if (operation.equalsIgnoreCase("2.6b")) {
+                List<NodeQueryPojo> li= new QueryProcessor().PathExpression1(path_expr); // 19/811
+                List<NodeQueryPojo> ansNids = new ArrayList<NodeQueryPojo>();
+                List<Pair<NodeQueryPojo,NodeQueryPojo>> ansNodes= new ArrayList<Pair<NodeQueryPojo,NodeQueryPojo>>();
+
+
+                ansNodes= Queries.queryPQ1(name, li,"b");
+
+                for( Pair<NodeQueryPojo,NodeQueryPojo> tmpLi : ansNodes)
+                {
+                    System.out.println("task 2.6b");
+                    System.out.println("(Head: "+tmpLi.getLeft().getLabel()+" | Tail: "+tmpLi.getRight().getLabel()+"),");
+                }
+                SystemDefs.JavabaseBM.flushAllPages();
+            }
+            if (operation.equalsIgnoreCase("2.6c")) {
+                List<NodeQueryPojo> li= new QueryProcessor().PathExpression1(path_expr); // 19/811
+                List<NodeQueryPojo> ansNids = new ArrayList<NodeQueryPojo>();
+                List<Pair<NodeQueryPojo,NodeQueryPojo>> ansNodes= new ArrayList<Pair<NodeQueryPojo,NodeQueryPojo>>();
+
+
+                ansNodes= Queries.queryPQ1(name, li,"c");
+
+                for( Pair<NodeQueryPojo,NodeQueryPojo> tmpLi : ansNodes)
+                {
+                    System.out.println("task 2.6c");
                     System.out.println("(Head: "+tmpLi.getLeft().getLabel()+" | Tail: "+tmpLi.getRight().getLabel()+"),");
                 }
                 SystemDefs.JavabaseBM.flushAllPages();
             }
 
+
+            if(operation.toLowerCase().startsWith("2.7")){
+                //String path_expr="3/26/355_961";
+                String paths[]=path_expr.split("/");
+                List<NodeQueryPojo> nodeQuery= new QueryProcessor().PathExpression1(paths[0]);
+                String edge_path="";
+                for(int i=1;i<paths.length;i++)
+                {
+                    edge_path+=paths[i];
+                    if(i<paths.length-1)
+                    {
+                        edge_path+="/";
+                    }
+                }
+
+                List<EdgeQueryPojo> edgeQuery= new QueryProcessor().PathExpression2(edge_path);
+                if(operation.indexOf("7a")>0) {
+                    List<Pair<EdgeQueryPojo, EdgeQueryPojo>> ansNids = new Query47().queryPQ2a(name, edgeQuery, nodeQuery, "a");
+                    System.out.println("printing result 2.7a");
+                    for (Pair<EdgeQueryPojo, EdgeQueryPojo> tmpLi : ansNids) {
+                        System.out.println("(Head: " + tmpLi.getLeft().getDestLabel() + " | Tail: " + tmpLi.getRight().getDestLabel() + "),");
+                    }
+                }
+
+
+                if(operation.indexOf("7b")>0) {
+
+                    System.out.println("printing result 2.7b");
+                    List<Pair<EdgeQueryPojo, EdgeQueryPojo>> ansNids1 = new Query47().queryPQ2a(name, edgeQuery, nodeQuery, "b");
+                    for (Pair<EdgeQueryPojo, EdgeQueryPojo> tmpLi : ansNids1) {
+                        System.out.println("(Head: " + tmpLi.getLeft().getDestLabel() + " | Tail: " + tmpLi.getRight().getDestLabel() + "),");
+                    }
+                }
+
+               if(operation.indexOf("7c")>0) {
+
+                   System.out.println("printing result 2.7c");
+                   List<Pair<EdgeQueryPojo, EdgeQueryPojo>> ansNids2 = new Query47().queryPQ2a(name, edgeQuery, nodeQuery, "c");
+                   for (Pair<EdgeQueryPojo, EdgeQueryPojo> tmpLi : ansNids2) {
+                       System.out.println("(Head: " + tmpLi.getLeft().getDestLabel() + " | Tail: " + tmpLi.getRight().getDestLabel() + "),");
+                   }
+               }
+
+                SystemDefs.JavabaseBM.flushAllPages();
+
+            }
+            if(operation.equalsIgnoreCase("2.9")){
+                List<EdgeQueryPojo> li2 = new QueryProcessor().PathExpression2(path_expr);
+                List<EdgeQueryPojo> edgeQueryPojoList = new ArrayList<EdgeQueryPojo>();
+                EdgeQueryPojo edgeQueryPojo = new EdgeQueryPojo();
+                edgeQueryPojo.setWeight(50);
+                EdgeQueryPojo edgeQueryPojo1 = new EdgeQueryPojo();
+                edgeQueryPojo1.setWeight(50);
+                EdgeQueryPojo edgeQueryPojo2 = new EdgeQueryPojo();
+                edgeQueryPojo2.setWeight(50);
+                edgeQueryPojoList.add(edgeQueryPojo);
+                edgeQueryPojoList.add(edgeQueryPojo1);
+                edgeQueryPojoList.add(edgeQueryPojo2);
+                System.out.println("Executing T9");
+                List<String> ansNodes2 = new ArrayList<String>();
+                if(operation.indexOf("9a")>0){
+                    System.out.println("Qa");
+                    new Triangle().triangleJoin(name, li2, "a");
+
+                    SystemDefs.JavabaseBM.flushAllPages();
+                }
+                if(operation.indexOf("9b")>0){
+                    System.out.println("Qb");
+                    new Triangle().triangleJoin(name, li2, "b");
+
+                    SystemDefs.JavabaseBM.flushAllPages();
+                }
+                if(operation.indexOf("9c")>0){
+                    System.out.println("Qc");
+                    new Triangle().triangleJoin(name, li2, "c");
+
+                    SystemDefs.JavabaseBM.flushAllPages();
+                }
+
+            }
+
         }
-    }//29 2 46 14 20
 
 
     public static void createDB(String graphDbName) {

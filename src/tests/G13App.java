@@ -15,7 +15,7 @@ import heap.InvalidTupleSizeException;
 
 // Shobhit
 // batchnodeinsert /home/anjoy92/Documents/dbmsi-group13/src/tests/NodeTestDataI.txt db1
-// batchnodedelete /home/anjoy92/Documents/dbmsi-group13/src/tests/NodeTestDataD.txt db1
+// batchnodedelete /home/anjoy93/Documents/dbmsi-group13/src/tests/NodeTestDataD.txt db1
 // batchedgeinsert /home/anjoy92/Documents/dbmsi-group13/src/tests/EdgeTestData.txt  db1
 // batchedgedelete /home/anjoy92/Documents/dbmsi-group13/src/tests/EdgeTestData2.txt  db1
 

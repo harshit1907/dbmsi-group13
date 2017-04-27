@@ -32,7 +32,7 @@ public class QueryProcessor {
             // System.out.println(pv+":");
              paths=input.split("/");
              String pattern1 = "^(\\d*),(\\d*)$";
-             String pattern2 = "(\\w*)_(\\w*)$";
+             String pattern2 = "_(\\w*)$";
              String pattern3="^(\\d*)$";
              Pattern r1 = Pattern.compile(pattern1);
              Pattern r2 = Pattern.compile(pattern2);
@@ -56,7 +56,7 @@ public class QueryProcessor {
              {
                  //System.out.println("label"); 
             	 //pe.setWeight(-1);
-                    pe.setEdgelabel(pv);
+                    pe.setEdgelabel(pv.substring(1));
                     
                  
              }

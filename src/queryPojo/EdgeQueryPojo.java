@@ -15,7 +15,10 @@ public class EdgeQueryPojo {
 
     public void setEdgelabel(String edgelabel) {
         this.key = 1;
+
         this.edgelabel = edgelabel;
+
+        System.out.println("label set"+this.edgelabel);
     }
 
     private String edgelabel;
