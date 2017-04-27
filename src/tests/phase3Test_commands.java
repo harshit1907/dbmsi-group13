@@ -42,7 +42,7 @@ import java.util.List;
 
 public class phase3Test_commands {
     public static void main(String[] agrs) throws InvalidSlotNumberException, InvalidTupleSizeException, HFException, HFDiskMgrException, HFBufMgrException, IOException, Exception {
-
+    	while(true) {
             PCounter.initialize();
             System.out.print("Group13> ");
             BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
@@ -65,8 +65,8 @@ public class phase3Test_commands {
                 //        new BatchNodeInsert().batchNodeInsert("/home/anjoy92/Documents/dbmsi-group13/src/tests/clean/NodeTestDataOld.txt", name);
                 //      new BatchEdgeInsert().batchEdgeInsert("/home/anjoy92/Documents/dbmsi-group13/src/tests/clean/EdgeTestDataOld.txt");
 
-                new BatchNodeInsert().batchNodeInsert("/home/nishi/dbmsi-group13/Phase3NodeInsertData.txt", name);
-                new BatchEdgeInsert().batchEdgeInsert("/home/nishi/dbmsi-group13/Phase3EdgeInsertData.txt");
+                new BatchNodeInsert().batchNodeInsert("C://NodeInsertData.txt", name);
+                new BatchEdgeInsert().batchEdgeInsert("C://EdgeInsertData.txt");
 
                 new Join().createEdgeIndex();
                 new Join().createEdgeIndexEid();
@@ -85,7 +85,7 @@ public class phase3Test_commands {
 
             //String inputFile = scanner.nextLine();
 
-
+            
             if (operation.equalsIgnoreCase("2.3")) {
 
                 List<NodeQueryPojo> li= new QueryProcessor().PathExpression1(path_expr); // 19/811
@@ -102,6 +102,11 @@ public class phase3Test_commands {
                     System.out.println("(Page No: "+tmpLi.getNd().pageNo+" | Slot no: "+tmpLi.getNd().slotNo+" | Label: "+tmpLi.getLabel()+" | Desr:"+tmpLi.getDesc().getString2()+"),");
                 }
                 SystemDefs.JavabaseBM.flushAllPages();
+                System.out.println("\nTotal Disk Read Count: " + PCounter.readCounter);
+
+                System.out.println("Total Disk Write Count: " + PCounter.writeCounter);
+
+
 
             }
             if (operation.equalsIgnoreCase("2.4")) {
@@ -114,6 +119,11 @@ public class phase3Test_commands {
                     System.out.println("(Page id: "+tmpLi.getNd().pageNo+" | Slot no: "+tmpLi.getNd().slotNo+"),");
                 }
                 SystemDefs.JavabaseBM.flushAllPages();
+                System.out.println("\nTotal Disk Read Count: " + PCounter.readCounter);
+
+                System.out.println("Total Disk Write Count: " + PCounter.writeCounter);
+
+
             }
             if (operation.equalsIgnoreCase("2.6a")) {
                 List<NodeQueryPojo> li= new QueryProcessor().PathExpression1(path_expr); // 19/811
@@ -129,6 +139,11 @@ public class phase3Test_commands {
                     System.out.println("(Head: "+tmpLi.getLeft().getLabel()+" | Tail: "+tmpLi.getRight().getLabel()+"),");
                 }
                 SystemDefs.JavabaseBM.flushAllPages();
+                System.out.println("\nTotal Disk Read Count: " + PCounter.readCounter);
+
+                System.out.println("Total Disk Write Count: " + PCounter.writeCounter);
+
+
             }
             if (operation.equalsIgnoreCase("2.6b")) {
                 List<NodeQueryPojo> li= new QueryProcessor().PathExpression1(path_expr); // 19/811
@@ -144,6 +159,11 @@ public class phase3Test_commands {
                     System.out.println("(Head: "+tmpLi.getLeft().getLabel()+" | Tail: "+tmpLi.getRight().getLabel()+"),");
                 }
                 SystemDefs.JavabaseBM.flushAllPages();
+                System.out.println("\nTotal Disk Read Count: " + PCounter.readCounter);
+
+                System.out.println("Total Disk Write Count: " + PCounter.writeCounter);
+
+
             }
             if (operation.equalsIgnoreCase("2.6c")) {
                 List<NodeQueryPojo> li= new QueryProcessor().PathExpression1(path_expr); // 19/811
@@ -159,6 +179,11 @@ public class phase3Test_commands {
                     System.out.println("(Head: "+tmpLi.getLeft().getLabel()+" | Tail: "+tmpLi.getRight().getLabel()+"),");
                 }
                 SystemDefs.JavabaseBM.flushAllPages();
+                System.out.println("\nTotal Disk Read Count: " + PCounter.readCounter);
+
+                System.out.println("Total Disk Write Count: " + PCounter.writeCounter);
+
+
             }
 
 
@@ -205,9 +230,14 @@ public class phase3Test_commands {
                }
 
                 SystemDefs.JavabaseBM.flushAllPages();
+                System.out.println("\nTotal Disk Read Count: " + PCounter.readCounter);
+
+                System.out.println("Total Disk Write Count: " + PCounter.writeCounter);
+
+
 
             }
-            if(operation.equalsIgnoreCase("2.9")){
+            if(operation.toLowerCase().startsWith("2.9")){
                 List<EdgeQueryPojo> li2 = new QueryProcessor().PathExpression2(path_expr);
                 List<EdgeQueryPojo> edgeQueryPojoList = new ArrayList<EdgeQueryPojo>();
                 EdgeQueryPojo edgeQueryPojo = new EdgeQueryPojo();
@@ -238,9 +268,15 @@ public class phase3Test_commands {
                     new Triangle().triangleJoin(name, li2, "c");
 
                     SystemDefs.JavabaseBM.flushAllPages();
+                    System.out.println("\nTotal Disk Read Count: " + PCounter.readCounter);
+
+                    System.out.println("Total Disk Write Count: " + PCounter.writeCounter);
+
+
                 }
 
             }
+    	}
 
         }
 

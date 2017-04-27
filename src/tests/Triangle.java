@@ -360,7 +360,13 @@ public class Triangle {
             Tuple nhp =new Tuple();
             AttrType[] attrType = new AttrType[1];
             attrType[0] = new AttrType(AttrType.attrString);
-
+            int numPages = 30;
+            TupleOrder[] order = new TupleOrder[1];
+            order[0] = new TupleOrder(TupleOrder.Ascending);
+            FldSpec[] projlistTemp = new FldSpec[1];
+            projlistTemp[0] = new FldSpec(new RelSpec(RelSpec.outer), 1);
+         
+        
             short[] attrSize = new short[1];
             attrSize[0] = 30;
             nhp.setHdr((short)1, attrType, attrSize);
@@ -369,7 +375,48 @@ public class Triangle {
 
             for (int j=0;j<ansNids.size();j++) {
                 String []tokens = ansNids.get(j).trim().split(" ");
+                
+                
+                Tuple cur =new Tuple();
+                AttrType[] attrTypeNode = new AttrType[1];
+                attrTypeNode[0] = new AttrType(AttrType.attrInteger);
+                short[] attrSizData = new short[0];
+                
+                cur.setHdr((short)1, attrTypeNode, attrSizData);
 
+                Heapfile fNew= new Heapfile("triangelTripleData");
+                cur.setIntFld(1, Integer.parseInt(tokens[0]));
+                fNew.insertRecord(cur.getTupleByteArray());
+                cur.setIntFld(1, Integer.parseInt(tokens[1]));
+                fNew.insertRecord(cur.getTupleByteArray());
+                cur.setIntFld(1, Integer.parseInt(tokens[2]));
+                fNew.insertRecord(cur.getTupleByteArray());
+               
+                FileScan fscanD = null;
+                try {
+                	fscanD = new FileScan(fNew._fileName, attrTypeNode, attrSizData, (short) 1, 1, projlistTemp, null);
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                Sort sortD = null;
+                try {
+                	sortD = new Sort(attrTypeNode, (short) 1, attrSizData, fscanD, 1, order[0], 30, numPages);
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+                cur = null;
+                String tripleData = "";
+                while ((cur = sortD.get_next()) != null) {
+                tripleData += cur.getIntFld(1) + " ";
+                }
+                fscanD.close();
+                sortD.close();
+                fNew.deleteFile();
+                
+                tokens = tripleData.trim().split(" ");
                 String formatted = String.format("%05d", Integer.parseInt(tokens[0]))
                         + "_" + String.format("%05d", Integer.parseInt(tokens[1]))
                         + "_" + String.format("%05d", Integer.parseInt(tokens[2]));
@@ -379,12 +426,7 @@ public class Triangle {
             }
 
             // SORT the file just created
-            FldSpec[] projlistTemp = new FldSpec[1];
-            projlistTemp[0] = new FldSpec(new RelSpec(RelSpec.outer), 1);
-            TupleOrder[] order = new TupleOrder[1];
-            order[0] = new TupleOrder(TupleOrder.Ascending);
-            int numPages = 30;
-
+           
             FileScan fscan = null;
             try {
                 fscan = new FileScan(f._fileName, attrType, attrSize, (short) 1, 1, projlistTemp, null);

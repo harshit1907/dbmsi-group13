@@ -1,14 +1,19 @@
-package iterator;
-   
+package giterator;
 
+
+import bufmgr.PageNotReadException;
+import edgeheap.EScan;
+import edgeheap.EdgeHeapFile;
+import global.AttrType;
+import global.EID;
 import heap.*;
-import global.*;
-import bufmgr.*;
-import diskmgr.*;
-import index.*;
-import java.lang.*;
-import java.io.*;
-/** 
+import index.IndexException;
+import iterator.*;
+import nodeheap.NodeHeapFile;
+
+import java.io.IOException;
+
+/**
  *
  *  This file contains an implementation of the nested loops join
  *  algorithm as described in the Shapiro paper.
@@ -19,23 +24,23 @@ import java.io.*;
  *              if (ri == sj) then add (r, s) to the result.
  */
 
-public class NestedLoopsJoins  extends Iterator 
+public class GraphNodeNestedLoopsJoins extends Iterator
 {
   private AttrType      _in1[],  _in2[];
   private   int        in1_len, in2_len;
-  private   Iterator  outer;
-  private   short t2_str_sizescopy[];
+  private   Iterator  inner;
+  private   short t1_str_sizescopy[];
   private   CondExpr OutputFilter[];
   private   CondExpr RightFilter[];
   private   int        n_buf_pgs;        // # of buffer pages available.
   private   boolean        done,         // Is the join complete
-    get_from_outer;                 // if TRUE, a tuple is got from outer
+    get_from_inner;                 // if TRUE, a tuple is got from outer
   private   Tuple     outer_tuple, inner_tuple;
   private   Tuple     Jtuple;           // Joined tuple
   private   FldSpec   perm_mat[];
   private   int        nOutFlds;
-  private   Heapfile  hf;
-  private   Scan      inner;
+  private EdgeHeapFile ehf;
+  private   EScan      outer;
 
   /**constructor
    *Initialize the two relations which are joined, including relation type,
@@ -46,8 +51,8 @@ public class NestedLoopsJoins  extends Iterator
    *@param len_in2  # of columns in S
    *@param  t2_str_sizes shows the length of the string fields.
    *@param amt_of_mem  IN PAGES
-   *@param am1  access method for left i/p to join
-   *@param relationName  access hfapfile for right i/p to join
+   *@param inner_index  access method for left i/p to join
+   *@param outer_relationName  access hfapfile for right i/p to join
    *@param outFilter   select expressions
    *@param rightFilter reference to filter applied on right i/p
    *@param proj_list shows what input fields go where in the output tuple
@@ -55,21 +60,21 @@ public class NestedLoopsJoins  extends Iterator
    *@exception IOException some I/O fault
    *@exception NestedLoopException exception from this class
    */
-  public NestedLoopsJoins( AttrType    in1[],    
-			   int     len_in1,           
-			   short   t1_str_sizes[],
-			   AttrType    in2[],         
-			   int     len_in2,           
-			   short   t2_str_sizes[],   
-			   int     amt_of_mem,        
-			   Iterator     am1,          
-			   String relationName,      
-			   CondExpr outFilter[],      
-			   CondExpr rightFilter[],    
-			   FldSpec   proj_list[],
-			   int        n_out_flds
+  public GraphNodeNestedLoopsJoins(AttrType    in1[],
+                                   int     len_in1,
+                                   short   t1_str_sizes[],
+                                   AttrType    in2[],
+                                   int     len_in2,
+                                   short   t2_str_sizes[],
+                                   int     amt_of_mem,
+                                   String outer_relationName,
+                                   Iterator     inner_index,
+                                   CondExpr outFilter[],
+                                   CondExpr rightFilter[],
+                                   FldSpec   proj_list[],
+                                   int        n_out_flds
 			   ) throws IOException,NestedLoopException {
-      //System.out.println("NestedLoop Join called");
+
       _in1 = new AttrType[in1.length];
       _in2 = new AttrType[in2.length];
       System.arraycopy(in1,0,_in1,0,in1.length);
@@ -77,8 +82,8 @@ public class NestedLoopsJoins  extends Iterator
       in1_len = len_in1;
       in2_len = len_in2;
 
-      outer = am1;
-      t2_str_sizescopy =  t2_str_sizes;
+      inner = inner_index;
+      t1_str_sizescopy =  t1_str_sizes;
       inner_tuple = new Tuple();
       Jtuple = new Tuple();
       OutputFilter = outFilter;
@@ -87,7 +92,7 @@ public class NestedLoopsJoins  extends Iterator
       n_buf_pgs    = amt_of_mem;
       inner = null;
       done  = false;
-      get_from_outer = true;
+      get_from_inner = true;
 
       AttrType[] Jtypes = new AttrType[n_out_flds];
       short[]    t_size;
@@ -104,11 +109,11 @@ public class NestedLoopsJoins  extends Iterator
       }
 
       try {
-	  hf = new Heapfile(relationName);
+          ehf = new EdgeHeapFile(outer_relationName);
 
       }
       catch(Exception e) {
-	throw new NestedLoopException(e, "Create new heapfile failed.");
+          throw new NestedLoopException(e, "Create new heapfile failed.");
       }
     }
 
@@ -155,23 +160,22 @@ public class NestedLoopsJoins  extends Iterator
 	  // If a get_next on the outer returns DONE?, then the nested loops
 	  //join is done too.
 
-	  if (get_from_outer) {
-	      get_from_outer = false;
-	      if (inner != null) {     // If this not the first time,
-              inner = null;
+	  if (get_from_inner) {
+	      get_from_inner = false;
+	      if (outer != null) {     // If this not the first time,
+              outer = null;
           }
 
 	      try {
-            inner = hf.openScan();
+            outer = ehf.openScan();
 	      } catch(Exception e){
             throw new NestedLoopException(e, "openScan failed");
 	      }
 
-	      if ((outer_tuple=outer.get_next()) == null) {
+	      if ((inner_tuple=inner.get_next()) == null) {
               done = true;
-              if (inner != null) {
-                  inner.closescan();
-                  inner = null;
+              if (outer != null) {
+                  outer = null;
               }
               return null;
           }
@@ -181,11 +185,12 @@ public class NestedLoopsJoins  extends Iterator
 	  // while the inner is not completely scanned && there
 	  // is no match (with pred),get a tuple from the inner.
 
-	      RID rid = new RID();
-	      while ((inner_tuple = inner.getNext(rid)) != null) {
-              inner_tuple.setHdr((short)in2_len, _in2,t2_str_sizescopy);
-              if (PredEval.Eval(RightFilter, inner_tuple, null, _in2, null)) {
-                  if (PredEval.Eval(OutputFilter, outer_tuple, inner_tuple, _in1, _in2)) {
+	      EID eid = new EID();
+	      while ((outer_tuple = outer.getNext(eid)) != null) {
+              outer_tuple.setHdr((short)in1_len, _in1,t1_str_sizescopy);
+
+              if (PredEval.Eval(OutputFilter, outer_tuple, null, _in1, null)) {
+                  if (PredEval.Eval(RightFilter, inner_tuple, outer_tuple, _in2, _in1)) {
                   // Apply a projection on the outer and inner tuples.
                   Projection.Join(outer_tuple, _in1,
                           inner_tuple, _in2,
@@ -199,7 +204,7 @@ public class NestedLoopsJoins  extends Iterator
 	      //returned from t//he while loop. Hence, inner is 
 	      //exhausted, => set get_from_outer = TRUE, go to top of loop
 	      
-	      get_from_outer = true; // Loop back to top and get next outer tuple.	      
+	      get_from_inner = true; // Loop back to top and get next outer tuple.
 	} while (true);
     } 
 
@@ -215,7 +220,7 @@ public class NestedLoopsJoins  extends Iterator
       if (!closeFlag) {
 
       try {
-          outer.close();
+          inner.close();
       } catch (Exception e) {
           throw new JoinsException(e, "NestedLoopsJoin.java: error in closing iterator.");
       }

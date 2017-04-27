@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import bufmgr.PageNotReadException;
+import diskmgr.PCounter;
 import edgeheap.EScan;
 import edgeheap.Edge;
 import global.AttrType;
@@ -45,6 +46,7 @@ public class Queries {
         List<Pair<NodeQueryPojo, NodeQueryPojo>> childQuery = new ArrayList<Pair<NodeQueryPojo, NodeQueryPojo>>();
 
         while (nodeQuery.size() > 1) {
+        	int reads = PCounter.readCounter, writes = PCounter.writeCounter;
             if (i == 0) {
                 i = 1;
 
@@ -127,6 +129,9 @@ public class Queries {
 
                 }
                 nlj.close();
+                System.out.print("\tDisk Read Count: "+ Integer.toString(PCounter.readCounter-reads));        
+
+                System.out.println("\tDisk Write Count: "+ Integer.toString(PCounter.writeCounter-writes));
             }
 
             nodeQuery.remove(0);
@@ -273,6 +278,7 @@ public class Queries {
         List<NodeQueryPojo> childQuery = new ArrayList<NodeQueryPojo>();
 
         while (nodeQuery.size() > 1) {
+        	int reads = PCounter.readCounter, writes = PCounter.writeCounter;
             if (i == 0) {
                 i = 1;
                 childQuery.add(nodeQuery.get(0));
@@ -325,6 +331,9 @@ public class Queries {
 
                 }
                 nlj.close();
+                System.out.print("\tDisk Read Count: "+ Integer.toString(PCounter.readCounter-reads));        
+
+                System.out.println("\tDisk Write Count: "+ Integer.toString(PCounter.writeCounter-writes));
             }
 
             nodeQuery.remove(0);
@@ -481,6 +490,7 @@ public static List<EdgeQueryPojo> queryPE2(String name, List<EdgeQueryPojo> edge
     int i = 0;
 
     while (edgeQuery.size() > 1) {
+    	int reads = PCounter.readCounter, writes = PCounter.writeCounter;
         List<EdgeQueryPojo> children = new LinkedList<EdgeQueryPojo>();
         if (i == 0) {
 
@@ -571,7 +581,9 @@ public static List<EdgeQueryPojo> queryPE2(String name, List<EdgeQueryPojo> edge
                 nlj.close();
 
             }
+            System.out.print("\tDisk Read Count: "+ Integer.toString(PCounter.readCounter-reads));        
 
+            System.out.println("\tDisk Write Count: "+ Integer.toString(PCounter.writeCounter-writes));
         }
 
         // System.out.println("children in iteration"+i);

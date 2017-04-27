@@ -305,7 +305,7 @@ public class Join {
         Heapfile f = new Heapfile(SystemDefs.JavabaseDBName + "p3tempEfile11.in");
 
         if (statusN == OK) {
-            System.out.println("  - Scan the records just inserted\n");
+          //  System.out.println("  - Scan the records just inserted\n");
 
             try {
                 scan = SystemDefs.JavabaseDB.ehfile.openScan();
@@ -373,7 +373,7 @@ public class Join {
         Heapfile fN = new Heapfile(SystemDefs.JavabaseDBName + "p3tempEfile22.in");
 
         if (statusNe == OK) {
-            System.out.println("  - Scan the records just inserted\n");
+          //  System.out.println("  - Scan the records just inserted\n");
 
             try {
                 scanNew = SystemDefs.JavabaseDB.ehfile.openScan();
@@ -517,6 +517,7 @@ public class Join {
     IndexException, PageNotReadException,
     TupleUtilsException, PredEvalException, SortException, LowMemException,
     UnknowAttrType, UnknownKeyTypeException, Exception {
+    	System.out.print("Node D Edge Join");
         final boolean OK = true;
         final boolean FAIL = false;
         boolean status = true;
@@ -767,6 +768,8 @@ public class Join {
     public NestedLoopsJoins joinNodeSEdge(String name, NodeQueryPojo nodeQueryPojo) throws JoinsException, IndexException, PageNotReadException,
     TupleUtilsException, PredEvalException, SortException, LowMemException,
     UnknowAttrType, UnknownKeyTypeException, Exception {
+    	System.out.print("Node S Edge Join");
+        
         final boolean OK = true;
         final boolean FAIL = false;
         boolean status = true;
@@ -887,6 +890,8 @@ public class Join {
     public NestedLoopsJoins joinEdgeSNode(String name, EdgeQueryPojo edgeQueryPojo) throws JoinsException, IndexException, PageNotReadException,
     TupleUtilsException, PredEvalException, SortException, LowMemException,
     UnknowAttrType, UnknownKeyTypeException, Exception {
+    	System.out.print("Edge S Node Join");
+        
         final boolean OK = true;
         final boolean FAIL = false;
         boolean status = true;
@@ -1022,6 +1027,8 @@ public class Join {
     public NestedLoopsJoins joinEdgeDNode(String name, EdgeQueryPojo edgeQueryPojo) throws JoinsException, IndexException, PageNotReadException,
     TupleUtilsException, PredEvalException, SortException, LowMemException,
     UnknowAttrType, UnknownKeyTypeException, Exception {
+    	System.out.print("Edge D Node Join");
+        
         final boolean OK = true;
         final boolean FAIL = false;
         boolean status = true;
@@ -1215,7 +1222,7 @@ public class Join {
 
 
         if (statusN == OK) {
-            System.out.println("  - Scan the records just inserted\n");
+           // System.out.println("  - Scan the records just inserted\n");
 
             try {
                 scan = SystemDefs.JavabaseDB.ehfile.openScan();
@@ -1345,7 +1352,7 @@ public static void createEdgeIndex() throws InvalidSlotNumberException, Exceptio
 
 
     if (statusN == OK) {
-        System.out.println("  - Scan the records just inserted\n");
+      //  System.out.println("  - Scan the records just inserted\n");
 
         try {
             scan = SystemDefs.JavabaseDB.ehfile.openScan();
